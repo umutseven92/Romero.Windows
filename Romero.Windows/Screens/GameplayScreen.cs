@@ -135,10 +135,10 @@ namespace WindowsGSM1
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
             else
-            {
+            { 
                
                 // Otherwise move the player position.
-                Vector2 movement = Vector2.Zero;
+                var movement = Vector2.Zero;
 
                 if (keyboardState.IsKeyDown(Keys.Left))
                     movement.X--;
