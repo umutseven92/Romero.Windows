@@ -44,9 +44,9 @@ namespace Romero.Windows
         }
 
         //Draw the sprite to the screen
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Vector2 spritePos)
         {
-            spriteBatch.Draw(_spriteTexture2D, SpritePosition,
+            spriteBatch.Draw(_spriteTexture2D, spritePos,
                 new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
                 Color.White, 0.0f, Vector2.Zero, ScaleCalc, SpriteEffects.None, 0);
         }

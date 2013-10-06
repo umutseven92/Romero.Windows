@@ -59,6 +59,8 @@ namespace Romero.Windows
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)
         {
+
+
             switch (gamepadConnected)
             {
                 #region Gamepad
@@ -134,7 +136,7 @@ namespace Romero.Windows
                         #endregion
                     }
 
-                    break; 
+                    break;
                 #endregion
                 #region Keyboard
                 case false:
@@ -203,7 +205,7 @@ namespace Romero.Windows
                         #endregion
                     }
                     break;
-                
+
                 #endregion
             }
 

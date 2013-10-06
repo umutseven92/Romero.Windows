@@ -1,5 +1,7 @@
 ﻿#region Using Statements
 
+using WindowsGSM1;
+using Romero.Windows.ScreenManager;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,7 +19,15 @@ namespace Romero.Windows
     {
         GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
-        private Player _playerSprite;
+       
+        private ScreenManager.ScreenManager screenManager;
+
+        // By preloading any assets used by UI rendering, we avoid framerate glitches
+        // when they suddenly need to be loaded in the middle of a menu transition.
+        static readonly string[] preloadAssets =
+        {
+            "gradient",
+        };
 
         public Game1()
         {
@@ -30,6 +40,13 @@ namespace Romero.Windows
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
 
+            screenManager = new ScreenManager.ScreenManager(this);
+
+            Components.Add(screenManager);
+
+            // Activate the first screens.
+            screenManager.AddScreen(new BackgroundScreen(), null);
+            screenManager.AddScreen(new MainMenuScreen(), null);
         }
 
         /// <summary>
@@ -41,7 +58,7 @@ namespace Romero.Windows
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            _playerSprite = new Player();
+          
 
             base.Initialize();
         }
@@ -56,7 +73,11 @@ namespace Romero.Windows
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            _playerSprite.LoadContent(Content);
+            
+            foreach (var asset in preloadAssets)
+            {
+                Content.Load<object>(asset);
+            }
         }
 
         /// <summary>
@@ -73,15 +94,15 @@ namespace Romero.Windows
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+        //protected override void Update(GameTime gameTime)
+        //{
+        //    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        //        Exit();
 
-            // TODO: Add your update logic here
-            _playerSprite.Update(gameTime);
-            base.Update(gameTime);
-        }
+        //    // TODO: Add your update logic here
+            
+        //    base.Update(gameTime);
+        //}
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -92,11 +113,7 @@ namespace Romero.Windows
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-            _spriteBatch.Begin();
-            _playerSprite.Draw(_spriteBatch);
-            _spriteBatch.End();
-
-
+        
             base.Draw(gameTime);
         }
     }
