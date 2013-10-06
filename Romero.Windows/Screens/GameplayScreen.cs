@@ -118,10 +118,10 @@ namespace WindowsGSM1
                 throw new ArgumentNullException("input");
 
             // Look up inputs for the active player profile.
-            int playerIndex = (int)ControllingPlayer.Value;
+            var playerIndex = (int)ControllingPlayer.Value;
 
 
-            KeyboardState keyboardState = input.CurrentKeyboardStates[playerIndex];
+            var keyboardState = input.CurrentKeyboardStates[playerIndex];
             GamePadState gamePadState = input.CurrentGamePadStates[playerIndex];
              //The game pauses either if the user presses the pause button, or if
              //they unplug the active gamepad. This requires us to keep track of
