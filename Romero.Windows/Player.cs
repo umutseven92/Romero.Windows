@@ -18,7 +18,7 @@ namespace Romero.Windows
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float SprintModifier = 2.0f;
+        const float SprintModifier = 1.5f;
 
         enum State
         {
