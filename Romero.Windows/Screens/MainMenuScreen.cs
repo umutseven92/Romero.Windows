@@ -8,10 +8,12 @@
 #endregion
 
 #region Using Statements
+
 using Microsoft.Xna.Framework;
+
 #endregion
 
-namespace WindowsGSM1
+namespace Romero.Windows.Screens
 {
     /// <summary>
     /// The main menu screen is the first thing displayed when the game starts up.
@@ -73,7 +75,7 @@ namespace WindowsGSM1
         /// </summary>
         protected override void OnCancel(PlayerIndex playerIndex)
         {
-            const string message = "Are you sure you want to exit this sample?";
+            const string message = "Are you sure you want to exit?";
 
             MessageBoxScreen confirmExitMessageBox = new MessageBoxScreen(message);
 

@@ -8,14 +8,14 @@
 #endregion
 
 #region Using Statements
+
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Romero.Windows.ScreenManager;
 
 #endregion
 
-namespace WindowsGSM1
+namespace Romero.Windows.Screens
 {
     /// <summary>
     /// Helper class represents a single entry in a MenuScreen. By default this
@@ -139,14 +139,10 @@ namespace WindowsGSM1
         /// </summary>
         public virtual void Draw(MenuScreen screen, bool isSelected, GameTime gameTime)
         {
-            // there is no such thing as a selected item on Windows Phone, so we always
-            // force isSelected to be false
-#if WINDOWS_PHONE
-            isSelected = false;
-#endif
+   
 
             // Draw the selected entry in yellow, otherwise white.
-            Color color = isSelected ? Color.Yellow : Color.White;
+            Color color = isSelected ? Color.Red : Color.White;
 
             // Pulsate the size of the selected menu entry.
             double time = gameTime.TotalGameTime.TotalSeconds;
@@ -159,7 +155,7 @@ namespace WindowsGSM1
             color *= screen.TransitionAlpha;
 
             // Draw text, centered on the middle of each line.
-            ScreenManager screenManager = screen.ScreenManager;
+            ScreenManager.ScreenManager screenManager = screen.ScreenManager;
             SpriteBatch spriteBatch = screenManager.SpriteBatch;
             SpriteFont font = screenManager.Font;
 

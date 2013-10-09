@@ -8,17 +8,16 @@
 #endregion
 
 #region Using Statements
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Input;
 using Romero.Windows.ScreenManager;
 
 #endregion
 
-namespace WindowsGSM1
+namespace Romero.Windows.Screens
 {
     /// <summary>
     /// Base class for screens that contain a menu of options. The user can
@@ -155,7 +154,7 @@ namespace WindowsGSM1
             float transitionOffset = (float)Math.Pow(TransitionPosition, 2);
 
             // start at Y = 175; each X value is generated per entry
-            Vector2 position = new Vector2(0f, 175f);
+            Vector2 position = new Vector2(0f, 250f);
 
             // update each menu entry's location in turn
             for (int i = 0; i < menuEntries.Count; i++)

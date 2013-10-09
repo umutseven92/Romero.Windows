@@ -53,6 +53,7 @@
     <Compile Include="Screens\PauseMenuScreen.cs" />
     <Compile Include="Screens\PlayerIndexEventArgs.cs" />
     <Compile Include="Sprite.cs" />
+    <Compile Include="Zombie.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">

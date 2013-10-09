@@ -8,6 +8,7 @@
 #endregion
 
 #region Using Statements
+
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -16,7 +17,7 @@ using Romero.Windows.ScreenManager;
 
 #endregion
 
-namespace WindowsGSM1
+namespace Romero.Windows.Screens
 {
     /// <summary>
     /// The background screen sits behind all the other menu screens.
