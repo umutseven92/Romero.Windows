@@ -34,7 +34,7 @@ namespace WindowsGSM1
         SpriteFont gameFont;
         private Texture2D playerTexture2D;
         //private Texture2D playerTexture2D;
-        
+        private Player _player;
         float pauseAlpha;
 
 
@@ -46,7 +46,7 @@ namespace WindowsGSM1
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-          
+          _player = new Player();
         }
 
 
@@ -60,6 +60,7 @@ namespace WindowsGSM1
 
             gameFont = content.Load<SpriteFont>("font");
             playerTexture2D = content.Load<Texture2D>("player");
+            _player.LoadContent(content);
             // A real game would probably have more content than this sample, so
             // it would take longer to load. We simulate that by delaying for a
             // while, giving you a chance to admire the beautiful loading screen.
@@ -94,7 +95,7 @@ namespace WindowsGSM1
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
-          
+          _player.Update(gameTime);
             base.Update(gameTime, otherScreenHasFocus, false);
 
             // Gradually fade in or out depending on whether we are covered by the pause screen.
@@ -117,51 +118,53 @@ namespace WindowsGSM1
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            // Look up inputs for the active player profile.
-            var playerIndex = (int)ControllingPlayer.Value;
+            //// Look up inputs for the active player profile.
+            //var playerIndex = (int)ControllingPlayer.Value;
 
 
-            var keyboardState = input.CurrentKeyboardStates[playerIndex];
-            GamePadState gamePadState = input.CurrentGamePadStates[playerIndex];
-             //The game pauses either if the user presses the pause button, or if
-             //they unplug the active gamepad. This requires us to keep track of
-             //whether a gamepad was ever plugged in, because we don't want to pause
-             //on PC if they are playing with a keyboard and have no gamepad at all!
-            bool gamePadDisconnected = !gamePadState.IsConnected &&
-                                       input.GamePadWasConnected[playerIndex];
+            //var keyboardState = input.CurrentKeyboardStates[playerIndex];
+            //GamePadState gamePadState = input.CurrentGamePadStates[playerIndex];
+            // //The game pauses either if the user presses the pause button, or if
+            // //they unplug the active gamepad. This requires us to keep track of
+            // //whether a gamepad was ever plugged in, because we don't want to pause
+            // //on PC if they are playing with a keyboard and have no gamepad at all!
+            //bool gamePadDisconnected = !gamePadState.IsConnected &&
+            //                           input.GamePadWasConnected[playerIndex];
 
-            if (input.IsPauseGame(ControllingPlayer) || gamePadDisconnected)
-            {
-                ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
-            }
-            else
-            { 
+            //if (input.IsPauseGame(ControllingPlayer) || gamePadDisconnected)
+            //{
+            //    ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
+            //}
+            //else
+            //{ 
                
-                // Otherwise move the player position.
-                var movement = Vector2.Zero;
+            //    // Otherwise move the player position.
+            //    var movement = Vector2.Zero;
 
-                if (keyboardState.IsKeyDown(Keys.Left))
-                    movement.X--;
+            //    if (keyboardState.IsKeyDown(Keys.Left))
+            //        movement.X--;
 
-                if (keyboardState.IsKeyDown(Keys.Right))
-                    movement.X++;
+            //    if (keyboardState.IsKeyDown(Keys.Right))
+            //        movement.X++;
 
-                if (keyboardState.IsKeyDown(Keys.Up))
-                    movement.Y--;
+            //    if (keyboardState.IsKeyDown(Keys.Up))
+            //        movement.Y--;
 
-                if (keyboardState.IsKeyDown(Keys.Down))
-                    movement.Y++;
+            //    if (keyboardState.IsKeyDown(Keys.Down))
+            //        movement.Y++;
 
-                Vector2 thumbstick = gamePadState.ThumbSticks.Left;
+            //    Vector2 thumbstick = gamePadState.ThumbSticks.Left;
 
-                movement.X += thumbstick.X;
-                movement.Y -= thumbstick.Y;
+            //    movement.X += thumbstick.X;
+            //    movement.Y -= thumbstick.Y;
 
-                if (movement.Length() > 1)
-                    movement.Normalize();
+            //    if (movement.Length() > 1)
+            //        movement.Normalize();
 
-                playerPosition += movement * 2;
-            }
+            //    playerPosition += movement * 2;
+            //}
+
+           
 
         }
 
@@ -179,8 +182,8 @@ namespace WindowsGSM1
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
 
             spriteBatch.Begin();
-           spriteBatch.Draw(playerTexture2D,playerPosition,Color.White);
-
+           //spriteBatch.Draw(playerTexture2D,playerPosition,Color.White);
+            _player.Draw(spriteBatch);
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.

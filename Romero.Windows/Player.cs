@@ -33,7 +33,7 @@ namespace Romero.Windows
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed = Vector2.Zero;
 
-        private bool gamepadConnected = true;
+        private bool gamepadConnected = false;
         KeyboardState _previousKeyboardState;
         private GamePadState _previousGamePadState;
 
