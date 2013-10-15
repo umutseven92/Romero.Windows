@@ -11,7 +11,7 @@ namespace Romero.Windows
      class Zombie : Sprite
     {
         const string ZombieAssetName = "enemy";
-        const int StartPositionX = 200;
+        const int StartPositionX = 640;
         const int StartPositionY = 200;
         const int EnemySpeed = 300;
         const int MoveUp = -1;

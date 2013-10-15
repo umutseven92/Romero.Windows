@@ -10,6 +10,19 @@ namespace Romero.Windows
 {
     class Sprite
     {
+
+        public Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X,
+                    (int)SpritePosition.Y,
+                    _spriteTexture2D.Width,
+                    _spriteTexture2D.Height);
+            }
+        }
+
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
 
@@ -34,7 +47,20 @@ namespace Romero.Windows
             {
                 _scale = value;
                 //Recalculate the Size of the Sprite with the new scale
-                Size = new Rectangle(0, 0, (int) (_spriteTexture2D.Width*_scale), (int) (_spriteTexture2D.Height*_scale));
+                Size = new Rectangle(0, 0, (int)(Source.Width * ScaleCalc), (int)(Source.Height * ScaleCalc));
+            }
+        }
+
+        //The Rectangular area from the original image that 
+        //defines the Sprite. 
+        Rectangle mSource;
+        public Rectangle Source
+        {
+            get { return mSource; }
+            set
+            {
+                mSource = value;
+                Size = new Rectangle(0, 0, (int)(mSource.Width * ScaleCalc), (int)(mSource.Height * ScaleCalc));
             }
         }
 
@@ -43,14 +69,16 @@ namespace Romero.Windows
         {
             _spriteTexture2D = contentManager.Load<Texture2D>(assetName);
             AssetName = assetName;
+            Source = new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height);
+
             Size = new Rectangle(0, 0, (int)(_spriteTexture2D.Width * ScaleCalc), (int)(_spriteTexture2D.Height * ScaleCalc));
         }
 
         //Draw the sprite to the screen
-        public void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
-                new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
+              new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
                 Color.White, 0.0f, Vector2.Zero, ScaleCalc, SpriteEffects.None, 0);
         }
 

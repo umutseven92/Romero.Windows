@@ -81,6 +81,11 @@ namespace Romero.Windows.Screens
             _pauseAlpha = coveredByOtherScreen ? Math.Min(_pauseAlpha + 1f / 32, 1) : Math.Max(_pauseAlpha - 1f / 32, 0);
 
             _gT = gameTime;
+
+            if (_zombie.BoundingBox.Intersects(_player.BoundingBox))
+            {
+               //Collision!
+            }
         }
 
 
