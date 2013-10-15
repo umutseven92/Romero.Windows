@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Romero.Windows
 {
-    class Sprite
+    public class Sprite
     {
 
         public Rectangle BoundingBox

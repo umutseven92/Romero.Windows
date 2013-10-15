@@ -14,9 +14,9 @@ using OpenTK.Graphics.ES20;
 
 namespace Romero.Windows
 {
-    class Player : Sprite
+    public class Player : Sprite
     {
-        List<Bullet> bullets = new List<Bullet>();
+        public List<Bullet> bullets = new List<Bullet>();
 
         ContentManager mContentManager;
 
@@ -117,8 +117,7 @@ namespace Romero.Windows
             var aFireball = new Bullet();
             aFireball.LoadContent(mContentManager);
             aFireball.Fire(SpritePosition
-               
-                , movement);
+               , movement);
             bullets.Add(aFireball);
 
         }

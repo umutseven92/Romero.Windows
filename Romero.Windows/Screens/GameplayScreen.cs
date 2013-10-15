@@ -1,6 +1,7 @@
 #region Using Statements
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -22,6 +23,8 @@ namespace Romero.Windows.Screens
         float _pauseAlpha;
         private GameTime _gT;
         private Zombie _zombie;
+        Random rnd = new Random();
+        private List<Zombie> lZombies;
         #endregion
 
         /// <summary>
@@ -33,6 +36,11 @@ namespace Romero.Windows.Screens
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
             _player = new Player();
             _zombie = new Zombie();
+            lZombies = new List<Zombie>();
+            for (int i = 0; i < 5; i++)
+            {
+                lZombies.Add(new Zombie());
+            }
         }
 
 
@@ -46,6 +54,13 @@ namespace Romero.Windows.Screens
 
             _player.LoadContent(_content);
             _zombie.LoadContent(_content);
+
+            foreach (var z in lZombies)
+            {
+
+                z.LoadContent(_content);
+
+            }
             // A real game would probably have more content than this sample, so
             // it would take longer to load. We simulate that by delaying for a
             // while, giving you a chance to admire the beautiful loading screen.
@@ -75,6 +90,22 @@ namespace Romero.Windows.Screens
                                                        bool coveredByOtherScreen)
         {
             _zombie.Update(gameTime);
+
+            foreach (var z in lZombies)
+            {
+                z.Update(gameTime);
+                foreach (var b in _player.bullets)
+                {
+                    if (z.BoundingBox.Intersects(b.BoundingBox))
+                    {
+                        var collision = true;
+                        b.Visible = false;
+
+                    }
+                }
+            }
+
+
             base.Update(gameTime, otherScreenHasFocus, false);
 
             // Gradually fade in or out depending on whether we are covered by the pause screen.
@@ -84,7 +115,7 @@ namespace Romero.Windows.Screens
 
             if (_zombie.BoundingBox.Intersects(_player.BoundingBox))
             {
-               //Collision!
+                //Zombie-Player Collision
             }
         }
 
@@ -125,7 +156,12 @@ namespace Romero.Windows.Screens
             spriteBatch.Begin();
 
             _player.Draw(spriteBatch);
-           _zombie.Draw(spriteBatch);
+            _zombie.Draw(spriteBatch);
+            foreach (var z in lZombies)
+            {
+                z.Draw(spriteBatch);
+
+            }
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.

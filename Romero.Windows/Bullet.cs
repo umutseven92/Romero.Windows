@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Romero.Windows
 {
-    class Bullet:Sprite
+   public class Bullet:Sprite
     {
         const int MaxDistance = 1000;
         private new const string AssetName = "bullet";
@@ -32,7 +32,7 @@ namespace Romero.Windows
             if (Visible)
             {
                 SpritePosition += mDirection * Speed * (float)theGameTime.ElapsedGameTime.TotalSeconds;
-              
+                
             }
         }
 

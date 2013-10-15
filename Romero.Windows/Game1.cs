@@ -42,7 +42,7 @@ namespace Romero.Windows
             Content.RootDirectory = "Content";
 
             screenManager = new ScreenManager.ScreenManager(this);
-
+            
             Components.Add(screenManager);
 
             // Activate the first screens.
