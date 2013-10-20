@@ -41,7 +41,10 @@ namespace Romero.Windows
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed = Vector2.Zero;
 
-        private bool gamepadConnected = false;
+        
+
+        private bool gamepadConnected = Global.Gamepad;
+
         private KeyboardState _previousKeyboardState;
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
@@ -124,7 +127,7 @@ namespace Romero.Windows
 
         private void Shoot(GamePadState currentGamePadState)
         {
-
+            //Gamepad shooting
         }
 
 
@@ -141,7 +144,7 @@ namespace Romero.Windows
         {
 
 
-            switch (gamepadConnected)
+            switch (Global.Gamepad)
             {
                 #region Gamepad
                 case true:

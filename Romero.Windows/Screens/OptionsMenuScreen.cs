@@ -24,10 +24,13 @@ namespace Romero.Windows.Screens
     {
         #region Fields
 
+      
+
         MenuEntry ungulateMenuEntry;
         MenuEntry languageMenuEntry;
         MenuEntry frobnicateMenuEntry;
         MenuEntry elfMenuEntry;
+        MenuEntry gamepadMenuEntry;
 
         enum Ungulate
         {
@@ -41,6 +44,8 @@ namespace Romero.Windows.Screens
         static string[] languages = { "C#", "French", "Deoxyribonucleic acid" };
         static int currentLanguage = 0;
 
+        private static string[] control = {"Keyboard", "Gamepad"};
+        private static int currentControl = 0;
         static bool frobnicate = true;
 
         static int elf = 23;
@@ -61,6 +66,7 @@ namespace Romero.Windows.Screens
             languageMenuEntry = new MenuEntry(string.Empty);
             frobnicateMenuEntry = new MenuEntry(string.Empty);
             elfMenuEntry = new MenuEntry(string.Empty);
+            gamepadMenuEntry = new MenuEntry(string.Empty);
 
             SetMenuEntryText();
 
@@ -72,14 +78,18 @@ namespace Romero.Windows.Screens
             frobnicateMenuEntry.Selected += FrobnicateMenuEntrySelected;
             elfMenuEntry.Selected += ElfMenuEntrySelected;
             back.Selected += OnCancel;
-
+            gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             // Add entries to the menu.
             MenuEntries.Add(ungulateMenuEntry);
             MenuEntries.Add(languageMenuEntry);
             MenuEntries.Add(frobnicateMenuEntry);
             MenuEntries.Add(elfMenuEntry);
+            MenuEntries.Add(gamepadMenuEntry);
             MenuEntries.Add(back);
+            
         }
+
+
 
 
         /// <summary>
@@ -91,13 +101,32 @@ namespace Romero.Windows.Screens
             languageMenuEntry.Text = "Language: " + languages[currentLanguage];
             frobnicateMenuEntry.Text = "Frobnicate: " + (frobnicate ? "on" : "off");
             elfMenuEntry.Text = "elf: " + elf;
+            gamepadMenuEntry.Text = "Input: " + control[currentControl];
         }
 
 
         #endregion
-
+        
         #region Handle Input
-
+        
+        /// <summary>
+        /// Gamepad selection
+        /// </summary>
+        void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            if (currentControl == 0)
+            {
+                currentControl++;
+                Global.Gamepad = true;
+            }
+            else if (currentControl == 1)
+            {
+                currentControl = 0;
+                Global.Gamepad = false;
+            }
+            SetMenuEntryText();
+            
+        }
 
         /// <summary>
         /// Event handler for when the Ungulate menu entry is selected.

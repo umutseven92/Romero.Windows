@@ -21,6 +21,11 @@ namespace Romero.Windows.Screens
     /// </summary>
     class PauseMenuScreen : MenuScreen
     {
+
+        private static string[] control = { "Keyboard", "Gamepad" };
+        private static int currentControl = 0;
+        MenuEntry gamepadMenuEntry;
+
         #region Initialization
 
 
@@ -33,21 +38,41 @@ namespace Romero.Windows.Screens
             // Create our menu entries.
             MenuEntry resumeGameMenuEntry = new MenuEntry("Resume Game");
             MenuEntry quitGameMenuEntry = new MenuEntry("Quit Game");
+            gamepadMenuEntry = new MenuEntry("Input: " + control[currentControl]);
 
             // Hook up menu event handlers.
             resumeGameMenuEntry.Selected += OnCancel;
             quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
+            gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
 
             // Add entries to the menu.
             MenuEntries.Add(resumeGameMenuEntry);
+            MenuEntries.Add(gamepadMenuEntry);
             MenuEntries.Add(quitGameMenuEntry);
+
         }
+
+
 
 
         #endregion
 
         #region Handle Input
-
+        
+        void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            if (currentControl == 0)
+            {
+                currentControl++;
+                Global.Gamepad = true;
+            }
+            else if (currentControl == 1)
+            {
+                currentControl = 0;
+                Global.Gamepad = false;
+            }
+            gamepadMenuEntry.Text = "Input: " + control[currentControl];
+        }
 
         /// <summary>
         /// Event handler for when the Quit Game menu entry is selected.

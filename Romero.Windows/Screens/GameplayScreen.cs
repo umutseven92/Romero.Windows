@@ -22,9 +22,9 @@ namespace Romero.Windows.Screens
         private readonly Player _player;
         float _pauseAlpha;
         private GameTime _gT;
-        private Zombie _zombie;
+       
         Random rnd = new Random();
-        private List<Zombie> lZombies;
+        private readonly List<Zombie> _lZombies;
         #endregion
 
         /// <summary>
@@ -35,11 +35,16 @@ namespace Romero.Windows.Screens
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
             _player = new Player();
-            _zombie = new Zombie();
-            lZombies = new List<Zombie>();
-            for (int i = 0; i < 5; i++)
+           
+            _lZombies = new List<Zombie>();
+            AddZombies(5);
+        }
+
+        private void AddZombies(int count)
+        {
+            for (var i = 0; i < count; i++)
             {
-                lZombies.Add(new Zombie());
+                _lZombies.Add(new Zombie());
             }
         }
 
@@ -53,13 +58,11 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _player.LoadContent(_content);
-            _zombie.LoadContent(_content);
+            
 
-            foreach (var z in lZombies)
+            foreach (var z in _lZombies)
             {
-
                 z.LoadContent(_content);
-
             }
             // A real game would probably have more content than this sample, so
             // it would take longer to load. We simulate that by delaying for a
@@ -89,18 +92,16 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
-            _zombie.Update(gameTime);
+           
 
-            foreach (var z in lZombies)
+            foreach (var z in _lZombies)
             {
                 z.Update(gameTime);
                 foreach (var b in _player.bullets)
                 {
                     if (z.BoundingBox.Intersects(b.BoundingBox))
                     {
-                        var collision = true;
-                        b.Visible = false;
-
+                        //Zombie- Bullet collision
                     }
                 }
             }
@@ -113,10 +114,14 @@ namespace Romero.Windows.Screens
 
             _gT = gameTime;
 
-            if (_zombie.BoundingBox.Intersects(_player.BoundingBox))
+            foreach (var z in _lZombies)
             {
-                //Zombie-Player Collision
+                if (z.BoundingBox.Intersects(_player.BoundingBox))
+                {
+                     //Zombie-Player Collision
+                }
             }
+
         }
 
 
@@ -156,8 +161,8 @@ namespace Romero.Windows.Screens
             spriteBatch.Begin();
 
             _player.Draw(spriteBatch);
-            _zombie.Draw(spriteBatch);
-            foreach (var z in lZombies)
+           
+            foreach (var z in _lZombies)
             {
                 z.Draw(spriteBatch);
 
