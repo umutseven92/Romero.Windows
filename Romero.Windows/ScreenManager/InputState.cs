@@ -1,9 +1,11 @@
-﻿
-using System.Collections.Generic;
+﻿#region Using Statements
 
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+
+#endregion
 
 namespace Romero.Windows.ScreenManager
 {
@@ -62,7 +64,7 @@ namespace Romero.Windows.ScreenManager
         /// </summary>
         public void Update()
         {
-            for (int i = 0; i < MaxInputs; i++)
+            for (var i = 0; i < MaxInputs; i++)
             {
                 LastKeyboardStates[i] = CurrentKeyboardStates[i];
                 LastGamePadStates[i] = CurrentGamePadStates[i];

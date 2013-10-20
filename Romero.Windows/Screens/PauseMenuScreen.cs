@@ -1,17 +1,3 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// PauseMenuScreen.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
-
-
-
-#endregion
 
 namespace Romero.Windows.Screens
 {
@@ -22,9 +8,9 @@ namespace Romero.Windows.Screens
     class PauseMenuScreen : MenuScreen
     {
 
-        private static string[] control = { "Keyboard", "Gamepad" };
-        private static int currentControl = 0;
-        MenuEntry gamepadMenuEntry;
+        private static readonly string[] Control = { "Keyboard", "Gamepad" };
+        private static int _currentControl = 0;
+        readonly MenuEntry _gamepadMenuEntry;
 
         #region Initialization
 
@@ -36,18 +22,18 @@ namespace Romero.Windows.Screens
             : base("Paused")
         {
             // Create our menu entries.
-            MenuEntry resumeGameMenuEntry = new MenuEntry("Resume Game");
-            MenuEntry quitGameMenuEntry = new MenuEntry("Quit Game");
-            gamepadMenuEntry = new MenuEntry("Input: " + control[currentControl]);
+            var resumeGameMenuEntry = new MenuEntry("Resume Game");
+            var quitGameMenuEntry = new MenuEntry("Quit Game");
+            _gamepadMenuEntry = new MenuEntry("Input: " + Control[_currentControl]);
 
             // Hook up menu event handlers.
             resumeGameMenuEntry.Selected += OnCancel;
             quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
-            gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
+            _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
 
             // Add entries to the menu.
             MenuEntries.Add(resumeGameMenuEntry);
-            MenuEntries.Add(gamepadMenuEntry);
+            MenuEntries.Add(_gamepadMenuEntry);
             MenuEntries.Add(quitGameMenuEntry);
 
         }
@@ -61,17 +47,18 @@ namespace Romero.Windows.Screens
         
         void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
-            if (currentControl == 0)
+            switch (_currentControl)
             {
-                currentControl++;
-                Global.Gamepad = true;
+                case 0:
+                    _currentControl++;
+                    Global.Gamepad = true;
+                    break;
+                case 1:
+                    _currentControl = 0;
+                    Global.Gamepad = false;
+                    break;
             }
-            else if (currentControl == 1)
-            {
-                currentControl = 0;
-                Global.Gamepad = false;
-            }
-            gamepadMenuEntry.Text = "Input: " + control[currentControl];
+            _gamepadMenuEntry.Text = "Input: " + Control[_currentControl];
         }
 
         /// <summary>
@@ -81,7 +68,7 @@ namespace Romero.Windows.Screens
         {
             const string message = "Are you sure you want to quit this game?";
 
-            MessageBoxScreen confirmQuitMessageBox = new MessageBoxScreen(message);
+            var confirmQuitMessageBox = new MessageBoxScreen(message);
 
             confirmQuitMessageBox.Accepted += ConfirmQuitMessageBoxAccepted;
 

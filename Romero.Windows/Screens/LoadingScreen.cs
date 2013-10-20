@@ -1,17 +1,7 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// LoadingScreen.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
 #region Using Statements
 
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Romero.Windows.ScreenManager;
 
 #endregion
@@ -36,10 +26,10 @@ namespace Romero.Windows.Screens
     {
         #region Fields
 
-        bool loadingIsSlow;
-        bool otherScreensAreGone;
+        readonly bool _loadingIsSlow;
+        bool _otherScreensAreGone;
 
-        GameScreen[] screensToLoad;
+        readonly GameScreen[] _screensToLoad;
 
         #endregion
 
@@ -53,8 +43,8 @@ namespace Romero.Windows.Screens
         private LoadingScreen(ScreenManager.ScreenManager screenManager, bool loadingIsSlow,
                               GameScreen[] screensToLoad)
         {
-            this.loadingIsSlow = loadingIsSlow;
-            this.screensToLoad = screensToLoad;
+            _loadingIsSlow = loadingIsSlow;
+            _screensToLoad = screensToLoad;
 
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
         }
@@ -68,11 +58,11 @@ namespace Romero.Windows.Screens
                                 params GameScreen[] screensToLoad)
         {
             // Tell all the current screens to transition off.
-            foreach (GameScreen screen in screenManager.GetScreens())
+            foreach (var screen in screenManager.GetScreens())
                 screen.ExitScreen();
 
             // Create and activate the loading screen.
-            LoadingScreen loadingScreen = new LoadingScreen(screenManager,
+            var loadingScreen = new LoadingScreen(screenManager,
                                                             loadingIsSlow,
                                                             screensToLoad);
 
@@ -95,11 +85,11 @@ namespace Romero.Windows.Screens
 
             // If all the previous screens have finished transitioning
             // off, it is time to actually perform the load.
-            if (otherScreensAreGone)
+            if (_otherScreensAreGone)
             {
                 ScreenManager.RemoveScreen(this);
 
-                foreach (GameScreen screen in screensToLoad)
+                foreach (GameScreen screen in _screensToLoad)
                 {
                     if (screen != null)
                     {
@@ -128,7 +118,7 @@ namespace Romero.Windows.Screens
             if ((ScreenState == ScreenState.Active) &&
                 (ScreenManager.GetScreens().Length == 1))
             {
-                otherScreensAreGone = true;
+                _otherScreensAreGone = true;
             }
 
             // The gameplay screen takes a while to load, so we display a loading
@@ -137,20 +127,20 @@ namespace Romero.Windows.Screens
             // second while returning from the game to the menus. This parameter
             // tells us how long the loading is going to take, so we know whether
             // to bother drawing the message.
-            if (loadingIsSlow)
+            if (_loadingIsSlow)
             {
-                SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
-                SpriteFont font = ScreenManager.Font;
+                var spriteBatch = ScreenManager.SpriteBatch;
+                var font = ScreenManager.Font;
 
                 const string message = "Loading...";
 
                 // Center the text in the viewport.
-                Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
-                Vector2 viewportSize = new Vector2(viewport.Width, viewport.Height);
-                Vector2 textSize = font.MeasureString(message);
-                Vector2 textPosition = (viewportSize - textSize) / 2;
+                var viewport = ScreenManager.GraphicsDevice.Viewport;
+                var viewportSize = new Vector2(viewport.Width, viewport.Height);
+                var textSize = font.MeasureString(message);
+                var textPosition = (viewportSize - textSize) / 2;
 
-                Color color = Color.White * TransitionAlpha;
+                var color = Color.White * TransitionAlpha;
 
                 // Draw the text.
                 spriteBatch.Begin();

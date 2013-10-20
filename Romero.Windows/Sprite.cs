@@ -10,7 +10,11 @@ namespace Romero.Windows
 {
     public class Sprite
     {
+        #region Declarations
 
+        /// <summary>
+        /// Collision box
+        /// </summary>
         public Rectangle BoundingBox
         {
             get
@@ -53,28 +57,27 @@ namespace Romero.Windows
 
         //The Rectangular area from the original image that 
         //defines the Sprite. 
-        Rectangle mSource;
+        Rectangle _source;
         public Rectangle Source
         {
-            get { return mSource; }
+            get { return _source; }
             set
             {
-                mSource = value;
-                Size = new Rectangle(0, 0, (int)(mSource.Width * ScaleCalc), (int)(mSource.Height * ScaleCalc));
+                _source = value;
+                Size = new Rectangle(0, 0, (int)(_source.Width * ScaleCalc), (int)(_source.Height * ScaleCalc));
             }
-        }
+        } 
 
-        //Load the texture for the sprite using the Content Pipeline
+        #endregion
+
         public void LoadContent(ContentManager contentManager, string assetName)
         {
             _spriteTexture2D = contentManager.Load<Texture2D>(assetName);
             AssetName = assetName;
             Source = new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height);
-
             Size = new Rectangle(0, 0, (int)(_spriteTexture2D.Width * ScaleCalc), (int)(_spriteTexture2D.Height * ScaleCalc));
         }
 
-        //Draw the sprite to the screen
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
@@ -82,7 +85,6 @@ namespace Romero.Windows
                 Color.White, 0.0f, Vector2.Zero, ScaleCalc, SpriteEffects.None, 0);
         }
 
-        //Update the Sprite and change it's position based on the passed in speed, direction and elapsed time.
         public void Update(GameTime gameTime, Vector2 speed, Vector2 direction)
         {
             SpritePosition += direction * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;

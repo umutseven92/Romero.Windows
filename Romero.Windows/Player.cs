@@ -1,14 +1,10 @@
-﻿
-#region using Statements
+﻿#region using Statements
 
-using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
-using OpenTK.Graphics.ES20;
 
 #endregion
 
@@ -16,10 +12,10 @@ namespace Romero.Windows
 {
     public class Player : Sprite
     {
-        public List<Bullet> bullets = new List<Bullet>();
+        #region Declarations
 
-        ContentManager mContentManager;
-
+        public List<Bullet> Bullets = new List<Bullet>();
+        ContentManager _contentManager;
         const string PlayerAssetName = "player";
         const int StartPositionX = 125;
         const int StartPositionY = 245;
@@ -37,36 +33,30 @@ namespace Romero.Windows
         }
 
         State _currentState = State.Running;
-
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed = Vector2.Zero;
-
-        
-
-        private bool gamepadConnected = Global.Gamepad;
-
-        private KeyboardState _previousKeyboardState;
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
 
+        #endregion
+
         public void LoadContent(ContentManager contentManager)
         {
-            mContentManager = contentManager;
+            _contentManager = contentManager;
 
-            foreach (var b in bullets)
+            foreach (var b in Bullets)
             {
                 b.LoadContent(contentManager);
             }
 
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
-            base.LoadContent(contentManager, PlayerAssetName);
+            LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
 
         }
 
         public void Update(GameTime gameTime)
         {
-
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One);
             var currentMouseState = Mouse.GetState();
@@ -75,19 +65,20 @@ namespace Romero.Windows
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
 
             _previousMouseState = currentMouseState;
-            _previousKeyboardState = currentKeyboardState;
             _previousGamePadState = currentGamepadState;
 
-            base.Update(gameTime, _speed, _direction);
+            Update(gameTime, _speed, _direction);
         }
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
-            foreach (var b in bullets)
+            foreach (var b in Bullets)
             {
                 b.Update(gameTime);
             }
-            if (!gamepadConnected)
+
+            //Mouse shooting
+            if (!Global.Gamepad)
             {
                 if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed)
                 {
@@ -95,6 +86,8 @@ namespace Romero.Windows
                 }
 
             }
+
+            //Gamepad shooting
             else
             {
                 if (currentGamePadState.IsButtonDown(Buttons.RightShoulder) && !_previousGamePadState.IsButtonDown(Buttons.RightShoulder))
@@ -105,8 +98,9 @@ namespace Romero.Windows
 
         }
 
-
-
+        /// <summary>
+        /// Mouse shooting
+        /// </summary>
         private void Shoot(MouseState currentMouseState)
         {
             var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
@@ -117,23 +111,26 @@ namespace Romero.Windows
                 movement.Normalize();
             }
 
-            var aFireball = new Bullet();
-            aFireball.LoadContent(mContentManager);
-            aFireball.Fire(SpritePosition
+            var bullet = new Bullet();
+            bullet.LoadContent(_contentManager);
+            bullet.Fire(SpritePosition
                , movement);
-            bullets.Add(aFireball);
+            Bullets.Add(bullet);
 
         }
 
+        /// <summary>
+        /// Gamepad shooting
+        /// </summary>
         private void Shoot(GamePadState currentGamePadState)
         {
-            //Gamepad shooting
+
         }
 
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {
-            foreach (var b in bullets)
+            foreach (var b in Bullets)
             {
                 b.Draw(theSpriteBatch);
             }
@@ -142,16 +139,17 @@ namespace Romero.Windows
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)
         {
-
-
             switch (Global.Gamepad)
             {
-                #region Gamepad
+                #region Gamepad Controls
+
                 case true:
+
                     if (currentGamePadState.IsButtonDown(Buttons.A))
                     {
                         _currentState = State.Sprinting;
                     }
+
                     else
                     {
                         _currentState = State.Running;
@@ -159,10 +157,13 @@ namespace Romero.Windows
 
                     switch (_currentState)
                     {
-                        #region Running
+                        #region Gamepad Running
+
                         case State.Running:
+
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
+
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
                                 _speed.X = PlayerSpeed;
@@ -187,11 +188,16 @@ namespace Romero.Windows
                                 _direction.Y = MoveDown;
                             }
                             break;
+
                         #endregion
-                        #region Sprinting
+
+                        #region Gamepad Sprinting
+
                         case State.Sprinting:
+
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
+
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
                                 _speed.X = PlayerSpeed * SprintModifier;
@@ -216,17 +222,23 @@ namespace Romero.Windows
                                 _direction.Y = MoveDown;
                             }
                             break;
+
                         #endregion
                     }
 
                     break;
+
                 #endregion
-                #region Keyboard
+
+                #region Keyboard Controls
+
                 case false:
+
                     if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
                     {
                         _currentState = State.Sprinting;
                     }
+
                     else
                     {
                         _currentState = State.Running;
@@ -234,58 +246,75 @@ namespace Romero.Windows
 
                     switch (_currentState)
                     {
-                        #region Running
+
+                        #region Keyboard Running
+
                         case State.Running:
+
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
+
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
                                 _speed.X = PlayerSpeed;
                                 _direction.X = MoveLeft;
                             }
+
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
                                 _speed.X = PlayerSpeed;
                                 _direction.X = MoveRight;
                             }
+
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
                                 _speed.Y = PlayerSpeed;
                                 _direction.Y = MoveUp;
                             }
+
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
                                 _speed.Y = PlayerSpeed;
                                 _direction.Y = MoveDown;
                             }
                             break;
+
                         #endregion
-                        #region Sprinting
+
+                        #region Keyboard Sprinting
+
                         case State.Sprinting:
+
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
+
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
                                 _speed.X = PlayerSpeed * SprintModifier;
                                 _direction.X = MoveLeft;
                             }
+
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
                                 _speed.X = PlayerSpeed * SprintModifier;
                                 _direction.X = MoveRight;
                             }
+
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
                                 _speed.Y = PlayerSpeed * SprintModifier;
                                 _direction.Y = MoveUp;
                             }
+
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
                                 _speed.Y = PlayerSpeed * SprintModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;
+
                         #endregion
+
                     }
                     break;
 

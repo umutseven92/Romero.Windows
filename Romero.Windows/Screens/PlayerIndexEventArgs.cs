@@ -1,12 +1,3 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// PlayerIndexEventArgs.cs
-//
-// XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
 #region Using Statements
 
 using System;
@@ -27,7 +18,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         public PlayerIndexEventArgs(PlayerIndex playerIndex)
         {
-            this.playerIndex = playerIndex;
+            _playerIndex = playerIndex;
         }
 
 
@@ -36,9 +27,9 @@ namespace Romero.Windows.Screens
         /// </summary>
         public PlayerIndex PlayerIndex
         {
-            get { return playerIndex; }
+            get { return _playerIndex; }
         }
 
-        PlayerIndex playerIndex;
+        readonly PlayerIndex _playerIndex;
     }
 }

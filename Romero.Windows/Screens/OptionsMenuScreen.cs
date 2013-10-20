@@ -1,17 +1,3 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// OptionsMenuScreen.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
-
-
-
-#endregion
 
 namespace Romero.Windows.Screens
 {
@@ -24,13 +10,11 @@ namespace Romero.Windows.Screens
     {
         #region Fields
 
-      
-
-        MenuEntry ungulateMenuEntry;
-        MenuEntry languageMenuEntry;
-        MenuEntry frobnicateMenuEntry;
-        MenuEntry elfMenuEntry;
-        MenuEntry gamepadMenuEntry;
+        readonly MenuEntry _ungulateMenuEntry;
+        readonly MenuEntry _languageMenuEntry;
+        readonly MenuEntry _frobnicateMenuEntry;
+        readonly MenuEntry _elfMenuEntry;
+        readonly MenuEntry _gamepadMenuEntry;
 
         enum Ungulate
         {
@@ -39,16 +23,16 @@ namespace Romero.Windows.Screens
             Llama,
         }
 
-        static Ungulate currentUngulate = Ungulate.Dromedary;
+        static Ungulate _currentUngulate = Ungulate.Dromedary;
 
-        static string[] languages = { "C#", "French", "Deoxyribonucleic acid" };
-        static int currentLanguage = 0;
+        static readonly string[] Languages = { "C#", "French", "Deoxyribonucleic acid" };
+        static int _currentLanguage = 0;
 
-        private static string[] control = {"Keyboard", "Gamepad"};
-        private static int currentControl = 0;
-        static bool frobnicate = true;
+        private static readonly string[] Control = { "Keyboard", "Gamepad" };
+        private static int _currentControl = 0;
+        static bool _frobnicate = true;
 
-        static int elf = 23;
+        static int _elf = 23;
 
         #endregion
 
@@ -62,31 +46,32 @@ namespace Romero.Windows.Screens
             : base("Options")
         {
             // Create our menu entries.
-            ungulateMenuEntry = new MenuEntry(string.Empty);
-            languageMenuEntry = new MenuEntry(string.Empty);
-            frobnicateMenuEntry = new MenuEntry(string.Empty);
-            elfMenuEntry = new MenuEntry(string.Empty);
-            gamepadMenuEntry = new MenuEntry(string.Empty);
+            _ungulateMenuEntry = new MenuEntry(string.Empty);
+            _languageMenuEntry = new MenuEntry(string.Empty);
+            _frobnicateMenuEntry = new MenuEntry(string.Empty);
+            _elfMenuEntry = new MenuEntry(string.Empty);
+            _gamepadMenuEntry = new MenuEntry(string.Empty);
 
             SetMenuEntryText();
 
-            MenuEntry back = new MenuEntry("Back");
+            var back = new MenuEntry("Back");
 
             // Hook up menu event handlers.
-            ungulateMenuEntry.Selected += UngulateMenuEntrySelected;
-            languageMenuEntry.Selected += LanguageMenuEntrySelected;
-            frobnicateMenuEntry.Selected += FrobnicateMenuEntrySelected;
-            elfMenuEntry.Selected += ElfMenuEntrySelected;
+            _ungulateMenuEntry.Selected += UngulateMenuEntrySelected;
+            _languageMenuEntry.Selected += LanguageMenuEntrySelected;
+            _frobnicateMenuEntry.Selected += FrobnicateMenuEntrySelected;
+            _elfMenuEntry.Selected += ElfMenuEntrySelected;
             back.Selected += OnCancel;
-            gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
-            // Add entries to the menu.
-            MenuEntries.Add(ungulateMenuEntry);
-            MenuEntries.Add(languageMenuEntry);
-            MenuEntries.Add(frobnicateMenuEntry);
-            MenuEntries.Add(elfMenuEntry);
-            MenuEntries.Add(gamepadMenuEntry);
-            MenuEntries.Add(back);
+            _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             
+            // Add entries to the menu.
+            MenuEntries.Add(_ungulateMenuEntry);
+            MenuEntries.Add(_languageMenuEntry);
+            MenuEntries.Add(_frobnicateMenuEntry);
+            MenuEntries.Add(_elfMenuEntry);
+            MenuEntries.Add(_gamepadMenuEntry);
+            MenuEntries.Add(back);
+
         }
 
 
@@ -97,35 +82,35 @@ namespace Romero.Windows.Screens
         /// </summary>
         void SetMenuEntryText()
         {
-            ungulateMenuEntry.Text = "Preferred ungulate: " + currentUngulate;
-            languageMenuEntry.Text = "Language: " + languages[currentLanguage];
-            frobnicateMenuEntry.Text = "Frobnicate: " + (frobnicate ? "on" : "off");
-            elfMenuEntry.Text = "elf: " + elf;
-            gamepadMenuEntry.Text = "Input: " + control[currentControl];
+            _ungulateMenuEntry.Text = "Preferred ungulate: " + _currentUngulate;
+            _languageMenuEntry.Text = "Language: " + Languages[_currentLanguage];
+            _frobnicateMenuEntry.Text = "Frobnicate: " + (_frobnicate ? "on" : "off");
+            _elfMenuEntry.Text = "elf: " + _elf;
+            _gamepadMenuEntry.Text = "Input: " + Control[_currentControl];
         }
 
 
         #endregion
-        
+
         #region Handle Input
-        
+
         /// <summary>
         /// Gamepad selection
         /// </summary>
         void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
-            if (currentControl == 0)
+            switch (_currentControl)
             {
-                currentControl++;
-                Global.Gamepad = true;
-            }
-            else if (currentControl == 1)
-            {
-                currentControl = 0;
-                Global.Gamepad = false;
+                case 0:
+                    _currentControl++;
+                    Global.Gamepad = true;
+                    break;
+                case 1:
+                    _currentControl = 0;
+                    Global.Gamepad = false;
+                    break;
             }
             SetMenuEntryText();
-            
         }
 
         /// <summary>
@@ -133,10 +118,10 @@ namespace Romero.Windows.Screens
         /// </summary>
         void UngulateMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            currentUngulate++;
+            _currentUngulate++;
 
-            if (currentUngulate > Ungulate.Llama)
-                currentUngulate = 0;
+            if (_currentUngulate > Ungulate.Llama)
+                _currentUngulate = 0;
 
             SetMenuEntryText();
         }
@@ -147,7 +132,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         void LanguageMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            currentLanguage = (currentLanguage + 1) % languages.Length;
+            _currentLanguage = (_currentLanguage + 1) % Languages.Length;
 
             SetMenuEntryText();
         }
@@ -158,7 +143,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         void FrobnicateMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            frobnicate = !frobnicate;
+            _frobnicate = !_frobnicate;
 
             SetMenuEntryText();
         }
@@ -169,7 +154,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         void ElfMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            elf++;
+            _elf++;
 
             SetMenuEntryText();
         }

@@ -1,12 +1,3 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// MenuEntry.cs
-//
-// XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
 #region Using Statements
 
 using System;
@@ -30,7 +21,7 @@ namespace Romero.Windows.Screens
         /// <summary>
         /// The text rendered for this entry.
         /// </summary>
-        string text;
+        string _text;
 
         /// <summary>
         /// Tracks a fading selection effect on the entry.
@@ -38,13 +29,13 @@ namespace Romero.Windows.Screens
         /// <remarks>
         /// The entries transition out of the selection effect when they are deselected.
         /// </remarks>
-        float selectionFade;
+        float _selectionFade;
 
         /// <summary>
         /// The position at which the entry is drawn. This is set by the MenuScreen
         /// each frame in Update.
         /// </summary>
-        Vector2 position;
+        Vector2 _position;
 
         #endregion
 
@@ -56,8 +47,8 @@ namespace Romero.Windows.Screens
         /// </summary>
         public string Text
         {
-            get { return text; }
-            set { text = value; }
+            get { return _text; }
+            set { _text = value; }
         }
 
 
@@ -66,8 +57,8 @@ namespace Romero.Windows.Screens
         /// </summary>
         public Vector2 Position
         {
-            get { return position; }
-            set { position = value; }
+            get { return _position; }
+            set { _position = value; }
         }
 
 
@@ -102,7 +93,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         public MenuEntry(string text)
         {
-            this.text = text;
+            _text = text;
         }
 
 
@@ -125,12 +116,9 @@ namespace Romero.Windows.Screens
             // When the menu selection changes, entries gradually fade between
             // their selected and deselected appearance, rather than instantly
             // popping to the new state.
-            float fadeSpeed = (float)gameTime.ElapsedGameTime.TotalSeconds * 4;
+            var fadeSpeed = (float)gameTime.ElapsedGameTime.TotalSeconds * 4;
 
-            if (isSelected)
-                selectionFade = Math.Min(selectionFade + fadeSpeed, 1);
-            else
-                selectionFade = Math.Max(selectionFade - fadeSpeed, 0);
+            _selectionFade = isSelected ? Math.Min(_selectionFade + fadeSpeed, 1) : Math.Max(_selectionFade - fadeSpeed, 0);
         }
 
 
@@ -142,26 +130,26 @@ namespace Romero.Windows.Screens
    
 
             // Draw the selected entry in yellow, otherwise white.
-            Color color = isSelected ? Color.Red : Color.White;
+            var color = isSelected ? Color.Red : Color.White;
 
             // Pulsate the size of the selected menu entry.
-            double time = gameTime.TotalGameTime.TotalSeconds;
+            var time = gameTime.TotalGameTime.TotalSeconds;
 
-            float pulsate = (float)Math.Sin(time * 6) + 1;
+            var pulsate = (float)Math.Sin(time * 6) + 1;
 
-            float scale = 1 + pulsate * 0.05f * selectionFade;
+            var scale = 1 + pulsate * 0.05f * _selectionFade;
 
             // Modify the alpha to fade text out during transitions.
             color *= screen.TransitionAlpha;
 
             // Draw text, centered on the middle of each line.
-            ScreenManager.ScreenManager screenManager = screen.ScreenManager;
-            SpriteBatch spriteBatch = screenManager.SpriteBatch;
-            SpriteFont font = screenManager.Font;
+            var screenManager = screen.ScreenManager;
+            var spriteBatch = screenManager.SpriteBatch;
+            var font = screenManager.Font;
 
-            Vector2 origin = new Vector2(0, font.LineSpacing / 2);
+            var origin = new Vector2(0, font.LineSpacing / 2);
 
-            spriteBatch.DrawString(font, text, position, color, 0,
+            spriteBatch.DrawString(font, _text, _position, color, 0,
                                    origin, scale, SpriteEffects.None, 0);
         }
 

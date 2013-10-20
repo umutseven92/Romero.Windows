@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace Romero.Windows
 {
     /// <summary>
-    /// Global Variables
+    /// Global variables
     /// </summary>
     public static class Global
     {
+        /// <summary>
+        /// Gamepad connection - OptionsMenuScreen.cs, PauseMenuScreen.cs, Player.cs
+        /// </summary>
         public static bool Gamepad = false;
     }
-
 
 }
 
