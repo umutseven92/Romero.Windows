@@ -20,11 +20,6 @@ namespace Romero.Windows
         //int StartPositionX = 640;
         //int StartPositionY = 200;
 
-        const int EnemySpeed = 1;
-        const int MoveUp = -1;
-        const int MoveDown = 1;
-        const int MoveLeft = -1;
-        const int MoveRight = 1;
         public bool Visible = true;
 
         Vector2 _direction = Vector2.Zero;

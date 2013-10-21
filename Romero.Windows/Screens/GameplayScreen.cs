@@ -117,7 +117,7 @@ namespace Romero.Windows.Screens
                         z.Visible = false;
                     }
                 }
-                if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible)
+                if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging)
                 {
                     //Zombie-Player Collision
                     z.Visible = false;

@@ -1,6 +1,7 @@
 ﻿#region using Statements
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -24,19 +25,22 @@ namespace Romero.Windows
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float SprintModifier = 1.5f;
+        const float DodgeModifier = 5.5f;
+        private const float SprintModifier = 2.5f;
 
-        enum State
+        public enum State
         {
             Running,
+            Dodging,
             Sprinting
         }
 
-        State _currentState = State.Running;
+        public State CurrentState = State.Running;
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed = Vector2.Zero;
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
+        private KeyboardState _previouseKeyboardState;
 
         #endregion
 
@@ -66,6 +70,7 @@ namespace Romero.Windows
 
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
+            _previouseKeyboardState = currentKeyboardState;
 
             Update(gameTime, _speed, _direction);
         }
@@ -152,18 +157,19 @@ namespace Romero.Windows
                 #region Gamepad Controls
 
                 case true:
-
+                    CurrentState = State.Running;
+                    
+                    if (currentGamePadState.IsButtonDown(Buttons.LeftStick) && !_previousGamePadState.IsButtonDown(Buttons.LeftStick))
+                    {
+                        CurrentState = State.Dodging;
+                    }
+                    
                     if (currentGamePadState.IsButtonDown(Buttons.LeftShoulder))
                     {
-                        _currentState = State.Sprinting;
+                        CurrentState = State.Sprinting;
                     }
 
-                    else
-                    {
-                        _currentState = State.Running;
-                    }
-
-                    switch (_currentState)
+                    switch (CurrentState)
                     {
                         #region Gamepad Running
 
@@ -199,10 +205,42 @@ namespace Romero.Windows
 
                         #endregion
 
+                        #region Gamepad Dodging
+
+                        case State.Dodging:
+
+                            _speed = Vector2.Zero;
+                            _direction = Vector2.Zero;
+
+                            if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
+                            {
+                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _direction.X = MoveLeft;
+                            }
+
+                            else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
+                            {
+                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _direction.X = MoveRight;
+                            }
+
+                            if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
+                            {
+                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _direction.Y = MoveUp;
+                            }
+
+                            else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
+                            {
+                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _direction.Y = MoveDown;
+                            }
+                            break;
+
+                        #endregion
+
                         #region Gamepad Sprinting
-
                         case State.Sprinting:
-
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
@@ -229,8 +267,8 @@ namespace Romero.Windows
                                 _speed.Y = PlayerSpeed * SprintModifier;
                                 _direction.Y = MoveDown;
                             }
-                            break;
 
+                            break;
                         #endregion
                     }
 
@@ -242,17 +280,21 @@ namespace Romero.Windows
 
                 case false:
 
+                    CurrentState = State.Running;
+
+                    if (currentKeyboardState.IsKeyDown(Keys.Space) && !_previouseKeyboardState.IsKeyDown(Keys.Space))
+                    {
+                        CurrentState = State.Dodging;
+
+                    }
+                    
                     if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
                     {
-                        _currentState = State.Sprinting;
+                        CurrentState = State.Sprinting;
                     }
 
-                    else
-                    {
-                        _currentState = State.Running;
-                    }
 
-                    switch (_currentState)
+                    switch (CurrentState)
                     {
 
                         #region Keyboard Running
@@ -289,10 +331,42 @@ namespace Romero.Windows
 
                         #endregion
 
+                        #region Keyboard Dodging
+
+                        case State.Dodging:
+
+                            _speed = Vector2.Zero;
+                            _direction = Vector2.Zero;
+
+                            if (currentKeyboardState.IsKeyDown(Keys.A))
+                            {
+                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _direction.X = MoveLeft;
+                            }
+
+                            else if (currentKeyboardState.IsKeyDown(Keys.D))
+                            {
+                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _direction.X = MoveRight;
+                            }
+
+                            if (currentKeyboardState.IsKeyDown(Keys.W))
+                            {
+                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _direction.Y = MoveUp;
+                            }
+
+                            else if (currentKeyboardState.IsKeyDown(Keys.S))
+                            {
+                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _direction.Y = MoveDown;
+                            }
+                            break;
+
+                        #endregion
+
                         #region Keyboard Sprinting
-
                         case State.Sprinting:
-
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
@@ -320,9 +394,7 @@ namespace Romero.Windows
                                 _direction.Y = MoveDown;
                             }
                             break;
-
                         #endregion
-
                     }
                     break;
 
