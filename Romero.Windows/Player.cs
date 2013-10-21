@@ -58,7 +58,7 @@ namespace Romero.Windows
         public void Update(GameTime gameTime)
         {
             var currentKeyboardState = Keyboard.GetState();
-            var currentGamepadState = GamePad.GetState(PlayerIndex.One);
+            var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
@@ -113,8 +113,7 @@ namespace Romero.Windows
 
             var bullet = new Bullet();
             bullet.LoadContent(_contentManager);
-            bullet.Fire(SpritePosition
-               , movement);
+            bullet.Fire(SpritePosition, movement);
             Bullets.Add(bullet);
 
         }
@@ -124,6 +123,15 @@ namespace Romero.Windows
         /// </summary>
         private void Shoot(GamePadState currentGamePadState)
         {
+            var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, -currentGamePadState.ThumbSticks.Right.Y);
+
+            if (thumb != Vector2.Zero)
+            {
+                var bullet = new Bullet();
+                bullet.LoadContent(_contentManager);
+                bullet.Fire(SpritePosition, thumb);
+                Bullets.Add(bullet);
+            }
 
         }
 
@@ -145,7 +153,7 @@ namespace Romero.Windows
 
                 case true:
 
-                    if (currentGamePadState.IsButtonDown(Buttons.A))
+                    if (currentGamePadState.IsButtonDown(Buttons.LeftShoulder))
                     {
                         _currentState = State.Sprinting;
                     }

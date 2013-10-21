@@ -20,15 +20,15 @@ namespace Romero.Windows
         //int StartPositionX = 640;
         //int StartPositionY = 200;
 
-        const int EnemySpeed = 300;
+        const int EnemySpeed = 1;
         const int MoveUp = -1;
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
         public bool Visible = true;
 
-        readonly Vector2 _direction = Vector2.Zero;
-        readonly Vector2 _speed = Vector2.Zero;
+        Vector2 _direction = Vector2.Zero;
+        readonly Vector2 _speed = new Vector2(50,50);
 
         #endregion
 
@@ -41,12 +41,23 @@ namespace Romero.Windows
         /// <summary>
         /// Update only when visible
         /// </summary>
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, Player player)
         {
             if (Visible)
             {
+                UpdateMovement(player);
                 Update(gameTime, _speed, _direction);
             }
+        }
+
+        private void UpdateMovement(Player player)
+        {
+            var playerPos = new Vector2(player.SpritePosition.X, player.SpritePosition.Y);
+            var movement = playerPos - SpritePosition;
+
+            movement.Normalize();
+            _direction = movement;
+
         }
 
         /// <summary>

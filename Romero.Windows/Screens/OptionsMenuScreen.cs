@@ -86,7 +86,15 @@ namespace Romero.Windows.Screens
             _languageMenuEntry.Text = "Language: " + Languages[_currentLanguage];
             _frobnicateMenuEntry.Text = "Frobnicate: " + (_frobnicate ? "on" : "off");
             _elfMenuEntry.Text = "elf: " + _elf;
-            _gamepadMenuEntry.Text = "Input: " + Control[_currentControl];
+            if (Global.Gamepad)
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[1];
+            }
+            else
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[0];
+            }
+            
         }
 
 

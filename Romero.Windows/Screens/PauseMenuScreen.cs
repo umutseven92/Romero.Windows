@@ -24,8 +24,16 @@ namespace Romero.Windows.Screens
             // Create our menu entries.
             var resumeGameMenuEntry = new MenuEntry("Resume Game");
             var quitGameMenuEntry = new MenuEntry("Quit Game");
-            _gamepadMenuEntry = new MenuEntry("Input: " + Control[_currentControl]);
-
+            _gamepadMenuEntry = new MenuEntry(string.Empty);
+            if (Global.Gamepad)
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[1];
+            }
+            else
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[0];
+            }
+           
             // Hook up menu event handlers.
             resumeGameMenuEntry.Selected += OnCancel;
             quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
@@ -58,7 +66,14 @@ namespace Romero.Windows.Screens
                     Global.Gamepad = false;
                     break;
             }
-            _gamepadMenuEntry.Text = "Input: " + Control[_currentControl];
+            if (Global.Gamepad)
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[1];
+            }
+            else
+            {
+                _gamepadMenuEntry.Text = "Input: " + Control[0];
+            }
         }
 
         /// <summary>

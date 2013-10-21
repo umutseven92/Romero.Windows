@@ -107,7 +107,7 @@ namespace Romero.Windows.Screens
 
             foreach (var z in _lZombies)
             {
-                z.Update(gameTime);
+                z.Update(gameTime,_player);
                 foreach (var b in _player.Bullets)
                 {
                     if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible)
@@ -133,7 +133,7 @@ namespace Romero.Windows.Screens
                         _lZombies[i].Id != z.Id)
                     {
                         //Zombie - Zombie Collision
-
+                        
                     }
                 }
             }
