@@ -1,12 +1,12 @@
 ﻿#region using Statements
 
 using System.Collections.Generic;
-using System.Diagnostics;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
-using OpenTK.Graphics.OpenGL;
+
 
 #endregion
 
@@ -29,6 +29,7 @@ namespace Romero.Windows
         const float DodgeModifier = 5.5f;
         private const float SprintModifier = 2.0f;
         private readonly bool _canDodge;
+        private string _fullCharacterName;
 
         public enum State
         {
@@ -46,6 +47,41 @@ namespace Romero.Windows
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Player()
+        {
+            switch (Global.SelectedCharacter)
+            {
+                case Global.Character.Fraser:
+                    PlayerAssetName = "fraser";
+                    _fullCharacterName = "Knight Fraser";
+                    _playerSpeed = 250;
+                    _canDodge = false;
+                    break;
+                case Global.Character.Becky:
+                    PlayerAssetName = "becky";
+                    _fullCharacterName = "Lady Rebecca";
+                    _playerSpeed = 500;
+                    _canDodge = true;
+                    break;
+                case Global.Character.Ben:
+                    PlayerAssetName = "ben";
+                    _fullCharacterName = "Sire Benjamin";
+                    _playerSpeed = 300;
+                    _canDodge = false;
+                    break;
+                case Global.Character.Deacon:
+                    PlayerAssetName = "deacon";
+                    _fullCharacterName = "Cleric Diakonos";
+                    _playerSpeed = 400;
+                    _canDodge = false;
+                    break;
+            }
+
+        }
+
         public void LoadContent(ContentManager contentManager)
         {
             _contentManager = contentManager;
@@ -59,34 +95,6 @@ namespace Romero.Windows
             LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
 
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Player()
-        {
-            PlayerAssetName = Global.Character;
-
-            switch (Global.Character)
-            {
-                case "fraser":
-                    _playerSpeed = 250;
-                    _canDodge = false;
-                    break;
-                case "ben":
-                    _playerSpeed = 300;
-                    _canDodge = false;
-                    break;
-                case "becky":
-                    _playerSpeed = 500;
-                    _canDodge = true;
-                    break;
-                case "deacon":
-                    _playerSpeed = 400;
-                    _canDodge = false;
-                    break;
-            }
         }
 
         public void Update(GameTime gameTime)

@@ -12,11 +12,20 @@ namespace Romero.Windows
         public static bool Gamepad = false;
 
         /// <summary>
-        /// Selectable character asset name
+        /// Selectable characters
         /// </summary>
-        public static string Character = "fraser";
+        public enum Character
+        {
+            Fraser,
+            Becky,
+            Deacon,
+            Ben
+        }
 
-
+        /// <summary>
+        /// Selected character
+        /// </summary>
+        public static Character SelectedCharacter = Character.Fraser;
     }
 
 }
