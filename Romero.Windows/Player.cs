@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
+using OpenTK.Graphics.OpenGL;
 
 #endregion
 
@@ -17,16 +18,17 @@ namespace Romero.Windows
 
         public List<Bullet> Bullets = new List<Bullet>();
         ContentManager _contentManager;
-        const string PlayerAssetName = "player";
+        public string PlayerAssetName;
         const int StartPositionX = 125;
         const int StartPositionY = 245;
-        const int PlayerSpeed = 500;
+        private readonly int _playerSpeed;
         const int MoveUp = -1;
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
         const float DodgeModifier = 5.5f;
-        private const float SprintModifier = 2.5f;
+        private const float SprintModifier = 2.0f;
+        private readonly bool _canDodge;
 
         public enum State
         {
@@ -57,6 +59,34 @@ namespace Romero.Windows
             LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
 
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Player()
+        {
+            PlayerAssetName = Global.Character;
+
+            switch (Global.Character)
+            {
+                case "fraser":
+                    _playerSpeed = 250;
+                    _canDodge = false;
+                    break;
+                case "ben":
+                    _playerSpeed = 300;
+                    _canDodge = false;
+                    break;
+                case "becky":
+                    _playerSpeed = 500;
+                    _canDodge = true;
+                    break;
+                case "deacon":
+                    _playerSpeed = 400;
+                    _canDodge = false;
+                    break;
+            }
         }
 
         public void Update(GameTime gameTime)
@@ -158,12 +188,16 @@ namespace Romero.Windows
 
                 case true:
                     CurrentState = State.Running;
-                    
+
                     if (currentGamePadState.IsButtonDown(Buttons.LeftStick) && !_previousGamePadState.IsButtonDown(Buttons.LeftStick))
                     {
-                        CurrentState = State.Dodging;
+                        if (_canDodge)
+                        {
+                            CurrentState = State.Dodging;
+                        }
+
                     }
-                    
+
                     if (currentGamePadState.IsButtonDown(Buttons.LeftShoulder))
                     {
                         CurrentState = State.Sprinting;
@@ -180,25 +214,25 @@ namespace Romero.Windows
 
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
-                                _speed.X = PlayerSpeed;
+                                _speed.X = _playerSpeed;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
                             {
-                                _speed.X = PlayerSpeed;
+                                _speed.X = _playerSpeed;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
                             {
-                                _speed.Y = PlayerSpeed;
+                                _speed.Y = _playerSpeed;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
                             {
-                                _speed.Y = PlayerSpeed;
+                                _speed.Y = _playerSpeed;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -214,25 +248,25 @@ namespace Romero.Windows
 
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
-                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * DodgeModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
                             {
-                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * DodgeModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
                             {
-                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * DodgeModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
                             {
-                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * DodgeModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -246,25 +280,25 @@ namespace Romero.Windows
 
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
-                                _speed.X = PlayerSpeed * SprintModifier;
+                                _speed.X = _playerSpeed * SprintModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
                             {
-                                _speed.X = PlayerSpeed * SprintModifier;
+                                _speed.X = _playerSpeed * SprintModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
                             {
-                                _speed.Y = PlayerSpeed * SprintModifier;
+                                _speed.Y = _playerSpeed * SprintModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
                             {
-                                _speed.Y = PlayerSpeed * SprintModifier;
+                                _speed.Y = _playerSpeed * SprintModifier;
                                 _direction.Y = MoveDown;
                             }
 
@@ -284,10 +318,13 @@ namespace Romero.Windows
 
                     if (currentKeyboardState.IsKeyDown(Keys.Space) && !_previouseKeyboardState.IsKeyDown(Keys.Space))
                     {
-                        CurrentState = State.Dodging;
+                        if (_canDodge)
+                        {
+                            CurrentState = State.Dodging;
+                        }
 
                     }
-                    
+
                     if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
                     {
                         CurrentState = State.Sprinting;
@@ -306,25 +343,25 @@ namespace Romero.Windows
 
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
-                                _speed.X = PlayerSpeed;
+                                _speed.X = _playerSpeed;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
-                                _speed.X = PlayerSpeed;
+                                _speed.X = _playerSpeed;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
-                                _speed.Y = PlayerSpeed;
+                                _speed.Y = _playerSpeed;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
-                                _speed.Y = PlayerSpeed;
+                                _speed.Y = _playerSpeed;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -340,25 +377,25 @@ namespace Romero.Windows
 
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
-                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * DodgeModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
-                                _speed.X = PlayerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * DodgeModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
-                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * DodgeModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
-                                _speed.Y = PlayerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * DodgeModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -372,25 +409,25 @@ namespace Romero.Windows
 
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
-                                _speed.X = PlayerSpeed * SprintModifier;
+                                _speed.X = _playerSpeed * SprintModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
-                                _speed.X = PlayerSpeed * SprintModifier;
+                                _speed.X = _playerSpeed * SprintModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
-                                _speed.Y = PlayerSpeed * SprintModifier;
+                                _speed.Y = _playerSpeed * SprintModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
-                                _speed.Y = PlayerSpeed * SprintModifier;
+                                _speed.Y = _playerSpeed * SprintModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;

@@ -28,6 +28,8 @@ namespace Romero.Windows.Screens
 
         #endregion
 
+     
+
         #region Functions
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace Romero.Windows.Screens
 
             //Main Player
             _player = new Player();
-
+            
             //Zombie Horde
             _lZombies = new List<Zombie>();
             AddZombies(5);
@@ -68,7 +70,7 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _player.LoadContent(_content);
-
+          
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
@@ -120,7 +122,7 @@ namespace Romero.Windows.Screens
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging)
                 {
                     //Zombie-Player Collision
-                    z.Visible = false;
+                   
                 }
 
             }
@@ -133,7 +135,7 @@ namespace Romero.Windows.Screens
                         _lZombies[i].Id != z.Id)
                     {
                         //Zombie - Zombie Collision
-                        
+                      
                     }
                 }
             }
@@ -182,7 +184,7 @@ namespace Romero.Windows.Screens
             spriteBatch.Begin();
 
             _player.Draw(spriteBatch);
-
+           
             foreach (var z in _lZombies)
             {
                 z.Draw(spriteBatch);
