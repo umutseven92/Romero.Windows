@@ -25,10 +25,11 @@ namespace Romero.Windows.Screens
         float _pauseAlpha;
         private GameTime _gT;
         private readonly List<Zombie> _lZombies;
-
+        private int deadZombies = 0;
+        private int zombieModifier = 1;
         #endregion
 
-     
+
 
         #region Functions
 
@@ -55,10 +56,10 @@ namespace Romero.Windows.Screens
 
             //Main Player
             _player = new Player();
-            
+
             //Zombie Horde
             _lZombies = new List<Zombie>();
-            AddZombies(5);
+            AddZombies(zombieModifier * 5);
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _player.LoadContent(_content);
-          
+
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
@@ -94,6 +95,7 @@ namespace Romero.Windows.Screens
             _content.Unload();
         }
 
+
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -102,27 +104,45 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
+            if (deadZombies == _lZombies.Count)
+            {
+                deadZombies = 0;
+                zombieModifier++;
+
+                _lZombies.Clear();
+                AddZombies(zombieModifier * 5);
+               
+                foreach (var z in _lZombies)
+                {
+                    z.LoadContent(_content);
+                }
+            }
+
             //For Player update
             _gT = gameTime;
+
 
             #region Collision
 
             foreach (var z in _lZombies)
             {
-                z.Update(gameTime,_player);
+
                 foreach (var b in _player.Bullets)
                 {
-                    if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible)
+                    if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
                     {
                         //Bullet - Zombie Collision
                         b.Visible = false;
+
                         z.Visible = false;
+                        deadZombies++;
+
                     }
                 }
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging)
                 {
                     //Zombie-Player Collision
-                   
+
                 }
 
             }
@@ -135,7 +155,7 @@ namespace Romero.Windows.Screens
                         _lZombies[i].Id != z.Id)
                     {
                         //Zombie - Zombie Collision
-                      
+
                     }
                 }
             }
@@ -168,6 +188,10 @@ namespace Romero.Windows.Screens
                 // Player movement
                 _player.Update(_gT);
             }
+            foreach (var z in _lZombies)
+            {
+                z.Update(_gT, _player);
+            }
         }
 
         /// <summary>
@@ -184,7 +208,7 @@ namespace Romero.Windows.Screens
             spriteBatch.Begin();
 
             _player.Draw(spriteBatch);
-           
+
             foreach (var z in _lZombies)
             {
                 z.Draw(spriteBatch);
