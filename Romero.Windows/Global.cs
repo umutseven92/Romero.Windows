@@ -26,6 +26,22 @@ namespace Romero.Windows
         /// Selected character
         /// </summary>
         public static Character SelectedCharacter = Character.Fraser;
+
+        /// <summary>
+        /// Selectable diffuculty
+        /// </summary>
+        public enum Diffuculty
+        {
+            Easy,
+            Normal,
+            Hard,
+            Insane
+        }
+
+        /// <summary>
+        /// Selected diffuculty
+        /// </summary>
+        public static Diffuculty SelectedDiffuculty = Diffuculty.Normal;
     }
 
 }

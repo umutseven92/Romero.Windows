@@ -25,8 +25,8 @@ namespace Romero.Windows.Screens
         float _pauseAlpha;
         private GameTime _gT;
         private readonly List<Zombie> _lZombies;
-        private int deadZombies = 0;
-        private int zombieModifier = 1;
+        private int _deadZombies = 0;
+        private int _zombieModifier;
         #endregion
 
 
@@ -54,12 +54,29 @@ namespace Romero.Windows.Screens
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
+            //Difficulty
+            switch (Global.SelectedDiffuculty)
+            {
+                case Global.Diffuculty.Easy:
+                    _zombieModifier = 1;
+                    break;
+                case Global.Diffuculty.Normal:
+                    _zombieModifier = 2;
+                    break;
+                case Global.Diffuculty.Hard:
+                    _zombieModifier = 3;
+                    break;
+                case Global.Diffuculty.Insane:
+                    _zombieModifier = 5;
+                    break;
+            }
+
             //Main Player
             _player = new Player();
 
             //Zombie Horde
             _lZombies = new List<Zombie>();
-            AddZombies(zombieModifier * 5);
+            AddZombies(_zombieModifier * 5);
         }
 
         /// <summary>
@@ -104,14 +121,14 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
-            if (deadZombies == _lZombies.Count)
+            if (_deadZombies == _lZombies.Count)
             {
-                deadZombies = 0;
-                zombieModifier++;
+                _deadZombies = 0;
+                _zombieModifier++;
 
                 _lZombies.Clear();
-                AddZombies(zombieModifier * 5);
-               
+                AddZombies(_zombieModifier * 5);
+
                 foreach (var z in _lZombies)
                 {
                     z.LoadContent(_content);
@@ -135,7 +152,7 @@ namespace Romero.Windows.Screens
                         b.Visible = false;
 
                         z.Visible = false;
-                        deadZombies++;
+                        _deadZombies++;
 
                     }
                 }
