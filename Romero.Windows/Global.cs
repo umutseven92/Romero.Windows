@@ -30,7 +30,7 @@ namespace Romero.Windows
         /// <summary>
         /// Selectable diffuculty
         /// </summary>
-        public enum Diffuculty
+        public enum Difficulty
         {
             Easy,
             Normal,
@@ -41,7 +41,7 @@ namespace Romero.Windows
         /// <summary>
         /// Selected diffuculty
         /// </summary>
-        public static Diffuculty SelectedDiffuculty = Diffuculty.Normal;
+        public static Difficulty SelectedDifficulty = Difficulty.Normal;
     }
 
 }

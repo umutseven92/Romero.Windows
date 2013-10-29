@@ -55,18 +55,18 @@ namespace Romero.Windows.Screens
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
             //Difficulty
-            switch (Global.SelectedDiffuculty)
+            switch (Global.SelectedDifficulty)
             {
-                case Global.Diffuculty.Easy:
+                case Global.Difficulty.Easy:
                     _zombieModifier = 1;
                     break;
-                case Global.Diffuculty.Normal:
+                case Global.Difficulty.Normal:
                     _zombieModifier = 2;
                     break;
-                case Global.Diffuculty.Hard:
+                case Global.Difficulty.Hard:
                     _zombieModifier = 3;
                     break;
-                case Global.Diffuculty.Insane:
+                case Global.Difficulty.Insane:
                     _zombieModifier = 5;
                     break;
             }

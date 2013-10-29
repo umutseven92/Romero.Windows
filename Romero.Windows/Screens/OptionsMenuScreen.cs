@@ -1,6 +1,3 @@
-
-using OpenTK.Graphics.ES10;
-
 namespace Romero.Windows.Screens
 {
     /// <summary>
@@ -14,10 +11,11 @@ namespace Romero.Windows.Screens
 
         readonly MenuEntry _gamepadMenuEntry;
         private readonly MenuEntry _difficultyMenuEntry;
+        private readonly MenuEntry _characterMenuEntry;
         private static readonly string[] Control = { "Keyboard", "Gamepad" };
         private static int _currentControl = 0;
         private static readonly string[] Difficulty = { "Easy", "Normal", "Hard", "Insane" };
-        private static int _currentDifficuly = 0;
+        private static readonly string[] Character = { "Knight Fraser", "Lady Rebecca", "Sire Benjamin", "Cleric Diakonos" };
 
         #endregion
 
@@ -32,6 +30,7 @@ namespace Romero.Windows.Screens
             // Create our menu entries.
             _gamepadMenuEntry = new MenuEntry(string.Empty);
             _difficultyMenuEntry = new MenuEntry(string.Empty);
+            _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
             var back = new MenuEntry("Back");
 
@@ -39,15 +38,16 @@ namespace Romero.Windows.Screens
             back.Selected += OnCancel;
             _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             _difficultyMenuEntry.Selected += _difficultyMenuEntry_Selected;
+            _characterMenuEntry.Selected += _characterMenuEntry_Selected;
 
             // Add entries to the menu.
-            MenuEntries.Add(_gamepadMenuEntry);
+            MenuEntries.Add(_characterMenuEntry);
             MenuEntries.Add(_difficultyMenuEntry);
+            MenuEntries.Add(_gamepadMenuEntry);
+
             MenuEntries.Add(back);
 
         }
-
-
 
         /// <summary>
         /// Fills in the latest values for the options screen menu text.
@@ -63,23 +63,39 @@ namespace Romero.Windows.Screens
                 _gamepadMenuEntry.Text = "Input: " + Control[0];
             }
 
-            switch (Global.SelectedDiffuculty)
+            switch (Global.SelectedDifficulty)
             {
-                case Global.Diffuculty.Easy:
-                    _difficultyMenuEntry.Text = "Difficulty: "+Difficulty[0];
-                    _currentDifficuly = 0;
+                case Global.Difficulty.Easy:
+                    _difficultyMenuEntry.Text = "Difficulty: " + Difficulty[0];
+
                     break;
-                case Global.Diffuculty.Normal:
-                    _difficultyMenuEntry.Text = "Difficulty: "+Difficulty[1];
-                    _currentDifficuly = 1;
+                case Global.Difficulty.Normal:
+                    _difficultyMenuEntry.Text = "Difficulty: " + Difficulty[1];
+
                     break;
-                case Global.Diffuculty.Hard:
-                    _difficultyMenuEntry.Text = "Difficulty: "+Difficulty[2];
-                    _currentDifficuly = 2;
+                case Global.Difficulty.Hard:
+                    _difficultyMenuEntry.Text = "Difficulty: " + Difficulty[2];
+
                     break;
-                case Global.Diffuculty.Insane:
-                    _difficultyMenuEntry.Text = "Difficulty: "+Difficulty[3];
-                    _currentDifficuly = 3;
+                case Global.Difficulty.Insane:
+                    _difficultyMenuEntry.Text = "Difficulty: " + Difficulty[3];
+
+                    break;
+            }
+
+            switch (Global.SelectedCharacter)
+            {
+                case Global.Character.Fraser:
+                    _characterMenuEntry.Text = "Character: " + Character[0];
+                    break;
+                case Global.Character.Becky:
+                    _characterMenuEntry.Text = "Character: " + Character[1];
+                    break;
+                case Global.Character.Ben:
+                    _characterMenuEntry.Text = "Character: " + Character[2];
+                    break;
+                case Global.Character.Deacon:
+                    _characterMenuEntry.Text = "Character: " + Character[3];
                     break;
             }
 
@@ -118,21 +134,43 @@ namespace Romero.Windows.Screens
             switch (_difficultyMenuEntry.Text)
             {
                 case "Difficulty: Easy":
-                    Global.SelectedDiffuculty = Global.Diffuculty.Normal;
+                    Global.SelectedDifficulty = Global.Difficulty.Normal;
                     break;
                 case "Difficulty: Normal":
-                    Global.SelectedDiffuculty = Global.Diffuculty.Hard;
+                    Global.SelectedDifficulty = Global.Difficulty.Hard;
                     break;
                 case "Difficulty: Hard":
-                    Global.SelectedDiffuculty = Global.Diffuculty.Insane;
+                    Global.SelectedDifficulty = Global.Difficulty.Insane;
                     break;
                 case "Difficulty: Insane":
-                    Global.SelectedDiffuculty = Global.Diffuculty.Easy;
+                    Global.SelectedDifficulty = Global.Difficulty.Easy;
                     break;
             }
             SetMenuEntryText();
         }
 
+        /// <summary>
+        /// Character selection
+        /// </summary>
+        void _characterMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            switch (_characterMenuEntry.Text)
+            {
+                case "Character: Knight Fraser":
+                    Global.SelectedCharacter = Global.Character.Becky;
+                    break;
+                case "Character: Lady Rebecca":
+                    Global.SelectedCharacter = Global.Character.Ben;
+                    break;
+                case "Character: Sire Benjamin":
+                    Global.SelectedCharacter = Global.Character.Deacon;
+                    break;
+                case "Character: Cleric Diakonos":
+                    Global.SelectedCharacter = Global.Character.Fraser;
+                    break;
+            }
+            SetMenuEntryText();
+        }
         #endregion
     }
 }
