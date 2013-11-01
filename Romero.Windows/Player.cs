@@ -26,7 +26,7 @@ namespace Romero.Windows
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float DodgeModifier = 5.5f;
+        const float DodgeModifier = 7f;
         private const float SprintModifier = 2.0f;
         private readonly bool _canDodge;
         private string _fullCharacterName;

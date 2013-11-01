@@ -1,3 +1,7 @@
+using System.Runtime.CompilerServices;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
 namespace Romero.Windows.Screens
 {
     /// <summary>
@@ -12,11 +16,12 @@ namespace Romero.Windows.Screens
         readonly MenuEntry _gamepadMenuEntry;
         private readonly MenuEntry _difficultyMenuEntry;
         private readonly MenuEntry _characterMenuEntry;
+        private readonly MenuEntry _fullScreenMenuEntry;
         private static readonly string[] Control = { "Keyboard", "Gamepad" };
         private static int _currentControl = 0;
         private static readonly string[] Difficulty = { "Easy", "Normal", "Hard", "Insane" };
         private static readonly string[] Character = { "Knight Fraser", "Lady Rebecca", "Sire Benjamin", "Cleric Diakonos" };
-
+        private static readonly string[] FullScreen = { "Full Screen", "Windowed" };
         #endregion
 
         #region Initialization
@@ -31,6 +36,7 @@ namespace Romero.Windows.Screens
             _gamepadMenuEntry = new MenuEntry(string.Empty);
             _difficultyMenuEntry = new MenuEntry(string.Empty);
             _characterMenuEntry = new MenuEntry(string.Empty);
+            _fullScreenMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
             var back = new MenuEntry("Back");
 
@@ -39,15 +45,18 @@ namespace Romero.Windows.Screens
             _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             _difficultyMenuEntry.Selected += _difficultyMenuEntry_Selected;
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
+            _fullScreenMenuEntry.Selected += _fullScreenMenuEntry_Selected;
 
             // Add entries to the menu.
             MenuEntries.Add(_characterMenuEntry);
             MenuEntries.Add(_difficultyMenuEntry);
             MenuEntries.Add(_gamepadMenuEntry);
-
+            MenuEntries.Add(_fullScreenMenuEntry);
             MenuEntries.Add(back);
 
         }
+
+
 
         /// <summary>
         /// Fills in the latest values for the options screen menu text.
@@ -98,6 +107,7 @@ namespace Romero.Windows.Screens
                     _characterMenuEntry.Text = "Character: " + Character[3];
                     break;
             }
+            _fullScreenMenuEntry.Text = Global.IsFullScreen ? FullScreen[0] : FullScreen[1];
 
         }
 
@@ -169,6 +179,26 @@ namespace Romero.Windows.Screens
                     Global.SelectedCharacter = Global.Character.Fraser;
                     break;
             }
+            SetMenuEntryText();
+        }
+
+        /// <summary>
+        /// Full screen
+        /// </summary>
+        void _fullScreenMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            if (Global.IsFullScreen)
+            {
+                Global.IsFullScreen = false;
+                Global.ScreenChanged = true;
+            }
+            else
+            {
+                Global.IsFullScreen = true;
+                Global.ScreenChanged = true;
+            }
+            
+
             SetMenuEntryText();
         }
         #endregion

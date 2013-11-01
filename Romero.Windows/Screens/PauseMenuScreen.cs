@@ -11,7 +11,8 @@ namespace Romero.Windows.Screens
         private static readonly string[] Control = { "Keyboard", "Gamepad" };
         private static int _currentControl = 0;
         readonly MenuEntry _gamepadMenuEntry;
-
+        private readonly MenuEntry _fullScreenMenuEntry;
+        private static readonly string[] FullScreen = { "Full Screen", "Windowed" };
         #region Initialization
 
 
@@ -25,6 +26,29 @@ namespace Romero.Windows.Screens
             var resumeGameMenuEntry = new MenuEntry("Resume Game");
             var quitGameMenuEntry = new MenuEntry("Quit Game");
             _gamepadMenuEntry = new MenuEntry(string.Empty);
+            _fullScreenMenuEntry = new MenuEntry(string.Empty);
+
+            SetMenuEntryText();
+            // Hook up menu event handlers.
+            resumeGameMenuEntry.Selected += OnCancel;
+            quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
+            _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
+            _fullScreenMenuEntry.Selected += _fullScreenMenuEntry_Selected;
+
+            // Add entries to the menu.
+            MenuEntries.Add(resumeGameMenuEntry);
+            MenuEntries.Add(_gamepadMenuEntry);
+            MenuEntries.Add(_fullScreenMenuEntry);
+            MenuEntries.Add(quitGameMenuEntry);
+
+        }
+
+        #endregion
+
+        #region Handle Input
+
+        private void SetMenuEntryText()
+        {
             if (Global.Gamepad)
             {
                 _gamepadMenuEntry.Text = "Input: " + Control[1];
@@ -33,26 +57,27 @@ namespace Romero.Windows.Screens
             {
                 _gamepadMenuEntry.Text = "Input: " + Control[0];
             }
-           
-            // Hook up menu event handlers.
-            resumeGameMenuEntry.Selected += OnCancel;
-            quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
-            _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
-
-            // Add entries to the menu.
-            MenuEntries.Add(resumeGameMenuEntry);
-            MenuEntries.Add(_gamepadMenuEntry);
-            MenuEntries.Add(quitGameMenuEntry);
+            _fullScreenMenuEntry.Text = Global.IsFullScreen ? FullScreen[0] : FullScreen[1];
 
         }
 
+        void _fullScreenMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            if (Global.IsFullScreen)
+            {
+                Global.IsFullScreen = false;
+                Global.ScreenChanged = true;
+            }
+            else
+            {
+                Global.IsFullScreen = true;
+                Global.ScreenChanged = true;
+            }
 
 
+            SetMenuEntryText();
+        }
 
-        #endregion
-
-        #region Handle Input
-        
         void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
             switch (_currentControl)
@@ -66,14 +91,7 @@ namespace Romero.Windows.Screens
                     Global.Gamepad = false;
                     break;
             }
-            if (Global.Gamepad)
-            {
-                _gamepadMenuEntry.Text = "Input: " + Control[1];
-            }
-            else
-            {
-                _gamepadMenuEntry.Text = "Input: " + Control[0];
-            }
+            SetMenuEntryText();
         }
 
         /// <summary>

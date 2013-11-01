@@ -29,8 +29,6 @@ namespace Romero.Windows.Screens
         private int _zombieModifier;
         #endregion
 
-
-
         #region Functions
 
         /// <summary>

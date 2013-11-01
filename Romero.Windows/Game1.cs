@@ -18,9 +18,9 @@ namespace Romero.Windows
     /// </summary>
     public class Game1 : Game
     {
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
-       
+
         private ScreenManager.ScreenManager screenManager;
 
         // By preloading any assets used by UI rendering, we avoid framerate glitches
@@ -34,15 +34,15 @@ namespace Romero.Windows
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferHeight = 720,
-                PreferredBackBufferWidth = 1080/*,
-                IsFullScreen = true*/
+                PreferredBackBufferHeight = 1080,
+                PreferredBackBufferWidth = 1920,
+                IsFullScreen = Global.IsFullScreen
             };
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
 
             screenManager = new ScreenManager.ScreenManager(this);
-            
+
             Components.Add(screenManager);
 
             // Activate the first screens.
@@ -59,7 +59,7 @@ namespace Romero.Windows
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-          
+
 
             base.Initialize();
         }
@@ -74,7 +74,7 @@ namespace Romero.Windows
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            
+
             foreach (var asset in preloadAssets)
             {
                 Content.Load<object>(asset);
@@ -95,15 +95,19 @@ namespace Romero.Windows
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        //protected override void Update(GameTime gameTime)
-        //{
-        //    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-        //        Exit();
+        protected override void Update(GameTime gameTime)
+        {
+          
 
-        //    // TODO: Add your update logic here
-            
-        //    base.Update(gameTime);
-        //}
+            // TODO: Add your update logic here
+            if (Global.ScreenChanged)
+            {
+                graphics.ToggleFullScreen();
+                graphics.ApplyChanges();
+                Global.ScreenChanged = false;
+            }
+            base.Update(gameTime);
+        }
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -114,7 +118,7 @@ namespace Romero.Windows
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-        
+
             base.Draw(gameTime);
         }
     }

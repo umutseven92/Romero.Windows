@@ -7,6 +7,16 @@ namespace Romero.Windows
     public static class Global
     {
         /// <summary>
+        /// Full screen
+        /// </summary>
+        public static bool IsFullScreen = true;
+
+        /// <summary>
+        /// Trigger to change fullscreen
+        /// </summary>
+        public static bool ScreenChanged = false;
+
+        /// <summary>
         /// Gamepad connection - OptionsMenuScreen.cs, PauseMenuScreen.cs, Player.cs
         /// </summary>
         public static bool Gamepad = false;

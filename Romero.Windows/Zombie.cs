@@ -29,7 +29,7 @@ namespace Romero.Windows
 
         public void LoadContent(ContentManager contentManager)
         {
-            SpritePosition = new Vector2(Random.Next(1080), Random.Next(720));
+            SpritePosition = new Vector2(Random.Next(1920), Random.Next(1080));
             LoadContent(contentManager, ZombieAssetName);
         }
 
