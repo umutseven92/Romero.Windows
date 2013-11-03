@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Mime;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -27,6 +28,9 @@ namespace Romero.Windows.Screens
         private readonly List<Zombie> _lZombies;
         private int _deadZombies = 0;
         private int _zombieModifier;
+        private int _difficultyModifier;
+        private SpriteFont _font;
+        private int _diagZombieCount;
         #endregion
 
         #region Functions
@@ -40,6 +44,7 @@ namespace Romero.Windows.Screens
             {
                 _lZombies.Add(new Zombie { Id = i });
             }
+            _diagZombieCount = count;
         }
 
         #endregion
@@ -57,15 +62,19 @@ namespace Romero.Windows.Screens
             {
                 case Global.Difficulty.Easy:
                     _zombieModifier = 1;
+                    _difficultyModifier = 1;
                     break;
                 case Global.Difficulty.Normal:
                     _zombieModifier = 2;
+                    _difficultyModifier = 2;
                     break;
                 case Global.Difficulty.Hard:
                     _zombieModifier = 3;
+                    _difficultyModifier = 3;
                     break;
                 case Global.Difficulty.Insane:
                     _zombieModifier = 5;
+                    _difficultyModifier = 5;
                     break;
             }
 
@@ -74,7 +83,7 @@ namespace Romero.Windows.Screens
 
             //Zombie Horde
             _lZombies = new List<Zombie>();
-            AddZombies(_zombieModifier * 5);
+            AddZombies(_zombieModifier * _difficultyModifier);
         }
 
         /// <summary>
@@ -92,6 +101,7 @@ namespace Romero.Windows.Screens
                 z.LoadContent(_content);
             }
 
+            _font = _content.Load<SpriteFont>("font");
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -123,9 +133,9 @@ namespace Romero.Windows.Screens
             {
                 _deadZombies = 0;
                 _zombieModifier++;
-
+                _difficultyModifier++;
                 _lZombies.Clear();
-                AddZombies(_zombieModifier * 5);
+                AddZombies(_zombieModifier * _difficultyModifier);
 
                 foreach (var z in _lZombies)
                 {
@@ -151,7 +161,7 @@ namespace Romero.Windows.Screens
 
                         z.Visible = false;
                         _deadZombies++;
-
+                        _diagZombieCount--;
                     }
                 }
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging)
@@ -209,6 +219,8 @@ namespace Romero.Windows.Screens
             }
         }
 
+
+
         /// <summary>
         /// Draws the gameplay screen.
         /// </summary>
@@ -229,6 +241,9 @@ namespace Romero.Windows.Screens
                 z.Draw(spriteBatch);
 
             }
+
+            DrawDiagnostics(spriteBatch);
+
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.
@@ -237,6 +252,14 @@ namespace Romero.Windows.Screens
                 var alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
+        }
+
+        /// <summary>
+        /// Draw fps, collision and other diagnostics
+        /// </summary>
+        private void DrawDiagnostics(SpriteBatch spriteBatch)
+        {
+            spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}", _diagZombieCount), new Vector2(20, 45), Color.Red);
         }
 
 
