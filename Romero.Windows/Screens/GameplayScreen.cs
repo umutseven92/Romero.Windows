@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Mime;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -22,21 +21,26 @@ namespace Romero.Windows.Screens
         #region Declarations
 
         ContentManager _content;
-        private readonly Player _player;
-        float _pauseAlpha;
-        private GameTime _gT;
-        private readonly List<Zombie> _lZombies;
-        private int _deadZombies = 0;
-        private int _zombieModifier;
-        private int _difficultyModifier;
+        private readonly Player _player; //Player, for single player
+        private GameTime _gT; //Gametime for Player.Update()
+        private readonly List<Zombie> _lZombies; //Zombies on screen
         private SpriteFont _font;
-        private int _diagZombieCount;
+        TimeSpan _elapsedTime = TimeSpan.Zero;
+        float _pauseAlpha;
+        private int _deadZombies;
+        private int _zombieModifier; //Zombie base spawn rate, increases with higher difficulty
+        private int _difficultyModifier; //Difficulty rate,  increases with higher difficulty
+        private int _diagZombieCount; //Diagnostics - zombie count
+        private int _wave;
+        int _frameRate;
+        int _frameCounter;
+        
         #endregion
 
         #region Functions
 
         /// <summary>
-        /// Add zombies to the game randomly.
+        /// Add zombies to the game
         /// </summary>
         private void AddZombies(int count)
         {
@@ -45,6 +49,19 @@ namespace Romero.Windows.Screens
                 _lZombies.Add(new Zombie { Id = i });
             }
             _diagZombieCount = count;
+        }
+
+        /// <summary>
+        /// Draw fps, collision and other diagnostics, press P to toggle. Make this inaccessible before release
+        /// </summary>
+        private void DrawDiagnostics(SpriteBatch spriteBatch)
+        {
+            _frameCounter++;
+            if (Global.IsDiagnosticsOpen)
+            {
+                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Red);
+            }
+
         }
 
         #endregion
@@ -57,32 +74,33 @@ namespace Romero.Windows.Screens
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
-            //Difficulty
+            //Set difficulty
             switch (Global.SelectedDifficulty)
             {
                 case Global.Difficulty.Easy:
                     _zombieModifier = 1;
-                    _difficultyModifier = 1;
+                    _difficultyModifier = 5;
                     break;
                 case Global.Difficulty.Normal:
                     _zombieModifier = 2;
-                    _difficultyModifier = 2;
+                    _difficultyModifier = 6;
                     break;
                 case Global.Difficulty.Hard:
                     _zombieModifier = 3;
-                    _difficultyModifier = 3;
+                    _difficultyModifier = 7;
                     break;
                 case Global.Difficulty.Insane:
                     _zombieModifier = 5;
-                    _difficultyModifier = 5;
+                    _difficultyModifier = 8;
                     break;
             }
 
-            //Main Player
+            //Player (single player)
             _player = new Player();
 
             //Zombie Horde
             _lZombies = new List<Zombie>();
+            _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
         }
 
@@ -102,6 +120,7 @@ namespace Romero.Windows.Screens
             }
 
             _font = _content.Load<SpriteFont>("font");
+            
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -129,6 +148,7 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
+            //All zombies on screen dead
             if (_deadZombies == _lZombies.Count)
             {
                 _deadZombies = 0;
@@ -136,16 +156,15 @@ namespace Romero.Windows.Screens
                 _difficultyModifier++;
                 _lZombies.Clear();
                 AddZombies(_zombieModifier * _difficultyModifier);
-
+                _wave++;
                 foreach (var z in _lZombies)
                 {
                     z.LoadContent(_content);
                 }
             }
 
-            //For Player update
+            //To update player
             _gT = gameTime;
-
 
             #region Collision
 
@@ -187,6 +206,19 @@ namespace Romero.Windows.Screens
 
             #endregion
 
+            #region FPS calculation
+            
+            _elapsedTime += gameTime.ElapsedGameTime;
+
+            if (_elapsedTime > TimeSpan.FromSeconds(1))
+            {
+                _elapsedTime -= TimeSpan.FromSeconds(1);
+                _frameRate = _frameCounter;
+                _frameCounter = 0;
+            }
+
+            #endregion
+
             base.Update(gameTime, otherScreenHasFocus, false);
 
             // Gradually fade in or out depending on whether we are covered by the pause screen.
@@ -205,18 +237,22 @@ namespace Romero.Windows.Screens
 
             if (input.IsPauseGame(ControllingPlayer))
             {
-                // Pause
+                // Pause (esc)
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
+            
             else
             {
                 // Player movement
                 _player.Update(_gT);
             }
+            
             foreach (var z in _lZombies)
             {
+                //Zombie movement
                 z.Update(_gT, _player);
             }
+
         }
 
 
@@ -254,13 +290,7 @@ namespace Romero.Windows.Screens
             }
         }
 
-        /// <summary>
-        /// Draw fps, collision and other diagnostics
-        /// </summary>
-        private void DrawDiagnostics(SpriteBatch spriteBatch)
-        {
-            spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}", _diagZombieCount), new Vector2(20, 45), Color.Red);
-        }
+
 
 
     }

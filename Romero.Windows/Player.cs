@@ -106,6 +106,11 @@ namespace Romero.Windows
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
 
+            if (currentKeyboardState.IsKeyDown(Keys.P) && !_previouseKeyboardState.IsKeyDown(Keys.P))
+            {
+                Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
+            }
+
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
             _previouseKeyboardState = currentKeyboardState;

@@ -52,6 +52,11 @@ namespace Romero.Windows
         /// Selected diffuculty
         /// </summary>
         public static Difficulty SelectedDifficulty = Difficulty.Normal;
+
+        /// <summary>
+        /// Diagnostics open/closed
+        /// </summary>
+        public static bool IsDiagnosticsOpen = true;
     }
 
 }
