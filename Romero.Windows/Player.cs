@@ -1,7 +1,7 @@
 ﻿#region using Statements
 
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -26,11 +26,15 @@ namespace Romero.Windows
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float DodgeModifier = 7f;
-        private const float SprintModifier = 2.0f;
+        const float DodgeModifier = 10f;
+        private const float SprintModifier = 3.0f;
         private readonly bool _canDodge;
         private string _fullCharacterName;
-
+        internal int Health;
+        internal bool Invulnerable = false;
+        const int InvulnTime = 2;
+        float _counterStart = 0f;
+        internal bool Dead = false;
         public enum State
         {
             Running,
@@ -58,28 +62,32 @@ namespace Romero.Windows
                     PlayerAssetName = "fraser";
                     _fullCharacterName = "Knight Fraser";
                     _playerSpeed = 250;
+                    Health = 300;
                     _canDodge = false;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
                     _fullCharacterName = "Lady Rebecca";
                     _playerSpeed = 500;
+                    Health = 120;
                     _canDodge = true;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
                     _fullCharacterName = "Sire Benjamin";
                     _playerSpeed = 300;
+                    Health = 150;
                     _canDodge = false;
                     break;
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
                     _fullCharacterName = "Cleric Diakonos";
                     _playerSpeed = 400;
+                    Health = 100;
                     _canDodge = false;
                     break;
             }
-
+            
         }
 
         public void LoadContent(ContentManager contentManager)
@@ -114,6 +122,17 @@ namespace Romero.Windows
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
             _previouseKeyboardState = currentKeyboardState;
+
+            if (Invulnerable)
+            {
+                _counterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_counterStart >= InvulnTime)
+                {
+                    Invulnerable = false;
+                    _counterStart = 0f;
+                }
+
+            }
 
             Update(gameTime, _speed, _direction);
         }

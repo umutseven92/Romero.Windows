@@ -24,24 +24,29 @@ namespace Romero.Windows.Screens
         {
             // Create our menu entries.
             var resumeGameMenuEntry = new MenuEntry("Resume Game");
-            var quitGameMenuEntry = new MenuEntry("Quit Game");
+            var mainMenuEntry = new MenuEntry("Back to Main Menu");
+            var quitMenuEntry = new MenuEntry("Quit Game");
             _gamepadMenuEntry = new MenuEntry(string.Empty);
             _fullScreenMenuEntry = new MenuEntry(string.Empty);
 
             SetMenuEntryText();
             // Hook up menu event handlers.
             resumeGameMenuEntry.Selected += OnCancel;
-            quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
+            mainMenuEntry.Selected += QuitGameMenuEntrySelected;
             _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             _fullScreenMenuEntry.Selected += _fullScreenMenuEntry_Selected;
+            quitMenuEntry.Selected += quitMenuEntry_Selected;
 
             // Add entries to the menu.
             MenuEntries.Add(resumeGameMenuEntry);
             MenuEntries.Add(_gamepadMenuEntry);
             MenuEntries.Add(_fullScreenMenuEntry);
-            MenuEntries.Add(quitGameMenuEntry);
+            MenuEntries.Add(mainMenuEntry);
+            MenuEntries.Add(quitMenuEntry);
 
         }
+
+
 
         #endregion
 
@@ -76,6 +81,22 @@ namespace Romero.Windows.Screens
 
 
             SetMenuEntryText();
+        }
+
+        void quitMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            const string message = "Are you sure you want to exit?";
+
+            var confirmExitMessageBox = new MessageBoxScreen(message);
+
+            confirmExitMessageBox.Accepted += confirmExitMessageBox_Accepted;
+            ScreenManager.AddScreen(confirmExitMessageBox, e.PlayerIndex);
+
+        }
+
+        void confirmExitMessageBox_Accepted(object sender, PlayerIndexEventArgs e)
+        {
+            ScreenManager.Game.Exit();
         }
 
         void gamepadMenuEntry_Selected(object sender, PlayerIndexEventArgs e)

@@ -34,7 +34,7 @@ namespace Romero.Windows.Screens
         private int _wave;
         int _frameRate;
         int _frameCounter;
-        
+        private bool devMode;
         #endregion
 
         #region Functions
@@ -60,6 +60,11 @@ namespace Romero.Windows.Screens
             if (Global.IsDiagnosticsOpen)
             {
                 spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Red);
+                spriteBatch.DrawString(_font, string.Format("Player health:{0}", _player.Health), new Vector2(1000, 45), Color.Green);
+                if (_player.Invulnerable)
+                {
+                    spriteBatch.DrawString(_font, "Invulnerable", new Vector2(1000, 65), Color.Green);
+                }
             }
 
         }
@@ -73,6 +78,12 @@ namespace Romero.Windows.Screens
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
+
+#if DEBUG
+            devMode = true;
+#else
+            devMode = false;
+#endif     
 
             //Set difficulty
             switch (Global.SelectedDifficulty)
@@ -120,7 +131,7 @@ namespace Romero.Windows.Screens
             }
 
             _font = _content.Load<SpriteFont>("font");
-            
+
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -166,48 +177,8 @@ namespace Romero.Windows.Screens
             //To update player
             _gT = gameTime;
 
-            #region Collision
-
-            foreach (var z in _lZombies)
-            {
-
-                foreach (var b in _player.Bullets)
-                {
-                    if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
-                    {
-                        //Bullet - Zombie Collision
-                        b.Visible = false;
-
-                        z.Visible = false;
-                        _deadZombies++;
-                        _diagZombieCount--;
-                    }
-                }
-                if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging)
-                {
-                    //Zombie-Player Collision
-
-                }
-
-            }
-
-            for (var i = 0; i < _lZombies.Count; i++)
-            {
-                foreach (var z in _lZombies)
-                {
-                    if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
-                        _lZombies[i].Id != z.Id)
-                    {
-                        //Zombie - Zombie Collision
-
-                    }
-                }
-            }
-
-            #endregion
-
             #region FPS calculation
-            
+
             _elapsedTime += gameTime.ElapsedGameTime;
 
             if (_elapsedTime > TimeSpan.FromSeconds(1))
@@ -240,17 +211,66 @@ namespace Romero.Windows.Screens
                 // Pause (esc)
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
-            
+
             else
             {
                 // Player movement
                 _player.Update(_gT);
             }
-            
+
             foreach (var z in _lZombies)
             {
                 //Zombie movement
                 z.Update(_gT, _player);
+            }
+
+            #region Collision
+
+            foreach (var z in _lZombies)
+            {
+
+                foreach (var b in _player.Bullets)
+                {
+                    if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
+                    {
+                        //Bullet - Zombie Collision
+                        b.Visible = false;
+
+                        z.Visible = false;
+                        _deadZombies++;
+                        _diagZombieCount--;
+                    }
+                }
+                if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
+                {
+                    //Zombie-Player Collision
+                    _player.Health -= 10;
+                    _player.Invulnerable = true;
+
+                }
+
+            }
+
+            for (var i = 0; i < _lZombies.Count; i++)
+            {
+                foreach (var z in _lZombies)
+                {
+                    if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
+                        _lZombies[i].Id != z.Id)
+                    {
+                        //Zombie - Zombie Collision
+
+                    }
+                }
+            }
+
+            #endregion
+
+            if (_player.Health <= 0 && !_player.Dead )
+            {
+                //DEATH!
+                _player.Dead = true;
+                
             }
 
         }
