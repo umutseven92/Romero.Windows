@@ -27,7 +27,7 @@ namespace Romero.Windows
         const int MoveLeft = -1;
         const int MoveRight = 1;
         const float DodgeModifier = 10f;
-        private const float SprintModifier = 3.0f;
+        private const float SprintModifier = 2.0f;
         private readonly bool _canDodge;
         private string _fullCharacterName;
         internal int Health;
@@ -61,21 +61,21 @@ namespace Romero.Windows
                 case Global.Character.Fraser:
                     PlayerAssetName = "fraser";
                     _fullCharacterName = "Knight Fraser";
-                    _playerSpeed = 250;
+                    _playerSpeed = 300;
                     Health = 300;
                     _canDodge = false;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
                     _fullCharacterName = "Lady Rebecca";
-                    _playerSpeed = 500;
+                    _playerSpeed = 450;
                     Health = 120;
                     _canDodge = true;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
                     _fullCharacterName = "Sire Benjamin";
-                    _playerSpeed = 300;
+                    _playerSpeed = 340;
                     Health = 150;
                     _canDodge = false;
                     break;

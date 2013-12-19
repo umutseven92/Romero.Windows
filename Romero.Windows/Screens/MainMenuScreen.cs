@@ -46,8 +46,9 @@ namespace Romero.Windows.Screens
         /// </summary>
         void PlayGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen());
+            ScreenManager.AddScreen(new CharacterSelectScreen(), e.PlayerIndex);
+
+            //LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
         }
 
 
