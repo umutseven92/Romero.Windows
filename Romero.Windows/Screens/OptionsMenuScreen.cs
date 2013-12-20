@@ -15,12 +15,10 @@ namespace Romero.Windows.Screens
 
         readonly MenuEntry _gamepadMenuEntry;
         private readonly MenuEntry _difficultyMenuEntry;
-        private readonly MenuEntry _characterMenuEntry;
         private readonly MenuEntry _fullScreenMenuEntry;
         private static readonly string[] Control = { "Keyboard", "Gamepad" };
         private static int _currentControl = 0;
         private static readonly string[] Difficulty = { "Easy", "Normal", "Hard", "Insane" };
-        private static readonly string[] Character = { "Knight Fraser", "Lady Rebecca", "Sire Benjamin", "Cleric Diakonos" };
         private static readonly string[] FullScreen = { "Full Screen", "Windowed" };
         #endregion
 
@@ -35,7 +33,7 @@ namespace Romero.Windows.Screens
             // Create our menu entries.
             _gamepadMenuEntry = new MenuEntry(string.Empty);
             _difficultyMenuEntry = new MenuEntry(string.Empty);
-            _characterMenuEntry = new MenuEntry(string.Empty);
+
             _fullScreenMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
             var back = new MenuEntry("Back");
@@ -44,11 +42,11 @@ namespace Romero.Windows.Screens
             back.Selected += OnCancel;
             _gamepadMenuEntry.Selected += gamepadMenuEntry_Selected;
             _difficultyMenuEntry.Selected += _difficultyMenuEntry_Selected;
-            _characterMenuEntry.Selected += _characterMenuEntry_Selected;
+
             _fullScreenMenuEntry.Selected += _fullScreenMenuEntry_Selected;
 
             // Add entries to the menu.
-            MenuEntries.Add(_characterMenuEntry);
+
             MenuEntries.Add(_difficultyMenuEntry);
             MenuEntries.Add(_gamepadMenuEntry);
             MenuEntries.Add(_fullScreenMenuEntry);
@@ -92,21 +90,7 @@ namespace Romero.Windows.Screens
                     break;
             }
 
-            switch (Global.SelectedCharacter)
-            {
-                case Global.Character.Fraser:
-                    _characterMenuEntry.Text = "Character: " + Character[0];
-                    break;
-                case Global.Character.Becky:
-                    _characterMenuEntry.Text = "Character: " + Character[1];
-                    break;
-                case Global.Character.Ben:
-                    _characterMenuEntry.Text = "Character: " + Character[2];
-                    break;
-                case Global.Character.Deacon:
-                    _characterMenuEntry.Text = "Character: " + Character[3];
-                    break;
-            }
+
             _fullScreenMenuEntry.Text = Global.IsFullScreen ? FullScreen[0] : FullScreen[1];
 
         }
@@ -159,28 +143,7 @@ namespace Romero.Windows.Screens
             SetMenuEntryText();
         }
 
-        /// <summary>
-        /// Character selection
-        /// </summary>
-        void _characterMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
-        {
-            switch (_characterMenuEntry.Text)
-            {
-                case "Character: Knight Fraser":
-                    Global.SelectedCharacter = Global.Character.Becky;
-                    break;
-                case "Character: Lady Rebecca":
-                    Global.SelectedCharacter = Global.Character.Ben;
-                    break;
-                case "Character: Sire Benjamin":
-                    Global.SelectedCharacter = Global.Character.Deacon;
-                    break;
-                case "Character: Cleric Diakonos":
-                    Global.SelectedCharacter = Global.Character.Fraser;
-                    break;
-            }
-            SetMenuEntryText();
-        }
+
 
         /// <summary>
         /// Full screen
@@ -197,7 +160,7 @@ namespace Romero.Windows.Screens
                 Global.IsFullScreen = true;
                 Global.ScreenChanged = true;
             }
-            
+
 
             SetMenuEntryText();
         }

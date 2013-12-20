@@ -1,5 +1,8 @@
 ﻿#region Using Statements
 
+using System.IO;
+using System.Xml;
+using System.Xml.Linq;
 using Romero.Windows.ScreenManager;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -32,6 +35,13 @@ namespace Romero.Windows
 
         public Game1()
         {
+            /*
+            if (!File.Exists("../../../UserConfig/config.xml"))
+            {
+                CreateUserConfig();
+            }
+            */
+
             graphics = new GraphicsDeviceManager(this)
             {
                 PreferredBackBufferHeight = 1080,
@@ -48,6 +58,19 @@ namespace Romero.Windows
             // Activate the first screens.
             screenManager.AddScreen(new BackgroundScreen(), null);
             screenManager.AddScreen(new MainMenuScreen(), null);
+        }
+
+        private void CreateUserConfig()
+        {
+            var doc = new XDocument
+                (new XComment("User configuration files"),
+                new XElement("Root",
+                    new XElement("SelectedCharacter", "Fraser"),
+                    new XElement("SelectedDifficulty", "Normal"),
+                    new XElement("IsDiagnosticsOpen", "true"))
+                    );
+            doc.Save("../../../UserConfig/config.xml");
+
         }
 
         /// <summary>
@@ -97,7 +120,7 @@ namespace Romero.Windows
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-          
+
 
             // TODO: Add your update logic here
             if (Global.ScreenChanged)

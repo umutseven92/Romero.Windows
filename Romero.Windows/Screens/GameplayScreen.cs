@@ -34,7 +34,6 @@ namespace Romero.Windows.Screens
         private int _wave;
         int _frameRate;
         int _frameCounter;
-        private bool devMode;
         #endregion
 
         #region Functions
@@ -79,11 +78,6 @@ namespace Romero.Windows.Screens
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
-#if DEBUG
-            devMode = true;
-#else
-            devMode = false;
-#endif     
 
             //Set difficulty
             switch (Global.SelectedDifficulty)
@@ -246,7 +240,7 @@ namespace Romero.Windows.Screens
                     //Zombie-Player Collision
                     _player.Health -= 10;
                     _player.Invulnerable = true;
-
+                    
                 }
 
             }
@@ -270,7 +264,7 @@ namespace Romero.Windows.Screens
             {
                 //DEATH!
                 _player.Dead = true;
-                
+                ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
             }
 
         }
