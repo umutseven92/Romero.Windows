@@ -1,5 +1,6 @@
 ﻿#region using Statements
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
@@ -87,7 +88,7 @@ namespace Romero.Windows
                     _canDodge = false;
                     break;
             }
-            
+
         }
 
         public void LoadContent(ContentManager contentManager)
@@ -205,11 +206,18 @@ namespace Romero.Windows
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {
+
+            MouseState curMouse = Mouse.GetState();
+            Vector2 mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+
+            Vector2 direction = (this.SpritePosition) - mouseLoc;
+            float angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
             foreach (var b in Bullets)
             {
                 b.Draw(theSpriteBatch);
             }
-            base.Draw(theSpriteBatch);
+            base.Draw(theSpriteBatch,angle);
         }
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)

@@ -58,11 +58,11 @@ namespace Romero.Windows
         /// <summary>
         /// Draw only when visible
         /// </summary>
-        public override void Draw(SpriteBatch theSpriteBatch)
+        public override void Draw(SpriteBatch theSpriteBatch, float position)
         {
             if (Visible)
             {
-                base.Draw(theSpriteBatch);
+                base.Draw(theSpriteBatch,position);
             }
         }
     }

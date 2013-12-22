@@ -82,7 +82,14 @@ namespace Romero.Windows
         {
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
               new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
-                Color.White, 0.0f, Vector2.Zero, ScaleCalc, SpriteEffects.None, 0);
+                Color.White, 0.0f, new Vector2(_spriteTexture2D.Height/2,_spriteTexture2D.Width/2), ScaleCalc, SpriteEffects.None, 0);
+        }
+
+        public virtual void Draw(SpriteBatch spriteBatch, float rotation)
+        {
+            spriteBatch.Draw(_spriteTexture2D, SpritePosition,
+              new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
+                Color.White, rotation, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
         public void Update(GameTime gameTime, Vector2 speed, Vector2 direction)

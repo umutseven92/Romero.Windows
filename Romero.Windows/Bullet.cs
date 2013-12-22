@@ -55,6 +55,8 @@ namespace Romero.Windows
             }
         }
 
+
+
         public void Fire(Vector2 theStartPosition, Vector2 theDirection)
         {
             SpritePosition = theStartPosition;

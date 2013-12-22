@@ -6,6 +6,7 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Romero.Windows.ScreenManager;
 
 #endregion
@@ -286,9 +287,17 @@ namespace Romero.Windows.Screens
 
             _player.Draw(spriteBatch);
 
+
+           
+
             foreach (var z in _lZombies)
             {
-                z.Draw(spriteBatch);
+                
+
+                Vector2 direction = z.SpritePosition - _player.SpritePosition;
+                 float angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI/2 + Math.PI);
+                
+                z.Draw(spriteBatch,angle);
 
             }
 
