@@ -12,7 +12,7 @@ namespace Romero.Windows
     {
         #region Declarations
 
-        const int MaxDistance = 1000;
+        const int MaxDistance = 5000;
         private new const string AssetName = "bullet";
         public bool Visible = false;
         Vector2 _startPosition;
