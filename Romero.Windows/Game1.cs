@@ -21,7 +21,7 @@ namespace Romero.Windows
     /// </summary>
     public class Game1 : Game
     {
-        public GraphicsDeviceManager graphics;
+        public  GraphicsDeviceManager graphics;
         SpriteBatch _spriteBatch;
 
         private ScreenManager.ScreenManager screenManager;
@@ -49,6 +49,7 @@ namespace Romero.Windows
                 IsFullScreen = Global.IsFullScreen
             };
             graphics.ApplyChanges();
+
             Content.RootDirectory = "Content";
 
             screenManager = new ScreenManager.ScreenManager(this);

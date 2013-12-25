@@ -44,7 +44,7 @@ namespace Romero.Windows
                 Update(gameTime, _speed, _direction);
             }
         }
-
+        
         private void UpdateMovement(Player player)
         {
             var playerPos = new Vector2(player.SpritePosition.X, player.SpritePosition.Y);

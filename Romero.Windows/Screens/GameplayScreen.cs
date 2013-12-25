@@ -241,7 +241,7 @@ namespace Romero.Windows.Screens
                     //Zombie-Player Collision
                     _player.Health -= 10;
                     _player.Invulnerable = true;
-                    
+
                 }
 
             }
@@ -261,7 +261,7 @@ namespace Romero.Windows.Screens
 
             #endregion
 
-            if (_player.Health <= 0 && !_player.Dead )
+            if (_player.Health <= 0 && !_player.Dead)
             {
                 //DEATH!
                 _player.Dead = true;
@@ -287,18 +287,12 @@ namespace Romero.Windows.Screens
 
             _player.Draw(spriteBatch);
 
-
-           
-
             foreach (var z in _lZombies)
             {
-                
+                var direction = z.SpritePosition - _player.SpritePosition;
+                var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
-                Vector2 direction = z.SpritePosition - _player.SpritePosition;
-                 float angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI/2 + Math.PI);
-                
-                z.Draw(spriteBatch,angle);
-
+                z.Draw(spriteBatch, angle);
             }
 
             DrawDiagnostics(spriteBatch);

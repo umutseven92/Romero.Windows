@@ -18,6 +18,8 @@ namespace Romero.Windows
         #region Declarations
 
         public List<Bullet> Bullets = new List<Bullet>();
+        readonly Sword _sword = new Sword();
+        
         ContentManager _contentManager;
         public string PlayerAssetName;
         const int StartPositionX = 125;
@@ -34,8 +36,11 @@ namespace Romero.Windows
         internal int Health;
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
-        float _counterStart = 0f;
+        private const int SwingTime = 1;
+        float _invulnCounterStart = 0f;
         internal bool Dead = false;
+        private float _swingCounterStart = 0f;
+
         public enum State
         {
             Running,
@@ -49,6 +54,9 @@ namespace Romero.Windows
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
+
+
+
 
         #endregion
 
@@ -114,6 +122,7 @@ namespace Romero.Windows
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
+            UpdateSword(gameTime, currentMouseState, currentGamepadState);
 
             if (currentKeyboardState.IsKeyDown(Keys.P) && !_previouseKeyboardState.IsKeyDown(Keys.P))
             {
@@ -126,17 +135,53 @@ namespace Romero.Windows
 
             if (Invulnerable)
             {
-                _counterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_counterStart >= InvulnTime)
+                _invulnCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_invulnCounterStart >= InvulnTime)
                 {
                     Invulnerable = false;
-                    _counterStart = 0f;
+                    _invulnCounterStart = 0f;
                 }
 
             }
 
+            if (_sword.Visible)
+            {
+                _swingCounterStart += (float) gameTime.ElapsedGameTime.TotalSeconds;
+                if (_swingCounterStart >= SwingTime)
+                {
+                    _sword.Visible = false;
+                    _swingCounterStart = 0f;
+                }
+            }
+            
+
             Update(gameTime, _speed, _direction);
         }
+
+        private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
+        {
+
+            _sword.Update(SpritePosition,Size);
+            //Mouse swing
+            if (!Global.Gamepad)
+            {
+                if (currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton != ButtonState.Pressed)
+                {
+                    Swing(currentMouseState);
+                }
+            }
+
+            //Gamepad swing
+            else
+            {
+                if (currentGamepadState.IsButtonDown(Buttons.LeftShoulder) && !_previousGamePadState.IsButtonDown(Buttons.LeftShoulder))
+                {
+                    
+                    Swing(currentGamepadState);
+                }
+            }
+        }
+
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
@@ -204,20 +249,40 @@ namespace Romero.Windows
         }
 
 
+        private void Swing(MouseState currentMouseState)
+        {
+            _sword.LoadContent(_contentManager);
+
+            _sword.Visible = true;
+        }
+
+        private void Swing(GamePadState currentGamePadState)
+        {
+            _sword.LoadContent(_contentManager);
+
+            _sword.Visible = true;
+        }
+
+
         public override void Draw(SpriteBatch theSpriteBatch)
         {
 
-            MouseState curMouse = Mouse.GetState();
-            Vector2 mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+            var curMouse = Mouse.GetState();
+            var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
 
-            Vector2 direction = (this.SpritePosition) - mouseLoc;
-            float angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+            var direction = (this.SpritePosition) - mouseLoc;
+            var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+            if (_sword.Visible)
+            {
+                _sword.Draw(theSpriteBatch,angle);
+            }
 
             foreach (var b in Bullets)
             {
                 b.Draw(theSpriteBatch);
             }
-            base.Draw(theSpriteBatch,angle);
+            base.Draw(theSpriteBatch, angle);
         }
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)

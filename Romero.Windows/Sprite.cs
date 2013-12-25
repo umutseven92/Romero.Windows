@@ -3,6 +3,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Romero.Windows.ScreenManager;
 
 #endregion
 
@@ -26,6 +27,7 @@ namespace Romero.Windows
                     _spriteTexture2D.Height);
             }
         }
+
 
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
@@ -66,12 +68,13 @@ namespace Romero.Windows
                 _source = value;
                 Size = new Rectangle(0, 0, (int)(_source.Width * ScaleCalc), (int)(_source.Height * ScaleCalc));
             }
-        } 
+        }
 
         #endregion
 
         public void LoadContent(ContentManager contentManager, string assetName)
         {
+         
             _spriteTexture2D = contentManager.Load<Texture2D>(assetName);
             AssetName = assetName;
             Source = new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height);
@@ -82,11 +85,12 @@ namespace Romero.Windows
         {
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
               new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
-                Color.White, 0.0f, new Vector2(_spriteTexture2D.Height/2,_spriteTexture2D.Width/2), ScaleCalc, SpriteEffects.None, 0);
+                Color.White, 0.0f, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
         public virtual void Draw(SpriteBatch spriteBatch, float rotation)
         {
+            
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
               new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
                 Color.White, rotation, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);

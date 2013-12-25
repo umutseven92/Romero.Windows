@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.Xna.Framework;
+
 namespace Romero.Windows
 {
     /// <summary>
@@ -6,6 +8,7 @@ namespace Romero.Windows
     /// </summary>
     public static class Global
     {
+
         /// <summary>
         /// Full screen
         /// </summary>
