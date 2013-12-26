@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Romero.Windows
 {
@@ -8,6 +9,8 @@ namespace Romero.Windows
     /// </summary>
     public static class Global
     {
+
+        public static GraphicsDeviceManager deviceInUse;
 
         /// <summary>
         /// Full screen

@@ -36,7 +36,7 @@ namespace Romero.Windows
         public Game1()
         {
             /*
-            if (!File.Exists("../../../UserConfig/config.xml"))
+            if (!File.Exists("../../../UserConfig/config.xml")) <-- Yanlis yer
             {
                 CreateUserConfig();
             }
@@ -49,7 +49,7 @@ namespace Romero.Windows
                 IsFullScreen = Global.IsFullScreen
             };
             graphics.ApplyChanges();
-
+            Global.deviceInUse = graphics;
             Content.RootDirectory = "Content";
 
             screenManager = new ScreenManager.ScreenManager(this);

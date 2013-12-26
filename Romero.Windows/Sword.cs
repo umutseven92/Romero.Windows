@@ -22,7 +22,7 @@ namespace Romero.Windows
         public void Update(Vector2 p,Rectangle playerSize)
         {
             SpritePosition = p;
-            
+
         }
 
     }

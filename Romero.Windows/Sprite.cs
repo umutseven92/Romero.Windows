@@ -21,13 +21,14 @@ namespace Romero.Windows
             get
             {
                 return new Rectangle(
-                    (int)SpritePosition.X,
-                    (int)SpritePosition.Y,
+                    (int)SpritePosition.X - _spriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - _spriteTexture2D.Height / 2,
                     _spriteTexture2D.Width,
                     _spriteTexture2D.Height);
             }
         }
 
+        Texture2D boundingBoxTexture = new Texture2D(Global.deviceInUse.GraphicsDevice, 1, 1);
 
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
@@ -74,7 +75,7 @@ namespace Romero.Windows
 
         public void LoadContent(ContentManager contentManager, string assetName)
         {
-         
+            boundingBoxTexture.SetData(new[] { Color.White });
             _spriteTexture2D = contentManager.Load<Texture2D>(assetName);
             AssetName = assetName;
             Source = new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height);
@@ -83,6 +84,8 @@ namespace Romero.Windows
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
+            spriteBatch.Draw(boundingBoxTexture, BoundingBox, Color.Red);
+
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
               new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
                 Color.White, 0.0f, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
@@ -90,7 +93,8 @@ namespace Romero.Windows
 
         public virtual void Draw(SpriteBatch spriteBatch, float rotation)
         {
-            
+            spriteBatch.Draw(boundingBoxTexture, BoundingBox, Color.Red);
+
             spriteBatch.Draw(_spriteTexture2D, SpritePosition,
               new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
                 Color.White, rotation, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
