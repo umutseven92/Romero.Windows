@@ -9,8 +9,10 @@ namespace Romero.Windows
     /// </summary>
     public static class Global
     {
-
-        public static GraphicsDeviceManager deviceInUse;
+        /// <summary>
+        /// Graphics Device for diagnostics
+        /// </summary>
+        public static GraphicsDeviceManager DeviceInUse;
 
         /// <summary>
         /// Full screen

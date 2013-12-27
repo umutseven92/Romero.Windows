@@ -21,14 +21,14 @@ namespace Romero.Windows
     /// </summary>
     public class Game1 : Game
     {
-        public  GraphicsDeviceManager graphics;
+        public  GraphicsDeviceManager Graphics;
         SpriteBatch _spriteBatch;
 
         private ScreenManager.ScreenManager screenManager;
 
         // By preloading any assets used by UI rendering, we avoid framerate glitches
         // when they suddenly need to be loaded in the middle of a menu transition.
-        static readonly string[] preloadAssets =
+        static readonly string[] PreloadAssets =
         {
             "gradient",
         };
@@ -42,14 +42,14 @@ namespace Romero.Windows
             }
             */
 
-            graphics = new GraphicsDeviceManager(this)
+            Graphics = new GraphicsDeviceManager(this)
             {
                 PreferredBackBufferHeight = 1080,
                 PreferredBackBufferWidth = 1920,
                 IsFullScreen = Global.IsFullScreen
             };
-            graphics.ApplyChanges();
-            Global.deviceInUse = graphics;
+            Graphics.ApplyChanges();
+            Global.DeviceInUse = Graphics;
             Content.RootDirectory = "Content";
 
             screenManager = new ScreenManager.ScreenManager(this);
@@ -99,7 +99,7 @@ namespace Romero.Windows
 
             // TODO: use this.Content to load your game content here
 
-            foreach (var asset in preloadAssets)
+            foreach (var asset in PreloadAssets)
             {
                 Content.Load<object>(asset);
             }
@@ -126,8 +126,8 @@ namespace Romero.Windows
             // TODO: Add your update logic here
             if (Global.ScreenChanged)
             {
-                graphics.ToggleFullScreen();
-                graphics.ApplyChanges();
+                Graphics.ToggleFullScreen();
+                Graphics.ApplyChanges();
                 Global.ScreenChanged = false;
             }
             base.Update(gameTime);

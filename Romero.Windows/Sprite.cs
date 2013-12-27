@@ -16,25 +16,29 @@ namespace Romero.Windows
         /// <summary>
         /// Collision box
         /// </summary>
+        private Rectangle _boundingBox;
         public Rectangle BoundingBox
         {
             get
             {
-                return new Rectangle(
-                    (int)SpritePosition.X - _spriteTexture2D.Width / 2,
-                    (int)SpritePosition.Y - _spriteTexture2D.Height / 2,
-                    _spriteTexture2D.Width,
-                    _spriteTexture2D.Height);
+                _boundingBox = new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+                return _boundingBox;
             }
+            set { _boundingBox = value; }
         }
 
-        Texture2D boundingBoxTexture = new Texture2D(Global.deviceInUse.GraphicsDevice, 1, 1);
+
+        readonly Texture2D _boundingBoxTexture = new Texture2D(Global.DeviceInUse.GraphicsDevice, 1, 1);
 
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
 
         //The texture object used when drawing the sprite
-        private Texture2D _spriteTexture2D;
+        public Texture2D SpriteTexture2D;
 
         //The asset name for the Sprite's Texture
         public string AssetName;
@@ -75,29 +79,42 @@ namespace Romero.Windows
 
         public void LoadContent(ContentManager contentManager, string assetName)
         {
-            boundingBoxTexture.SetData(new[] { Color.White });
-            _spriteTexture2D = contentManager.Load<Texture2D>(assetName);
+            _boundingBoxTexture.SetData(new[] { Color.White });
+            SpriteTexture2D = contentManager.Load<Texture2D>(assetName);
             AssetName = assetName;
-            Source = new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height);
-            Size = new Rectangle(0, 0, (int)(_spriteTexture2D.Width * ScaleCalc), (int)(_spriteTexture2D.Height * ScaleCalc));
+            Source = new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height);
+            Size = new Rectangle(0, 0, (int)(SpriteTexture2D.Width * ScaleCalc), (int)(SpriteTexture2D.Height * ScaleCalc));
         }
 
+        /// <summary>
+        /// Draw without direction angle
+        /// </summary>
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(boundingBoxTexture, BoundingBox, Color.Red);
+            if (Global.IsDiagnosticsOpen)
+            {
+                spriteBatch.Draw(_boundingBoxTexture, BoundingBox, Color.Red);
+            }
 
-            spriteBatch.Draw(_spriteTexture2D, SpritePosition,
-              new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
-                Color.White, 0.0f, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+            spriteBatch.Draw(SpriteTexture2D, SpritePosition,
+              new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
+                Color.White, 0.0f, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
+        /// <summary>
+        /// Draw with direction angle
+        /// </summary>
+        /// <param name="rotation">Direction angle</param>
         public virtual void Draw(SpriteBatch spriteBatch, float rotation)
         {
-            spriteBatch.Draw(boundingBoxTexture, BoundingBox, Color.Red);
+            if (Global.IsDiagnosticsOpen)
+            {
+                spriteBatch.Draw(_boundingBoxTexture, BoundingBox, Color.Red);
+            }
 
-            spriteBatch.Draw(_spriteTexture2D, SpritePosition,
-              new Rectangle(0, 0, _spriteTexture2D.Width, _spriteTexture2D.Height),
-                Color.White, rotation, new Vector2(_spriteTexture2D.Height / 2, _spriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+            spriteBatch.Draw(SpriteTexture2D, SpritePosition,
+              new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
+                Color.White, rotation, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
         public void Update(GameTime gameTime, Vector2 speed, Vector2 direction)

@@ -243,6 +243,15 @@ namespace Romero.Windows.Screens
                     _player.Invulnerable = true;
 
                 }
+                if (z.BoundingBox.Intersects(_player._sword.BoundingBox) && z.Visible && _player._sword.Visible)
+                {
+                    //Bullet - Zombie Collision
+                    _player._sword.Visible = false;
+
+                    z.Visible = false;
+                    _deadZombies++;
+                    _diagZombieCount--;
+                }
 
             }
 

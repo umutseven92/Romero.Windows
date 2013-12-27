@@ -18,8 +18,8 @@ namespace Romero.Windows
         #region Declarations
 
         public List<Bullet> Bullets = new List<Bullet>();
-        readonly Sword _sword = new Sword();
-        
+        public Sword _sword = new Sword();
+
         ContentManager _contentManager;
         public string PlayerAssetName;
         const int StartPositionX = 125;
@@ -39,7 +39,7 @@ namespace Romero.Windows
         private const int SwingTime = 1;
         float _invulnCounterStart = 0f;
         internal bool Dead = false;
-        private float _swingCounterStart = 0f;
+        
 
         public enum State
         {
@@ -107,7 +107,7 @@ namespace Romero.Windows
             {
                 b.LoadContent(contentManager);
             }
-
+            _sword.LoadContent(_contentManager);
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
             LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
@@ -144,28 +144,18 @@ namespace Romero.Windows
 
             }
 
-            if (_sword.Visible)
-            {
-                _swingCounterStart += (float) gameTime.ElapsedGameTime.TotalSeconds;
-                if (_swingCounterStart >= SwingTime)
-                {
-                    _sword.Visible = false;
-                    _swingCounterStart = 0f;
-                }
-            }
-            
+
 
             Update(gameTime, _speed, _direction);
         }
 
-        private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
+        private void UpdateSword(GameTime gameTime,MouseState currentMouseState, GamePadState currentGamepadState)
         {
-
-            _sword.Update(SpritePosition,Size);
+            _sword.Update(gameTime);
             //Mouse swing
             if (!Global.Gamepad)
             {
-                if (currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton != ButtonState.Pressed)
+                if (currentMouseState.RightButton == ButtonState.Pressed && !_sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed)
                 {
                     Swing(currentMouseState);
                 }
@@ -174,13 +164,14 @@ namespace Romero.Windows
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Buttons.LeftShoulder) && !_previousGamePadState.IsButtonDown(Buttons.LeftShoulder))
+                if (currentGamepadState.IsButtonDown(Buttons.LeftShoulder) && !_sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftShoulder))
                 {
-                    
                     Swing(currentGamepadState);
                 }
             }
         }
+
+      
 
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
@@ -248,21 +239,23 @@ namespace Romero.Windows
 
         }
 
-
         private void Swing(MouseState currentMouseState)
         {
-            _sword.LoadContent(_contentManager);
+            var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
+            var movement = mousePos - SpritePosition;
 
-            _sword.Visible = true;
+            if (movement != Vector2.Zero)
+            {
+                movement.Normalize();
+            }
+            _sword.Swing(SpritePosition,movement);
+
         }
 
         private void Swing(GamePadState currentGamePadState)
         {
-            _sword.LoadContent(_contentManager);
 
-            _sword.Visible = true;
         }
-
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {
@@ -271,18 +264,19 @@ namespace Romero.Windows
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
 
             var direction = (this.SpritePosition) - mouseLoc;
-            var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+            var playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+            var swordAngle = (float) (Math.Atan2(direction.Y, direction.X));
 
             if (_sword.Visible)
             {
-                _sword.Draw(theSpriteBatch,angle);
+                _sword.Draw(theSpriteBatch,playerAngle);
             }
 
             foreach (var b in Bullets)
             {
                 b.Draw(theSpriteBatch);
             }
-            base.Draw(theSpriteBatch, angle);
+            base.Draw(theSpriteBatch, playerAngle);
         }
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)
@@ -435,7 +429,6 @@ namespace Romero.Windows
                         CurrentState = State.Sprinting;
                     }
 
-
                     switch (CurrentState)
                     {
 
@@ -509,6 +502,7 @@ namespace Romero.Windows
 
                         #region Keyboard Sprinting
                         case State.Sprinting:
+                            
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
