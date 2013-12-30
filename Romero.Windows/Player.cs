@@ -39,7 +39,7 @@ namespace Romero.Windows
         private const int SwingTime = 1;
         float _invulnCounterStart = 0f;
         internal bool Dead = false;
-        
+
 
         public enum State
         {
@@ -149,7 +149,7 @@ namespace Romero.Windows
             Update(gameTime, _speed, _direction);
         }
 
-        private void UpdateSword(GameTime gameTime,MouseState currentMouseState, GamePadState currentGamepadState)
+        private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
         {
             _sword.Update(gameTime);
             //Mouse swing
@@ -164,14 +164,14 @@ namespace Romero.Windows
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Buttons.LeftShoulder) && !_sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftShoulder))
+                if (currentGamepadState.IsButtonDown(Buttons.LeftTrigger) && !_sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftTrigger))
                 {
                     Swing(currentGamepadState);
                 }
             }
         }
 
-      
+
 
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
@@ -248,28 +248,50 @@ namespace Romero.Windows
             {
                 movement.Normalize();
             }
-            _sword.Swing(SpritePosition,movement);
+            _sword.Swing(SpritePosition, movement);
 
         }
+
 
         private void Swing(GamePadState currentGamePadState)
         {
+            var swingThumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, -currentGamePadState.ThumbSticks.Right.Y);
+            if (swingThumb != Vector2.Zero)
+            {
+                _sword.Swing(SpritePosition, swingThumb);
+
+            }
 
         }
-
+        float playerAngle;
         public override void Draw(SpriteBatch theSpriteBatch)
         {
 
             var curMouse = Mouse.GetState();
+            var currentGamePadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
 
             var direction = (this.SpritePosition) - mouseLoc;
-            var playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
-            var swordAngle = (float) (Math.Atan2(direction.Y, direction.X));
+            if (!Global.Gamepad)
+            {
+                playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+            }
+            else
+            {
+                var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
+                if (thumb != Vector2.Zero)
+                {
+                    playerAngle =
+                    (float)
+                        (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
+                }
+
+            }
+
 
             if (_sword.Visible)
             {
-                _sword.Draw(theSpriteBatch,playerAngle);
+                _sword.Draw(theSpriteBatch, playerAngle);
             }
 
             foreach (var b in Bullets)
@@ -502,7 +524,7 @@ namespace Romero.Windows
 
                         #region Keyboard Sprinting
                         case State.Sprinting:
-                            
+
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
