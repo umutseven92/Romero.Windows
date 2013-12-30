@@ -47,7 +47,7 @@ namespace Romero.Windows.Screens
         public override void LoadContent()
         {
             if (_content == null)
-                _content = new ContentManager(ScreenManager.Game.Services, "Content");
+                _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
 
             _backgroundTexture = _content.Load<Texture2D>("background");
         }

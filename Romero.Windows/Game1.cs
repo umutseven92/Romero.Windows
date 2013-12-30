@@ -50,7 +50,7 @@ namespace Romero.Windows
             };
             Graphics.ApplyChanges();
             Global.DeviceInUse = Graphics;
-            Content.RootDirectory = "Content";
+            Content.RootDirectory = "Content/Sprites";
 
             screenManager = new ScreenManager.ScreenManager(this);
 
