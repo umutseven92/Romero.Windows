@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 #endregion
 
-namespace Romero.Windows
+namespace Romero.Windows.Classes
 {
     class Zombie : Sprite
     {
@@ -17,19 +17,36 @@ namespace Romero.Windows
         const string ZombieAssetName = "enemy";
         private static readonly Random Random = new Random();
 
-        //int StartPositionX = 640;
-        //int StartPositionY = 200;
 
         public bool Visible = true;
 
         Vector2 _direction = Vector2.Zero;
-        readonly Vector2 _speed = new Vector2(50,50);
+        Vector2 _speed;
 
         #endregion
 
         public void LoadContent(ContentManager contentManager)
         {
-            SpritePosition = new Vector2(Random.Next(1920), Random.Next(1080));
+            switch (Global.ZombieSpawnSeed % 4)
+            {
+                case 0:
+                    SpritePosition = new Vector2(Random.Next(-200, 2120), -200);
+                    break;
+                case 1:
+                    SpritePosition = new Vector2(2120, Random.Next(0, 1080));
+
+                    break;
+                case 2:
+                    SpritePosition = new Vector2(Random.Next(-200, 2120), 1280);
+
+                    break;
+                case 3:
+                    SpritePosition = new Vector2(-200, Random.Next(0, 1080));
+                    break;
+            }
+            Global.ZombieSpawnSeed++;
+
+            _speed = new Vector2(Random.Next(25, 100), Random.Next(25, 100));
             LoadContent(contentManager, ZombieAssetName);
         }
 
@@ -44,7 +61,7 @@ namespace Romero.Windows
                 Update(gameTime, _speed, _direction);
             }
         }
-        
+
         private void UpdateMovement(Player player)
         {
             var playerPos = new Vector2(player.SpritePosition.X, player.SpritePosition.Y);
@@ -62,7 +79,7 @@ namespace Romero.Windows
         {
             if (Visible)
             {
-                base.Draw(theSpriteBatch,position);
+                base.Draw(theSpriteBatch, position);
             }
         }
     }

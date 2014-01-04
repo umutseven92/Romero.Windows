@@ -22,8 +22,8 @@ namespace Romero.Windows
 
         ContentManager _contentManager;
         public string PlayerAssetName;
-        const int StartPositionX = 125;
-        const int StartPositionY = 245;
+        const int StartPositionX = 960;
+        const int StartPositionY = 540;
         private readonly int _playerSpeed;
         const int MoveUp = -1;
         const int MoveDown = 1;

@@ -15,6 +15,8 @@ namespace Romero.Windows
         public static GraphicsDeviceManager DeviceInUse;
 
 
+        public static int ZombieSpawnSeed;
+
         public static Game GameInProgress;
         /// <summary>
         /// Full screen
@@ -67,6 +69,8 @@ namespace Romero.Windows
         /// Diagnostics open/closed
         /// </summary>
         public static bool IsDiagnosticsOpen = true;
+
+
     }
 
 }
