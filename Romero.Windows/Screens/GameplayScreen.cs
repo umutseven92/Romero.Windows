@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Romero.Windows.Classes;
 using Romero.Windows.ScreenManager;
 
 #endregion
@@ -20,9 +21,11 @@ namespace Romero.Windows.Screens
     {
 
         #region Declarations
-
+        int screenWidth;
+        int screenHeight;
         ContentManager _content;
         private readonly Player _player; //Player, for single player
+        private Camera2D camera;
         private GameTime _gT; //Gametime for Player.Update()
         private readonly List<Zombie> _lZombies; //Zombies on screen
         private SpriteFont _font;
@@ -35,6 +38,7 @@ namespace Romero.Windows.Screens
         private int _wave;
         int _frameRate;
         int _frameCounter;
+        Texture2D backgroundTexture;
         #endregion
 
         #region Functions
@@ -103,7 +107,9 @@ namespace Romero.Windows.Screens
 
             //Player (single player)
             _player = new Player();
-
+           
+            //camera = new Camera2D(Global.GameInProgress) {Focus = _player};
+            
             //Zombie Horde
             _lZombies = new List<Zombie>();
             _wave = 1;
@@ -117,7 +123,11 @@ namespace Romero.Windows.Screens
         {
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
+            
+            screenWidth = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth;
+            screenHeight = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight;
 
+            backgroundTexture = _content.Load<Texture2D>("ground");
             _player.LoadContent(_content);
 
             foreach (var z in _lZombies)
@@ -294,6 +304,8 @@ namespace Romero.Windows.Screens
 
             spriteBatch.Begin();
 
+            var screenRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
+            spriteBatch.Draw(backgroundTexture, screenRectangle, Color.White);
             _player.Draw(spriteBatch);
 
             foreach (var z in _lZombies)

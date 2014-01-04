@@ -51,7 +51,7 @@ namespace Romero.Windows
             Graphics.ApplyChanges();
             Global.DeviceInUse = Graphics;
             Content.RootDirectory = "Content/Sprites";
-
+            Global.GameInProgress = this;
             screenManager = new ScreenManager.ScreenManager(this);
 
             Components.Add(screenManager);

@@ -14,6 +14,8 @@ namespace Romero.Windows
         /// </summary>
         public static GraphicsDeviceManager DeviceInUse;
 
+
+        public static Game GameInProgress;
         /// <summary>
         /// Full screen
         /// </summary>
