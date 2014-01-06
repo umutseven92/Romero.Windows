@@ -2,23 +2,22 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Content;
 using Romero.Windows.Interfaces;
 
 #endregion
 
-namespace Romero.Windows
+namespace Romero.Windows.Classes
 {
     public class Player : Sprite, IFocusable
     {
         #region Declarations
 
         public List<Bullet> Bullets = new List<Bullet>();
-        public Sword _sword = new Sword();
+        public Sword Sword = new Sword();
 
         ContentManager _contentManager;
         public string PlayerAssetName;
@@ -29,17 +28,19 @@ namespace Romero.Windows
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float DodgeModifier = 10f;
+        const float DodgeModifier = 50f;
         private const float SprintModifier = 2.0f;
         private readonly bool _canDodge;
-        private string _fullCharacterName;
+        public string FullCharacterName;
         internal int Health;
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
-        private const int SwingTime = 1;
         float _invulnCounterStart = 0f;
         internal bool Dead = false;
-
+        private bool _canShoot = true;
+        private readonly float _shootDelay;
+        private float _shootCounterStart = 0f;
+        float _playerAngle;
 
         public enum State
         {
@@ -69,29 +70,33 @@ namespace Romero.Windows
             {
                 case Global.Character.Fraser:
                     PlayerAssetName = "fraser";
-                    _fullCharacterName = "Knight Fraser";
+                    FullCharacterName = "Knight Fraser";
                     _playerSpeed = 300;
+                    _shootDelay = 1;
                     Health = 300;
                     _canDodge = false;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
-                    _fullCharacterName = "Lady Rebecca";
+                    FullCharacterName = "Lady Rebecca";
                     _playerSpeed = 450;
+                    _shootDelay = 0.8f;
                     Health = 120;
                     _canDodge = true;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
-                    _fullCharacterName = "Sire Benjamin";
+                    FullCharacterName = "Sire Benjamin";
                     _playerSpeed = 340;
+                    _shootDelay = 0.5f;
                     Health = 150;
                     _canDodge = false;
                     break;
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
-                    _fullCharacterName = "Cleric Diakonos";
+                    FullCharacterName = "Cleric Diakonos";
                     _playerSpeed = 400;
+                    _shootDelay = 1;
                     Health = 100;
                     _canDodge = false;
                     break;
@@ -107,7 +112,7 @@ namespace Romero.Windows
             {
                 b.LoadContent(contentManager);
             }
-            _sword.LoadContent(_contentManager);
+            Sword.LoadContent(_contentManager);
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
             LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
@@ -144,18 +149,26 @@ namespace Romero.Windows
 
             }
 
-
+            if (!_canShoot)
+            {
+                _shootCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_shootCounterStart >= _shootDelay)
+                {
+                    _canShoot = true;
+                    _shootCounterStart = 0f;
+                }
+            }
 
             Update(gameTime, _speed, _direction);
         }
 
         private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
         {
-            _sword.Update(gameTime);
+            Sword.Update(gameTime);
             //Mouse swing
             if (!Global.Gamepad)
             {
-                if (currentMouseState.RightButton == ButtonState.Pressed && !_sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed)
+                if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed)
                 {
                     Swing(currentMouseState);
                 }
@@ -164,7 +177,7 @@ namespace Romero.Windows
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Buttons.LeftTrigger) && !_sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftTrigger))
+                if (currentGamepadState.IsButtonDown(Buttons.LeftTrigger) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftTrigger))
                 {
                     Swing(currentGamepadState);
                 }
@@ -186,7 +199,13 @@ namespace Romero.Windows
             {
                 if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed)
                 {
-                    Shoot(currentMouseState);
+                    if (_canShoot)
+                    {
+                        Shoot(currentMouseState);
+                        _canShoot = false;
+                    }
+
+
                 }
 
             }
@@ -248,7 +267,7 @@ namespace Romero.Windows
             {
                 movement.Normalize();
             }
-            _sword.Swing(SpritePosition, movement);
+            Sword.Swing(SpritePosition, movement);
 
         }
 
@@ -258,12 +277,12 @@ namespace Romero.Windows
             var swingThumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, -currentGamePadState.ThumbSticks.Right.Y);
             if (swingThumb != Vector2.Zero)
             {
-                _sword.Swing(SpritePosition, swingThumb);
+                Sword.Swing(SpritePosition, swingThumb);
 
             }
 
         }
-        float playerAngle;
+      
         public override void Draw(SpriteBatch theSpriteBatch)
         {
 
@@ -274,14 +293,14 @@ namespace Romero.Windows
             var direction = (this.SpritePosition) - mouseLoc;
             if (!Global.Gamepad)
             {
-                playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
             }
             else
             {
                 var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
                 if (thumb != Vector2.Zero)
                 {
-                    playerAngle =
+                    _playerAngle =
                     (float)
                         (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
                 }
@@ -289,16 +308,16 @@ namespace Romero.Windows
             }
 
 
-            if (_sword.Visible)
+            if (Sword.Visible)
             {
-                _sword.Draw(theSpriteBatch, playerAngle);
+                Sword.Draw(theSpriteBatch, _playerAngle);
             }
 
             foreach (var b in Bullets)
             {
                 b.Draw(theSpriteBatch);
             }
-            base.Draw(theSpriteBatch, playerAngle);
+            base.Draw(theSpriteBatch, _playerAngle);
         }
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)

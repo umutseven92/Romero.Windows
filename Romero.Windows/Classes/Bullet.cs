@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 #endregion
 
-namespace Romero.Windows
+namespace Romero.Windows.Classes
 {
     public class Bullet : Sprite
     {

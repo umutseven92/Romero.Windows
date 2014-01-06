@@ -21,11 +21,11 @@ namespace Romero.Windows.Screens
     {
 
         #region Declarations
-        int screenWidth;
-        int screenHeight;
+        int _screenWidth;
+        int _screenHeight;
         ContentManager _content;
         private readonly Player _player; //Player, for single player
-        private Camera2D camera;
+        // private Camera2D camera;
         private GameTime _gT; //Gametime for Player.Update()
         private readonly List<Zombie> _lZombies; //Zombies on screen
         private SpriteFont _font;
@@ -38,7 +38,7 @@ namespace Romero.Windows.Screens
         private int _wave;
         int _frameRate;
         int _frameCounter;
-        Texture2D backgroundTexture;
+        Texture2D _backgroundTexture;
         #endregion
 
         #region Functions
@@ -64,10 +64,11 @@ namespace Romero.Windows.Screens
             if (Global.IsDiagnosticsOpen)
             {
                 spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Red);
-                spriteBatch.DrawString(_font, string.Format("Player health:{0}", _player.Health), new Vector2(1000, 45), Color.Green);
+                spriteBatch.DrawString(_font, string.Format("Player health: {0}", _player.Health), new Vector2(1000, 45), Color.Green);
+                spriteBatch.DrawString(_font,string.Format("Character: {0}",_player.FullCharacterName),new Vector2(1000,65),Color.Green );
                 if (_player.Invulnerable)
                 {
-                    spriteBatch.DrawString(_font, "Invulnerable", new Vector2(1000, 65), Color.Green);
+                    spriteBatch.DrawString(_font, "Invulnerable", new Vector2(1000, 85), Color.Green);
                 }
             }
 
@@ -107,9 +108,9 @@ namespace Romero.Windows.Screens
 
             //Player (single player)
             _player = new Player();
-           
+
             //camera = new Camera2D(Global.GameInProgress) {Focus = _player};
-            
+
             //Zombie Horde
             _lZombies = new List<Zombie>();
             _wave = 1;
@@ -123,11 +124,11 @@ namespace Romero.Windows.Screens
         {
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
-            
-            screenWidth = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth;
-            screenHeight = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight;
 
-            backgroundTexture = _content.Load<Texture2D>("ground");
+            _screenWidth = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth;
+            _screenHeight = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight;
+
+            _backgroundTexture = _content.Load<Texture2D>("ground");
             _player.LoadContent(_content);
 
             foreach (var z in _lZombies)
@@ -253,10 +254,10 @@ namespace Romero.Windows.Screens
                     _player.Invulnerable = true;
 
                 }
-                if (z.BoundingBox.Intersects(_player._sword.BoundingBox) && z.Visible && _player._sword.Visible)
+                if (z.BoundingBox.Intersects(_player.Sword.BoundingBox) && z.Visible && _player.Sword.Visible)
                 {
                     //Bullet - Zombie Collision
-                    _player._sword.Visible = false;
+                    _player.Sword.Visible = false;
 
                     z.Visible = false;
                     _deadZombies++;
@@ -304,8 +305,8 @@ namespace Romero.Windows.Screens
 
             spriteBatch.Begin();
 
-            var screenRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
-            spriteBatch.Draw(backgroundTexture, screenRectangle, Color.White);
+            var screenRectangle = new Rectangle(0, 0, _screenWidth, _screenHeight);
+            spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White);
             _player.Draw(spriteBatch);
 
             foreach (var z in _lZombies)
