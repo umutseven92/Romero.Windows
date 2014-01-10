@@ -11,7 +11,8 @@ namespace Romero.Windows.Classes
     public class Bullet : Sprite
     {
         #region Declarations
-
+        
+        //Max distance the bullet can travel
         const int MaxDistance = 5000;
         private new const string AssetName = "bullet";
         public bool Visible = false;
@@ -54,8 +55,6 @@ namespace Romero.Windows.Classes
                 base.Draw(theSpriteBatch);
             }
         }
-
-
 
         public void Fire(Vector2 theStartPosition, Vector2 theDirection)
         {

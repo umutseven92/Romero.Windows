@@ -106,14 +106,14 @@ namespace Romero.Windows.ScreenManager
         protected override void LoadContent()
         {
             // Load content belonging to the screen manager.
-            ContentManager content = Game.Content;
+            var content = Game.Content;
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _font = content.Load<SpriteFont>("font");
             _blankTexture = content.Load<Texture2D>("blank");
 
             // Tell each of the screens to load their content.
-            foreach (GameScreen screen in _screens)
+            foreach (var screen in _screens)
             {
                 screen.LoadContent();
             }
@@ -126,7 +126,7 @@ namespace Romero.Windows.ScreenManager
         protected override void UnloadContent()
         {
             // Tell each of the screens to unload their content.
-            foreach (GameScreen screen in _screens)
+            foreach (var screen in _screens)
             {
                 screen.UnloadContent();
             }

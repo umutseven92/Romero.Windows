@@ -159,10 +159,18 @@ namespace Romero.Windows.ScreenManager
         public bool IsMenuSelect(PlayerIndex? controllingPlayer,
             out PlayerIndex playerIndex)
         {
-            return IsNewKeyPress(Keys.Space, controllingPlayer, out playerIndex) ||
-                   IsNewKeyPress(Keys.Enter, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.A, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex);
+            if (Global.Gamepad)
+            {
+                return IsNewButtonPress(Buttons.A, controllingPlayer, out playerIndex) ||
+                  IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex);
+            }
+            else
+            {
+                return IsNewKeyPress(Keys.Space, controllingPlayer, out playerIndex) ||
+                       IsNewKeyPress(Keys.Enter, controllingPlayer, out playerIndex);
+            }
+
+
         }
 
 
@@ -175,9 +183,17 @@ namespace Romero.Windows.ScreenManager
         public bool IsMenuCancel(PlayerIndex? controllingPlayer,
             out PlayerIndex playerIndex)
         {
-            return IsNewKeyPress(Keys.Escape, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.B, controllingPlayer, out playerIndex) ||
+
+            if (Global.Gamepad)
+            {
+                return IsNewButtonPress(Buttons.B, controllingPlayer, out playerIndex) ||
                    IsNewButtonPress(Buttons.Back, controllingPlayer, out playerIndex);
+            }
+            else
+            {
+                return IsNewKeyPress(Keys.Escape, controllingPlayer, out playerIndex);
+            }
+
         }
 
 
@@ -190,9 +206,17 @@ namespace Romero.Windows.ScreenManager
         {
             PlayerIndex playerIndex;
 
-            return IsNewKeyPress(Keys.Up, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.DPadUp, controllingPlayer, out playerIndex) ||
+            if (Global.Gamepad)
+            {
+                return IsNewButtonPress(Buttons.DPadUp, controllingPlayer, out playerIndex) ||
                    IsNewButtonPress(Buttons.LeftThumbstickUp, controllingPlayer, out playerIndex);
+            }
+            else
+            {
+                return IsNewKeyPress(Keys.Up, controllingPlayer, out playerIndex) ||
+                       IsNewKeyPress(Keys.W, controllingPlayer, out playerIndex);
+            }
+
         }
 
 
@@ -205,9 +229,18 @@ namespace Romero.Windows.ScreenManager
         {
             PlayerIndex playerIndex;
 
-            return IsNewKeyPress(Keys.Down, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.DPadDown, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.LeftThumbstickDown, controllingPlayer, out playerIndex);
+            if (Global.Gamepad)
+            {
+                return IsNewButtonPress(Buttons.DPadDown, controllingPlayer, out playerIndex) ||
+                  IsNewButtonPress(Buttons.LeftThumbstickDown, controllingPlayer, out playerIndex);
+            }
+            else
+            {
+                return IsNewKeyPress(Keys.Down, controllingPlayer, out playerIndex) ||
+                       IsNewKeyPress(Keys.S, controllingPlayer, out playerIndex);
+            }
+
+
         }
 
 
@@ -220,9 +253,17 @@ namespace Romero.Windows.ScreenManager
         {
             PlayerIndex playerIndex;
 
-            return IsNewKeyPress(Keys.Escape, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.Back, controllingPlayer, out playerIndex) ||
-                   IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex);
+            if (Global.Gamepad)
+            {
+                return IsNewButtonPress(Buttons.Back, controllingPlayer, out playerIndex) ||
+                 IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex);
+            }
+            else
+            {
+                return IsNewKeyPress(Keys.Escape, controllingPlayer, out playerIndex);
+            }
+
+
         }
 
 

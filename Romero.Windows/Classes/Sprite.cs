@@ -3,11 +3,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Romero.Windows.ScreenManager;
 
 #endregion
 
-namespace Romero.Windows
+namespace Romero.Windows.Classes
 {
     public class Sprite
     {
@@ -16,6 +15,7 @@ namespace Romero.Windows
         /// <summary>
         /// Collision box
         /// </summary>
+        readonly Texture2D _boundingBoxTexture = new Texture2D(Global.DeviceInUse.GraphicsDevice, 1, 1);
         private Rectangle _boundingBox;
         public Rectangle BoundingBox
         {
@@ -31,9 +31,6 @@ namespace Romero.Windows
             set { _boundingBox = value; }
         }
 
-
-        readonly Texture2D _boundingBoxTexture = new Texture2D(Global.DeviceInUse.GraphicsDevice, 1, 1);
-
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
 
@@ -46,24 +43,21 @@ namespace Romero.Windows
         //The Size of the Sprite (with scale applied)
         public Rectangle Size;
 
-        //The amount to increase/decrease the size of the original sprite. 
+        //The amount to increase/decrease the size of the original sprite.
         private float _scale = 1.0f;
 
-        //When the scale is modified throught he property, the Size of the 
-        //sprite is recalculated with the new scale applied.
+        //When the scale is modified throught he property, the Size of the sprite is recalculated with the new scale applied
         public float ScaleCalc
         {
             get { return _scale; }
             set
             {
                 _scale = value;
-                //Recalculate the Size of the Sprite with the new scale
                 Size = new Rectangle(0, 0, (int)(Source.Width * ScaleCalc), (int)(Source.Height * ScaleCalc));
             }
         }
 
-        //The Rectangular area from the original image that 
-        //defines the Sprite. 
+        //The Rectangular area from the original image that defines the Sprite
         Rectangle _source;
         public Rectangle Source
         {
@@ -104,7 +98,7 @@ namespace Romero.Windows
         /// <summary>
         /// Draw with direction angle
         /// </summary>
-        /// <param name="rotation">Direction angle</param>
+        /// <param name="rotation">Direction angle as float</param>
         public virtual void Draw(SpriteBatch spriteBatch, float rotation)
         {
             if (Global.IsDiagnosticsOpen)
@@ -113,8 +107,7 @@ namespace Romero.Windows
             }
 
             spriteBatch.Draw(SpriteTexture2D, SpritePosition,
-              new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
-                Color.White, rotation, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+              new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height), Color.White, rotation, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
         public void Update(GameTime gameTime, Vector2 speed, Vector2 direction)

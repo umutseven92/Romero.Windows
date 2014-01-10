@@ -6,19 +6,20 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Romero.Windows.Interfaces;
 
 #endregion
 
 namespace Romero.Windows.Classes
 {
-    public class Player : Sprite, IFocusable
+    /// <summary>
+    /// The main player
+    /// </summary>
+    public class Player : Sprite
     {
         #region Declarations
 
         public List<Bullet> Bullets = new List<Bullet>();
         public Sword Sword = new Sword();
-
         ContentManager _contentManager;
         public string PlayerAssetName;
         const int StartPositionX = 960;
@@ -28,19 +29,22 @@ namespace Romero.Windows.Classes
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        const float DodgeModifier = 50f;
+        private readonly float _dodgeModifier;
         private const float SprintModifier = 2.0f;
         private readonly bool _canDodge;
         public string FullCharacterName;
         internal int Health;
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
-        float _invulnCounterStart = 0f;
+        float _invulnCounterStart;
         internal bool Dead = false;
         private bool _canShoot = true;
         private readonly float _shootDelay;
-        private float _shootCounterStart = 0f;
+        private float _shootCounterStart;
         float _playerAngle;
+        public bool Visible = true;
+        private float _blinkCounterStart;
+        private const float BlinkDelay = 0.1f;
 
         public enum State
         {
@@ -56,8 +60,7 @@ namespace Romero.Windows.Classes
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
 
-
-
+        
 
         #endregion
 
@@ -75,6 +78,7 @@ namespace Romero.Windows.Classes
                     _shootDelay = 1;
                     Health = 300;
                     _canDodge = false;
+                    _dodgeModifier = 0f;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
@@ -83,6 +87,7 @@ namespace Romero.Windows.Classes
                     _shootDelay = 0.8f;
                     Health = 120;
                     _canDodge = true;
+                    _dodgeModifier = 50f;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
@@ -91,6 +96,7 @@ namespace Romero.Windows.Classes
                     _shootDelay = 0.5f;
                     Health = 150;
                     _canDodge = false;
+                    _dodgeModifier = 0f;
                     break;
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
@@ -99,6 +105,7 @@ namespace Romero.Windows.Classes
                     _shootDelay = 1;
                     Health = 100;
                     _canDodge = false;
+                    _dodgeModifier = 0f;
                     break;
             }
 
@@ -129,10 +136,12 @@ namespace Romero.Windows.Classes
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
             UpdateSword(gameTime, currentMouseState, currentGamepadState);
 
-            if (currentKeyboardState.IsKeyDown(Keys.P) && !_previouseKeyboardState.IsKeyDown(Keys.P))
+            /*
+            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics))
             {
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
+            */
 
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
@@ -140,9 +149,11 @@ namespace Romero.Windows.Classes
 
             if (Invulnerable)
             {
+                Blink(gameTime);
                 _invulnCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (_invulnCounterStart >= InvulnTime)
                 {
+                    Visible = true;
                     Invulnerable = false;
                     _invulnCounterStart = 0f;
                 }
@@ -162,6 +173,22 @@ namespace Romero.Windows.Classes
             Update(gameTime, _speed, _direction);
         }
 
+       
+        /// <summary>
+        /// Blink when hit
+        /// </summary>
+        private void Blink(GameTime gT)
+        {
+            _blinkCounterStart += (float) gT.ElapsedGameTime.TotalSeconds;
+            
+            if (_blinkCounterStart >= BlinkDelay)
+            {
+                Visible = !Visible;
+                _blinkCounterStart = 0f;
+            }
+
+        }
+
         private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
         {
             Sword.Update(gameTime);
@@ -177,7 +204,7 @@ namespace Romero.Windows.Classes
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Buttons.LeftTrigger) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Buttons.LeftTrigger))
+                if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing))
                 {
                     Swing(currentGamepadState);
                 }
@@ -213,7 +240,7 @@ namespace Romero.Windows.Classes
             //Gamepad shooting
             else
             {
-                if (currentGamePadState.IsButtonDown(Buttons.RightShoulder) && !_previousGamePadState.IsButtonDown(Buttons.RightShoulder))
+                if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot))
                 {
                     Shoot(currentGamePadState);
                 }
@@ -282,7 +309,7 @@ namespace Romero.Windows.Classes
             }
 
         }
-      
+
         public override void Draw(SpriteBatch theSpriteBatch)
         {
 
@@ -290,7 +317,8 @@ namespace Romero.Windows.Classes
             var currentGamePadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
 
-            var direction = (this.SpritePosition) - mouseLoc;
+            var direction = (SpritePosition) - mouseLoc;
+            
             if (!Global.Gamepad)
             {
                 _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
@@ -317,7 +345,11 @@ namespace Romero.Windows.Classes
             {
                 b.Draw(theSpriteBatch);
             }
-            base.Draw(theSpriteBatch, _playerAngle);
+            if (Visible)
+            {
+                base.Draw(theSpriteBatch, _playerAngle);
+            }
+
         }
 
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)
@@ -329,7 +361,7 @@ namespace Romero.Windows.Classes
                 case true:
                     CurrentState = State.Running;
 
-                    if (currentGamePadState.IsButtonDown(Buttons.LeftStick) && !_previousGamePadState.IsButtonDown(Buttons.LeftStick))
+                    if (currentGamePadState.IsButtonDown(Keybinds.GamepadDodge) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadDodge))
                     {
                         if (_canDodge)
                         {
@@ -338,7 +370,7 @@ namespace Romero.Windows.Classes
 
                     }
 
-                    if (currentGamePadState.IsButtonDown(Buttons.LeftShoulder))
+                    if (currentGamePadState.IsButtonDown(Keybinds.GamepadSprint))
                     {
                         CurrentState = State.Sprinting;
                     }
@@ -388,25 +420,25 @@ namespace Romero.Windows.Classes
 
                             if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
                             {
-                                _speed.X = _playerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * _dodgeModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
                             {
-                                _speed.X = _playerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * _dodgeModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
                             {
-                                _speed.Y = _playerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * _dodgeModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
                             {
-                                _speed.Y = _playerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * _dodgeModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -456,7 +488,7 @@ namespace Romero.Windows.Classes
 
                     CurrentState = State.Running;
 
-                    if (currentKeyboardState.IsKeyDown(Keys.Space) && !_previouseKeyboardState.IsKeyDown(Keys.Space))
+                    if (currentKeyboardState.IsKeyDown(Keybinds.KeyboardDodge) && !_previouseKeyboardState.IsKeyDown(Keybinds.KeyboardDodge))
                     {
                         if (_canDodge)
                         {
@@ -465,7 +497,7 @@ namespace Romero.Windows.Classes
 
                     }
 
-                    if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
+                    if (currentKeyboardState.IsKeyDown(Keybinds.KeyboardSprint))
                     {
                         CurrentState = State.Sprinting;
                     }
@@ -516,25 +548,25 @@ namespace Romero.Windows.Classes
 
                             if (currentKeyboardState.IsKeyDown(Keys.A))
                             {
-                                _speed.X = _playerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * _dodgeModifier;
                                 _direction.X = MoveLeft;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.D))
                             {
-                                _speed.X = _playerSpeed * DodgeModifier;
+                                _speed.X = _playerSpeed * _dodgeModifier;
                                 _direction.X = MoveRight;
                             }
 
                             if (currentKeyboardState.IsKeyDown(Keys.W))
                             {
-                                _speed.Y = _playerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * _dodgeModifier;
                                 _direction.Y = MoveUp;
                             }
 
                             else if (currentKeyboardState.IsKeyDown(Keys.S))
                             {
-                                _speed.Y = _playerSpeed * DodgeModifier;
+                                _speed.Y = _playerSpeed * _dodgeModifier;
                                 _direction.Y = MoveDown;
                             }
                             break;
@@ -581,6 +613,6 @@ namespace Romero.Windows.Classes
 
         }
 
-        public Vector2 Position { get; private set; }
+     
     }
 }

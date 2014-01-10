@@ -14,6 +14,9 @@ namespace Romero.Windows
         /// </summary>
         public static GraphicsDeviceManager DeviceInUse;
 
+        public static int ZombieSpawnDelay = 0;
+
+        public static int ZombieSpawnTicker = 5;
 
         public static int ZombieSpawnSeed;
 
@@ -68,7 +71,7 @@ namespace Romero.Windows
         /// <summary>
         /// Diagnostics open/closed
         /// </summary>
-        public static bool IsDiagnosticsOpen = true;
+        public static bool IsDiagnosticsOpen = false;
 
 
     }

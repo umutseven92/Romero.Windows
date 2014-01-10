@@ -48,6 +48,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         private void AddZombies(int count)
         {
+            Global.ZombieSpawnDelay = 0;
             for (var i = 0; i < count; i++)
             {
                 _lZombies.Add(new Zombie { Id = i });
@@ -65,7 +66,7 @@ namespace Romero.Windows.Screens
             {
                 spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Red);
                 spriteBatch.DrawString(_font, string.Format("Player health: {0}", _player.Health), new Vector2(1000, 45), Color.Green);
-                spriteBatch.DrawString(_font,string.Format("Character: {0}",_player.FullCharacterName),new Vector2(1000,65),Color.Green );
+                spriteBatch.DrawString(_font, string.Format("Character: {0}", _player.FullCharacterName), new Vector2(1000, 65), Color.Green);
                 if (_player.Invulnerable)
                 {
                     spriteBatch.DrawString(_font, "Invulnerable", new Vector2(1000, 85), Color.Green);
@@ -157,6 +158,7 @@ namespace Romero.Windows.Screens
         }
 
 
+
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -165,12 +167,14 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
+
             //All zombies on screen dead
             if (_deadZombies == _lZombies.Count)
             {
                 _deadZombies = 0;
                 _zombieModifier++;
                 _difficultyModifier++;
+
                 _lZombies.Clear();
                 AddZombies(_zombieModifier * _difficultyModifier);
                 _wave++;
@@ -202,7 +206,7 @@ namespace Romero.Windows.Screens
             _pauseAlpha = coveredByOtherScreen ? Math.Min(_pauseAlpha + 1f / 32, 1) : Math.Max(_pauseAlpha - 1f / 32, 0);
 
         }
-
+        private KeyboardState _previouseKeyboardState;
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
         /// this will only be called when the gameplay screen is active.
@@ -212,6 +216,29 @@ namespace Romero.Windows.Screens
             if (input == null)
                 throw new ArgumentNullException("input");
 
+            var currentKeyboardState = Keyboard.GetState();
+
+            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics))
+            {
+                Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
+            {
+                foreach (var z in _lZombies)
+                {
+                    if (z.Visible)
+                    {
+                        z.Visible = false;
+                        z.Dead = true;
+                        _deadZombies++;
+                        _diagZombieCount--;
+                    }
+
+                }
+            }
+
+            _previouseKeyboardState = currentKeyboardState;
             if (input.IsPauseGame(ControllingPlayer))
             {
                 // Pause (esc)
@@ -241,10 +268,20 @@ namespace Romero.Windows.Screens
                     {
                         //Bullet - Zombie Collision
                         b.Visible = false;
-
                         z.Visible = false;
+                        z.Dead = true;
                         _deadZombies++;
                         _diagZombieCount--;
+                        if (_deadZombies >= Global.ZombieSpawnTicker)
+                        {
+                            foreach (var d in _lZombies)
+                            {
+                                if (!d.Dead)
+                                {
+                                    d.Visible = true;
+                                }
+                            }
+                        }
                     }
                 }
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
@@ -256,12 +293,22 @@ namespace Romero.Windows.Screens
                 }
                 if (z.BoundingBox.Intersects(_player.Sword.BoundingBox) && z.Visible && _player.Sword.Visible)
                 {
-                    //Bullet - Zombie Collision
+                    //Sword - Zombie Collision
                     _player.Sword.Visible = false;
-
                     z.Visible = false;
+                    z.Dead = true;
                     _deadZombies++;
                     _diagZombieCount--;
+                    if (_deadZombies >= Global.ZombieSpawnTicker)
+                    {
+                        foreach (var d in _lZombies)
+                        {
+                            if (!d.Dead)
+                            {
+                                d.Visible = true;
+                            }
+                        }
+                    }
                 }
 
             }
@@ -285,6 +332,7 @@ namespace Romero.Windows.Screens
             {
                 //DEATH!
                 _player.Dead = true;
+                _player.Visible = false;
                 ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
             }
 

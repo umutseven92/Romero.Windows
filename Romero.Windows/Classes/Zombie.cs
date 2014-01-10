@@ -17,9 +17,10 @@ namespace Romero.Windows.Classes
         const string ZombieAssetName = "enemy";
         private static readonly Random Random = new Random();
 
+        private static readonly Random HighSpeedRandom = new Random();
 
         public bool Visible = true;
-
+        public bool Dead = false;
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed;
 
@@ -45,8 +46,20 @@ namespace Romero.Windows.Classes
                     break;
             }
             Global.ZombieSpawnSeed++;
+            Global.ZombieSpawnDelay++;
+            if (HighSpeedRandom.Next(0, 40) == 5)
+            {
+                _speed = new Vector2(300);
+            }
+            else
+            {
+                _speed = new Vector2(Random.Next(25, 100));
+            }
+            if (Global.ZombieSpawnDelay >= 10)
+            {
+                Visible = false;
 
-            _speed = new Vector2(Random.Next(25, 100), Random.Next(25, 100));
+            }
             LoadContent(contentManager, ZombieAssetName);
         }
 
