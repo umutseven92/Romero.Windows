@@ -55,7 +55,7 @@ namespace Romero.Windows.Classes
             {
                 _speed = new Vector2(Random.Next(25, 100));
             }
-            if (Global.ZombieSpawnDelay >= 10)
+            if (Global.ZombieSpawnDelay > 10)
             {
                 Visible = false;
 

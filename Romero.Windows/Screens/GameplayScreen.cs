@@ -168,7 +168,7 @@ namespace Romero.Windows.Screens
                                                        bool coveredByOtherScreen)
         {
 
-            //All zombies on screen dead
+            //All zombies on screen dead - buggy
             if (_deadZombies == _lZombies.Count)
             {
                 _deadZombies = 0;
@@ -259,6 +259,8 @@ namespace Romero.Windows.Screens
 
             #region Collision
 
+            var zombieSpawnChecker = 0;
+
             foreach (var z in _lZombies)
             {
 
@@ -268,20 +270,8 @@ namespace Romero.Windows.Screens
                     {
                         //Bullet - Zombie Collision
                         b.Visible = false;
-                        z.Visible = false;
-                        z.Dead = true;
-                        _deadZombies++;
-                        _diagZombieCount--;
-                        if (_deadZombies >= Global.ZombieSpawnTicker)
-                        {
-                            foreach (var d in _lZombies)
-                            {
-                                if (!d.Dead)
-                                {
-                                    d.Visible = true;
-                                }
-                            }
-                        }
+                       
+                        KillZombie(z,zombieSpawnChecker);
                     }
                 }
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
@@ -295,20 +285,8 @@ namespace Romero.Windows.Screens
                 {
                     //Sword - Zombie Collision
                     _player.Sword.Visible = false;
-                    z.Visible = false;
-                    z.Dead = true;
-                    _deadZombies++;
-                    _diagZombieCount--;
-                    if (_deadZombies >= Global.ZombieSpawnTicker)
-                    {
-                        foreach (var d in _lZombies)
-                        {
-                            if (!d.Dead)
-                            {
-                                d.Visible = true;
-                            }
-                        }
-                    }
+
+                    KillZombie(z, zombieSpawnChecker);
                 }
 
             }
@@ -338,7 +316,27 @@ namespace Romero.Windows.Screens
 
         }
 
+        private void KillZombie(Zombie z, int zombieSpawnChecker)
+        {
+            z.Visible = false;
+            z.Dead = true;
+            _deadZombies++;
+            _diagZombieCount--;
+            if (_deadZombies % Global.ZombieSpawnTicker == 0)
+            {
+                foreach (var d in _lZombies)
+                {
+                    if (!d.Dead && !d.Visible && zombieSpawnChecker < Global.ZombieSpawnTicker)
+                    {
+                        d.Visible = true;
+                        zombieSpawnChecker++;
+                    }
 
+                }
+
+            }
+            zombieSpawnChecker = 0;
+        }
 
         /// <summary>
         /// Draws the gameplay screen.
