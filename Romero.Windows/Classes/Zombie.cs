@@ -26,6 +26,8 @@ namespace Romero.Windows.Classes
 
         #endregion
 
+        
+
         public void LoadContent(ContentManager contentManager)
         {
             switch (Global.ZombieSpawnSeed % 4)

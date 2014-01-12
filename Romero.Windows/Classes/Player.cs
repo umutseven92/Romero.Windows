@@ -45,6 +45,12 @@ namespace Romero.Windows.Classes
         public bool Visible = true;
         private float _blinkCounterStart;
         private const float BlinkDelay = 0.1f;
+        private bool _canSprint = true;
+        private readonly float _sprintTime;
+        private readonly float _sprintDelay;
+        private float _sprintCounterStart;
+        private float _sprintDelayCounterStart;
+        private GameTime _gT;
 
         public enum State
         {
@@ -60,7 +66,7 @@ namespace Romero.Windows.Classes
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
 
-        
+
 
         #endregion
 
@@ -79,6 +85,8 @@ namespace Romero.Windows.Classes
                     Health = 300;
                     _canDodge = false;
                     _dodgeModifier = 0f;
+                    _sprintTime = 3;
+                    _sprintDelay = 5;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
@@ -88,6 +96,8 @@ namespace Romero.Windows.Classes
                     Health = 120;
                     _canDodge = true;
                     _dodgeModifier = 50f;
+                    _sprintTime = 10;
+                    _sprintDelay = 2;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
@@ -97,6 +107,8 @@ namespace Romero.Windows.Classes
                     Health = 150;
                     _canDodge = false;
                     _dodgeModifier = 0f;
+                    _sprintTime = 6;
+                    _sprintDelay = 3;
                     break;
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
@@ -106,6 +118,8 @@ namespace Romero.Windows.Classes
                     Health = 100;
                     _canDodge = false;
                     _dodgeModifier = 0f;
+                    _sprintTime = 5;
+                    _sprintDelay = 4;
                     break;
             }
 
@@ -128,6 +142,7 @@ namespace Romero.Windows.Classes
 
         public void Update(GameTime gameTime)
         {
+            _gT = gameTime;
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
@@ -170,17 +185,27 @@ namespace Romero.Windows.Classes
                 }
             }
 
+            if (!_canSprint)
+            {
+                _sprintDelayCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                if (_sprintDelayCounterStart >= _sprintDelay)
+                {
+                    _sprintDelayCounterStart = 0;
+                    _canSprint = true;
+                }
+            }
+
             Update(gameTime, _speed, _direction);
         }
 
-       
+
         /// <summary>
         /// Blink when hit
         /// </summary>
         private void Blink(GameTime gT)
         {
-            _blinkCounterStart += (float) gT.ElapsedGameTime.TotalSeconds;
-            
+            _blinkCounterStart += (float)gT.ElapsedGameTime.TotalSeconds;
+
             if (_blinkCounterStart >= BlinkDelay)
             {
                 Visible = !Visible;
@@ -318,7 +343,7 @@ namespace Romero.Windows.Classes
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
 
             var direction = (SpritePosition) - mouseLoc;
-            
+
             if (!Global.Gamepad)
             {
                 _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
@@ -499,7 +524,25 @@ namespace Romero.Windows.Classes
 
                     if (currentKeyboardState.IsKeyDown(Keybinds.KeyboardSprint))
                     {
-                        CurrentState = State.Sprinting;
+
+                        if (_canSprint)
+                        {
+                            _sprintCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                        }
+                     
+                        if (_sprintCounterStart >= _sprintTime)
+                        {
+                            _canSprint = false;
+                            _sprintCounterStart = 0;
+                        }
+
+                        
+                        if (_canSprint)
+                        {
+                            CurrentState = State.Sprinting;
+                        }
+
+
                     }
 
                     switch (CurrentState)
@@ -508,6 +551,12 @@ namespace Romero.Windows.Classes
                         #region Keyboard Running
 
                         case State.Running:
+
+                            _sprintCounterStart -= (float) _gT.ElapsedGameTime.TotalSeconds;
+                            if (_sprintCounterStart <= 0)
+                            {
+                                _sprintCounterStart = 0;
+                            }
 
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
@@ -613,6 +662,6 @@ namespace Romero.Windows.Classes
 
         }
 
-     
+
     }
 }

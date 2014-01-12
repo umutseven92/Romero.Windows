@@ -25,7 +25,6 @@ namespace Romero.Windows.Screens
         int _screenHeight;
         ContentManager _content;
         private readonly Player _player; //Player, for single player
-        // private Camera2D camera;
         private GameTime _gT; //Gametime for Player.Update()
         private readonly List<Zombie> _lZombies; //Zombies on screen
         private SpriteFont _font;
@@ -39,6 +38,8 @@ namespace Romero.Windows.Screens
         int _frameRate;
         int _frameCounter;
         Texture2D _backgroundTexture;
+        private KeyboardState _previousKeyboardState;
+        int _zombieSpawnChecker;
         #endregion
 
         #region Functions
@@ -157,8 +158,6 @@ namespace Romero.Windows.Screens
             _content.Unload();
         }
 
-
-
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -168,7 +167,7 @@ namespace Romero.Windows.Screens
                                                        bool coveredByOtherScreen)
         {
 
-            //All zombies on screen dead - buggy
+            //All zombies on screen dead
             if (_deadZombies == _lZombies.Count)
             {
                 _deadZombies = 0;
@@ -181,6 +180,7 @@ namespace Romero.Windows.Screens
                 foreach (var z in _lZombies)
                 {
                     z.LoadContent(_content);
+
                 }
             }
 
@@ -206,7 +206,7 @@ namespace Romero.Windows.Screens
             _pauseAlpha = coveredByOtherScreen ? Math.Min(_pauseAlpha + 1f / 32, 1) : Math.Max(_pauseAlpha - 1f / 32, 0);
 
         }
-        private KeyboardState _previouseKeyboardState;
+
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
         /// this will only be called when the gameplay screen is active.
@@ -218,27 +218,40 @@ namespace Romero.Windows.Screens
 
             var currentKeyboardState = Keyboard.GetState();
 
-            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics))
+            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics))
             {
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
+            //Kill all zombies -buggy!
+            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
             {
                 foreach (var z in _lZombies)
                 {
-                    if (z.Visible)
+                    z.Visible = false;
+                    z.Dead = true;
+                    _deadZombies++;
+                    _diagZombieCount--;
+                    if (_deadZombies % Global.ZombieSpawnTicker == 0)
                     {
-                        z.Visible = false;
-                        z.Dead = true;
-                        _deadZombies++;
-                        _diagZombieCount--;
+                        foreach (var d in _lZombies)
+                        {
+                            if (!d.Dead && !d.Visible && _zombieSpawnChecker < Global.ZombieSpawnTicker)
+                            {
+                                d.Visible = true;
+                                _zombieSpawnChecker++;
+                            }
+
+                        }
+
                     }
+                    _zombieSpawnChecker = 0;
 
                 }
             }
 
-            _previouseKeyboardState = currentKeyboardState;
+            _previousKeyboardState = currentKeyboardState;
+
             if (input.IsPauseGame(ControllingPlayer))
             {
                 // Pause (esc)
@@ -259,7 +272,7 @@ namespace Romero.Windows.Screens
 
             #region Collision
 
-            var zombieSpawnChecker = 0;
+
 
             foreach (var z in _lZombies)
             {
@@ -270,8 +283,8 @@ namespace Romero.Windows.Screens
                     {
                         //Bullet - Zombie Collision
                         b.Visible = false;
-                       
-                        KillZombie(z,zombieSpawnChecker);
+
+                        KillZombie(z, _zombieSpawnChecker);
                     }
                 }
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
@@ -286,24 +299,24 @@ namespace Romero.Windows.Screens
                     //Sword - Zombie Collision
                     _player.Sword.Visible = false;
 
-                    KillZombie(z, zombieSpawnChecker);
+                    KillZombie(z, _zombieSpawnChecker);
                 }
 
             }
+            /*
+                        for (var i = 0; i < _lZombies.Count; i++)
+                        {
+                            foreach (var z in _lZombies)
+                            {
+                                if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
+                                    _lZombies[i].Id != z.Id)
+                                {
+                                    //Zombie - Zombie Collision
 
-            for (var i = 0; i < _lZombies.Count; i++)
-            {
-                foreach (var z in _lZombies)
-                {
-                    if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
-                        _lZombies[i].Id != z.Id)
-                    {
-                        //Zombie - Zombie Collision
-
-                    }
-                }
-            }
-
+                                }
+                            }
+                        }
+            */
             #endregion
 
             if (_player.Health <= 0 && !_player.Dead)
@@ -322,7 +335,7 @@ namespace Romero.Windows.Screens
             z.Dead = true;
             _deadZombies++;
             _diagZombieCount--;
-            if (_deadZombies % Global.ZombieSpawnTicker == 0)
+            if (_deadZombies % 5 == 0)
             {
                 foreach (var d in _lZombies)
                 {
@@ -333,7 +346,7 @@ namespace Romero.Windows.Screens
                     }
 
                 }
-
+                Global.ZombieSpawnTicker++;
             }
             zombieSpawnChecker = 0;
         }
