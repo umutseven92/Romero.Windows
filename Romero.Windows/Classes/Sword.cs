@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Romero.Windows.Classes;
 
-namespace Romero.Windows
+namespace Romero.Windows.Classes
 {
     public class Sword : Sprite
     {

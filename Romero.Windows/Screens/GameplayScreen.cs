@@ -21,8 +21,6 @@ namespace Romero.Windows.Screens
     {
 
         #region Declarations
-        int _screenWidth;
-        int _screenHeight;
         ContentManager _content;
         private readonly Player _player; //Player, for single player
         private GameTime _gT; //Gametime for Player.Update()
@@ -40,6 +38,7 @@ namespace Romero.Windows.Screens
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         int _zombieSpawnChecker;
+        readonly Rectangle _bgRectangle = new Rectangle(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight);
         #endregion
 
         #region Functions
@@ -127,10 +126,7 @@ namespace Romero.Windows.Screens
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
 
-            _screenWidth = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth;
-            _screenHeight = Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight;
-
-            _backgroundTexture = _content.Load<Texture2D>("ground");
+            _backgroundTexture = _content.Load<Texture2D>("groundTile");
             _player.LoadContent(_content);
 
             foreach (var z in _lZombies)
@@ -223,29 +219,33 @@ namespace Romero.Windows.Screens
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
 
-            //Kill all zombies -buggy!
+            //Kill all zombies
             if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
             {
                 foreach (var z in _lZombies)
                 {
-                    z.Visible = false;
-                    z.Dead = true;
-                    _deadZombies++;
-                    _diagZombieCount--;
-                    if (_deadZombies % Global.ZombieSpawnTicker == 0)
+                    if (!z.Dead && z.Visible)
                     {
-                        foreach (var d in _lZombies)
+                        z.Visible = false;
+                        z.Dead = true;
+                        _deadZombies++;
+                        _diagZombieCount--;
+                        if (_deadZombies % Global.ZombieSpawnTicker == 0)
                         {
-                            if (!d.Dead && !d.Visible && _zombieSpawnChecker < Global.ZombieSpawnTicker)
+                            foreach (var d in _lZombies)
                             {
-                                d.Visible = true;
-                                _zombieSpawnChecker++;
+                                if (!d.Dead && !d.Visible && _zombieSpawnChecker < Global.ZombieSpawnTicker)
+                                {
+                                    d.Visible = true;
+                                    _zombieSpawnChecker++;
+                                }
+
                             }
 
                         }
-
+                        _zombieSpawnChecker = 0;
                     }
-                    _zombieSpawnChecker = 0;
+
 
                 }
             }
@@ -297,7 +297,7 @@ namespace Romero.Windows.Screens
                 if (z.BoundingBox.Intersects(_player.Sword.BoundingBox) && z.Visible && _player.Sword.Visible)
                 {
                     //Sword - Zombie Collision
-                    _player.Sword.Visible = false;
+                    //_player.Sword.Visible = false;
 
                     KillZombie(z, _zombieSpawnChecker);
                 }
@@ -362,10 +362,15 @@ namespace Romero.Windows.Screens
 
             var spriteBatch = ScreenManager.SpriteBatch;
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap,
+    DepthStencilState.Default, RasterizerState.CullNone);
 
-            var screenRectangle = new Rectangle(0, 0, _screenWidth, _screenHeight);
-            spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White);
+            // spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White); --> Non tiled background
+
+            spriteBatch.Draw(_backgroundTexture, Vector2.Zero, _bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            spriteBatch.End();
+
+            spriteBatch.Begin();
             _player.Draw(spriteBatch);
 
             foreach (var z in _lZombies)
@@ -387,8 +392,6 @@ namespace Romero.Windows.Screens
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
         }
-
-
 
 
     }

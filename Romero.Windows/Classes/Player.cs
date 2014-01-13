@@ -151,12 +151,6 @@ namespace Romero.Windows.Classes
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
             UpdateSword(gameTime, currentMouseState, currentGamepadState);
 
-            /*
-            if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics) && !_previouseKeyboardState.IsKeyDown(Keybinds.DeveloperDiagnostics))
-            {
-                Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
-            }
-            */
 
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
