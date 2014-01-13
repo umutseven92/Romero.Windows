@@ -56,6 +56,11 @@ namespace Romero.Windows
 
             Components.Add(screenManager);
 
+            if (GamePad.GetState(PlayerIndex.One).IsConnected)
+            {
+                Global.Gamepad = true;
+            }
+
             // Activate the first screens.
             screenManager.AddScreen(new BackgroundScreen(), null);
             screenManager.AddScreen(new MainMenuScreen(), null);

@@ -34,23 +34,32 @@ namespace Romero.Windows.Classes
         private readonly bool _canDodge;
         public string FullCharacterName;
         internal int Health;
+        internal bool Dead = false;
+        float _playerAngle;
+        public bool Visible = true;
+        private GameTime _gT;
+        
+        //Invulnerability Timer
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
         float _invulnCounterStart;
-        internal bool Dead = false;
+        //Shoot Timer
         private bool _canShoot = true;
         private readonly float _shootDelay;
         private float _shootCounterStart;
-        float _playerAngle;
-        public bool Visible = true;
+        //Blink Timer
         private float _blinkCounterStart;
         private const float BlinkDelay = 0.1f;
+        //Sprint Timer
         private bool _canSprint = true;
         private readonly float _sprintTime;
         private readonly float _sprintDelay;
         private float _sprintCounterStart;
         private float _sprintDelayCounterStart;
-        private GameTime _gT;
+        //Sword Timer
+        private bool _canSwing = true;
+        private readonly float _swingDelay;
+        private float _swingCounterStart;
 
         public enum State
         {
@@ -65,7 +74,6 @@ namespace Romero.Windows.Classes
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
-
 
 
         #endregion
@@ -87,6 +95,7 @@ namespace Romero.Windows.Classes
                     _dodgeModifier = 0f;
                     _sprintTime = 3;
                     _sprintDelay = 5;
+                    _swingDelay = 1;
                     break;
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
@@ -96,8 +105,9 @@ namespace Romero.Windows.Classes
                     Health = 120;
                     _canDodge = true;
                     _dodgeModifier = 50f;
-                    _sprintTime = 10;
-                    _sprintDelay = 2;
+                    _sprintTime = 7;
+                    _sprintDelay = 4;
+                    _swingDelay = 0.5f;
                     break;
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
@@ -107,8 +117,9 @@ namespace Romero.Windows.Classes
                     Health = 150;
                     _canDodge = false;
                     _dodgeModifier = 0f;
-                    _sprintTime = 6;
-                    _sprintDelay = 3;
+                    _sprintTime = 5;
+                    _sprintDelay = 4;
+                    _swingDelay = 0.7f;
                     break;
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
@@ -118,8 +129,9 @@ namespace Romero.Windows.Classes
                     Health = 100;
                     _canDodge = false;
                     _dodgeModifier = 0f;
-                    _sprintTime = 5;
+                    _sprintTime = 4;
                     _sprintDelay = 4;
+                    _swingDelay = 1;
                     break;
             }
 
@@ -146,6 +158,8 @@ namespace Romero.Windows.Classes
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
+
+            StayInScreen();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
@@ -179,6 +193,16 @@ namespace Romero.Windows.Classes
                 }
             }
 
+            if (!_canSwing)
+            {
+                _swingCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_swingCounterStart >= _swingDelay)
+                {
+                    _canSwing = true;
+                    _swingCounterStart = 0f;
+                }
+            }
+
             if (!_canSprint)
             {
                 _sprintDelayCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
@@ -190,6 +214,31 @@ namespace Romero.Windows.Classes
             }
 
             Update(gameTime, _speed, _direction);
+        }
+
+
+        /// <summary>
+        /// Check if character is out of screen
+        /// </summary>
+        private void StayInScreen()
+        {
+            if (SpritePosition.X < 0)
+            {
+                SpritePosition.X = 0;
+            }
+            else if (SpritePosition.X >= Global.DeviceInUse.PreferredBackBufferWidth)
+            {
+                SpritePosition.X = Global.DeviceInUse.PreferredBackBufferWidth - Size.X;
+            }
+
+            if (SpritePosition.Y <= 0)
+            {
+                SpritePosition.Y = 0;
+            }
+            else if (SpritePosition.Y >= Global.DeviceInUse.PreferredBackBufferHeight)
+            {
+                SpritePosition.Y = Global.DeviceInUse.PreferredBackBufferHeight - Size.Y;
+            }
         }
 
 
@@ -214,18 +263,20 @@ namespace Romero.Windows.Classes
             //Mouse swing
             if (!Global.Gamepad)
             {
-                if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed && CurrentState == State.Running)
+                if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed && CurrentState == State.Running && _canSwing)
                 {
                     Swing(currentMouseState);
+                    _canSwing = false;
                 }
             }
 
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing) && CurrentState == State.Running)
+                if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing) && CurrentState == State.Running && _canSwing)
                 {
                     Swing(currentGamepadState);
+                    _canSwing = false;
                 }
             }
         }

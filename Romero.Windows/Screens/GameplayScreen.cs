@@ -64,13 +64,13 @@ namespace Romero.Windows.Screens
             _frameCounter++;
             if (Global.IsDiagnosticsOpen)
             {
-                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Red);
-                spriteBatch.DrawString(_font, string.Format("Player health: {0}", _player.Health), new Vector2(1000, 45), Color.Green);
-                spriteBatch.DrawString(_font, string.Format("Character: {0}", _player.FullCharacterName), new Vector2(1000, 65), Color.Green);
-                if (_player.Invulnerable)
-                {
-                    spriteBatch.DrawString(_font, "Invulnerable", new Vector2(1000, 85), Color.Green);
-                }
+                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
+                spriteBatch.DrawString(_font,
+                      _player.Invulnerable
+                          ? string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}, Invulnerable",
+                              _player.Health, _player.FullCharacterName, _player.CurrentState)
+                          : string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}", _player.Health,
+                              _player.FullCharacterName, _player.CurrentState), new Vector2(1500, 45), Color.Green);
             }
 
         }
