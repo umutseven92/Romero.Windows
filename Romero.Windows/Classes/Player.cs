@@ -249,7 +249,7 @@ namespace Romero.Windows.Classes
             //Mouse shooting
             if (!Global.Gamepad)
             {
-                if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed)
+                if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed && CurrentState == State.Running)
                 {
                     if (_canShoot)
                     {
@@ -265,9 +265,15 @@ namespace Romero.Windows.Classes
             //Gamepad shooting
             else
             {
-                if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot))
+                if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot) && CurrentState == State.Running)
                 {
-                    Shoot(currentGamePadState);
+                    if (_canShoot)
+                    {
+                        Shoot(currentGamePadState);
+
+                        _canShoot = false;
+                    }
+
                 }
             }
 
