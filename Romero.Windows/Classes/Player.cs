@@ -220,7 +220,7 @@ namespace Romero.Windows.Classes
             //Mouse swing
             if (!Global.Gamepad)
             {
-                if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed)
+                if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed && CurrentState == State.Running)
                 {
                     Swing(currentMouseState);
                 }
@@ -229,7 +229,7 @@ namespace Romero.Windows.Classes
             //Gamepad swing
             else
             {
-                if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing))
+                if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing) && CurrentState == State.Running)
                 {
                     Swing(currentGamepadState);
                 }
@@ -397,7 +397,23 @@ namespace Romero.Windows.Classes
 
                     if (currentGamePadState.IsButtonDown(Keybinds.GamepadSprint))
                     {
-                        CurrentState = State.Sprinting;
+                        if (_canSprint)
+                        {
+                            _sprintCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                        }
+
+                        if (_sprintCounterStart >= _sprintTime)
+                        {
+                            _canSprint = false;
+                            _sprintCounterStart = 0;
+                        }
+
+
+                        if (_canSprint)
+                        {
+                            CurrentState = State.Sprinting;
+                        }
+
                     }
 
                     switch (CurrentState)
@@ -406,6 +422,11 @@ namespace Romero.Windows.Classes
 
                         case State.Running:
 
+                            _sprintCounterStart -= (float)_gT.ElapsedGameTime.TotalSeconds;
+                            if (_sprintCounterStart <= 0)
+                            {
+                                _sprintCounterStart = 0;
+                            }
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
@@ -529,14 +550,14 @@ namespace Romero.Windows.Classes
                         {
                             _sprintCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
                         }
-                     
+
                         if (_sprintCounterStart >= _sprintTime)
                         {
                             _canSprint = false;
                             _sprintCounterStart = 0;
                         }
 
-                        
+
                         if (_canSprint)
                         {
                             CurrentState = State.Sprinting;
@@ -552,7 +573,7 @@ namespace Romero.Windows.Classes
 
                         case State.Running:
 
-                            _sprintCounterStart -= (float) _gT.ElapsedGameTime.TotalSeconds;
+                            _sprintCounterStart -= (float)_gT.ElapsedGameTime.TotalSeconds;
                             if (_sprintCounterStart <= 0)
                             {
                                 _sprintCounterStart = 0;
