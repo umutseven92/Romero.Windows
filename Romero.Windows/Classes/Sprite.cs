@@ -31,6 +31,7 @@ namespace Romero.Windows.Classes
             set { _boundingBox = value; }
         }
 
+       
         //The current position of the Sprite
         public Vector2 SpritePosition = new Vector2(0, 0);
 
@@ -110,6 +111,7 @@ namespace Romero.Windows.Classes
               new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height), Color.White, rotation, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
 
+       
         public void Update(GameTime gameTime, Vector2 speed, Vector2 direction)
         {
             SpritePosition += direction * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;

@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Classes\Bullet.cs" />
+    <Compile Include="Classes\Camera2D.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Classes\Player.cs" />

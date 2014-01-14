@@ -39,6 +39,7 @@ namespace Romero.Windows.Screens
         private KeyboardState _previousKeyboardState;
         int _zombieSpawnChecker;
         readonly Rectangle _bgRectangle = new Rectangle(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight);
+
         #endregion
 
         #region Functions
@@ -109,8 +110,6 @@ namespace Romero.Windows.Screens
 
             //Player (single player)
             _player = new Player();
-
-            //camera = new Camera2D(Global.GameInProgress) {Focus = _player};
 
             //Zombie Horde
             _lZombies = new List<Zombie>();
@@ -350,7 +349,7 @@ namespace Romero.Windows.Screens
             }
             zombieSpawnChecker = 0;
         }
-
+        Camera2D cam = new Camera2D(new Viewport(0, 0, 640, 480));
         /// <summary>
         /// Draws the gameplay screen.
         /// </summary>
@@ -364,15 +363,13 @@ namespace Romero.Windows.Screens
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap,
     DepthStencilState.Default, RasterizerState.CullNone);
-
             // spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White); --> Non tiled background
-
             spriteBatch.Draw(_backgroundTexture, Vector2.Zero, _bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             spriteBatch.End();
 
+
             spriteBatch.Begin();
             _player.Draw(spriteBatch);
-
             foreach (var z in _lZombies)
             {
                 var direction = z.SpritePosition - _player.SpritePosition;
@@ -382,7 +379,6 @@ namespace Romero.Windows.Screens
             }
 
             DrawDiagnostics(spriteBatch);
-
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.

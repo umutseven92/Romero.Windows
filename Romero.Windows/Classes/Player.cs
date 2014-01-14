@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+
 #endregion
 
 namespace Romero.Windows.Classes
@@ -38,7 +39,7 @@ namespace Romero.Windows.Classes
         float _playerAngle;
         public bool Visible = true;
         private GameTime _gT;
-        
+
         //Invulnerability Timer
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
@@ -159,7 +160,7 @@ namespace Romero.Windows.Classes
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
 
-            StayInScreen();
+            // StayInScreen();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
@@ -733,6 +734,7 @@ namespace Romero.Windows.Classes
 
 
         }
+
 
 
     }
