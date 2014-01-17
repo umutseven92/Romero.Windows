@@ -7,6 +7,9 @@ using OpenTK.Input;
 
 namespace Romero.Windows
 {
+    /// <summary>
+    /// Keybinds
+    /// </summary>
     public static class Keybinds
     {
         #region Developer Controls

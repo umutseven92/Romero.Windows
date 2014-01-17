@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-
 #endregion
 
 namespace Romero.Windows.Classes
@@ -22,45 +21,61 @@ namespace Romero.Windows.Classes
         public List<Bullet> Bullets = new List<Bullet>();
         public Sword Sword = new Sword();
         ContentManager _contentManager;
+        private GameTime _gT;
+        private Camera2D _cam;
+
+        #region Player Modifiers
         public string PlayerAssetName;
+        private readonly int _playerSpeed;
+        private readonly float _dodgeModifier;
+        private readonly bool _canDodge;
+        public string FullCharacterName;
+        internal int Health;
+        #endregion
+
         const int StartPositionX = 2048;
         const int StartPositionY = 2048;
-        private readonly int _playerSpeed;
+
         const int MoveUp = -1;
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-        private readonly float _dodgeModifier;
+
         private const float SprintModifier = 2.0f;
-        private readonly bool _canDodge;
-        public string FullCharacterName;
-        internal int Health;
         internal bool Dead = false;
         float _playerAngle;
         public bool Visible = true;
-        private GameTime _gT;
-        private Camera2D cam;
-        //Invulnerability Timer
+
+        #region Invulnerability
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
         float _invulnCounterStart;
-        //Shoot Timer
+        #endregion
+
+        #region Shooting
         private bool _canShoot = true;
         private readonly float _shootDelay;
         private float _shootCounterStart;
-        //Blink Timer
+        #endregion
+
+        #region Blinking
         private float _blinkCounterStart;
         private const float BlinkDelay = 0.1f;
-        //Sprint Timer
+        #endregion
+
+        #region Sprinting
         private bool _canSprint = true;
         private readonly float _sprintTime;
         private readonly float _sprintDelay;
         private float _sprintCounterStart;
         private float _sprintDelayCounterStart;
-        //Sword Timer
+        #endregion
+
+        #region Swinging
         private bool _canSwing = true;
         private readonly float _swingDelay;
         private float _swingCounterStart;
+        #endregion
 
         public enum State
         {
@@ -72,24 +87,18 @@ namespace Romero.Windows.Classes
         public State CurrentState = State.Running;
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed = Vector2.Zero;
+
         private GamePadState _previousGamePadState;
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
 
- #endregion
+        #endregion
 
-        public void GetCamera(Camera2D cameraBeingUsed)
-        {
-             cam = cameraBeingUsed;
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
         public Player()
         {
-           
             switch (Global.SelectedCharacter)
             {
+                #region Knight Fraser
                 case Global.Character.Fraser:
                     PlayerAssetName = "fraser";
                     FullCharacterName = "Knight Fraser";
@@ -102,6 +111,9 @@ namespace Romero.Windows.Classes
                     _sprintDelay = 5;
                     _swingDelay = 1;
                     break;
+                #endregion
+
+                #region Lady Rebecca
                 case Global.Character.Becky:
                     PlayerAssetName = "becky";
                     FullCharacterName = "Lady Rebecca";
@@ -114,6 +126,9 @@ namespace Romero.Windows.Classes
                     _sprintDelay = 4;
                     _swingDelay = 0.5f;
                     break;
+                #endregion
+
+                #region Sire Benjamin
                 case Global.Character.Ben:
                     PlayerAssetName = "ben";
                     FullCharacterName = "Sire Benjamin";
@@ -126,6 +141,9 @@ namespace Romero.Windows.Classes
                     _sprintDelay = 4;
                     _swingDelay = 0.7f;
                     break;
+                #endregion
+
+                #region Cleric Diakanos
                 case Global.Character.Deacon:
                     PlayerAssetName = "deacon";
                     FullCharacterName = "Cleric Diakonos";
@@ -138,6 +156,7 @@ namespace Romero.Windows.Classes
                     _sprintDelay = 4;
                     _swingDelay = 1;
                     break;
+                #endregion
             }
 
         }
@@ -150,6 +169,7 @@ namespace Romero.Windows.Classes
             {
                 b.LoadContent(contentManager);
             }
+
             Sword.LoadContent(_contentManager);
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
             LoadContent(contentManager, PlayerAssetName);
@@ -157,25 +177,36 @@ namespace Romero.Windows.Classes
 
         }
 
-        public void Update(GameTime gameTime,Camera2D camera)
+        public void Update(GameTime gameTime, Camera2D camera)
         {
-            cam = camera;
+            _cam = camera;
             _gT = gameTime;
+
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
 
-            // StayInScreen();
+            StayInScreen();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
             UpdateSword(gameTime, currentMouseState, currentGamepadState);
 
-
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
             _previouseKeyboardState = currentKeyboardState;
 
+            CheckTimers(gameTime);
+
+            Update(gameTime, _speed, _direction);
+        }
+
+        /// <summary>
+        /// Set timer values
+        /// </summary>
+        private void CheckTimers(GameTime gameTime)
+        {
+            #region Invulnerability & Blink
             if (Invulnerable)
             {
                 Blink(gameTime);
@@ -188,7 +219,9 @@ namespace Romero.Windows.Classes
                 }
 
             }
+            #endregion
 
+            #region Shooting
             if (!_canShoot)
             {
                 _shootCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -198,7 +231,9 @@ namespace Romero.Windows.Classes
                     _shootCounterStart = 0f;
                 }
             }
+            #endregion
 
+            #region Swinging
             if (!_canSwing)
             {
                 _swingCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -208,18 +243,19 @@ namespace Romero.Windows.Classes
                     _swingCounterStart = 0f;
                 }
             }
+            #endregion
 
+            #region Sprinting
             if (!_canSprint)
             {
-                _sprintDelayCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                _sprintDelayCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (_sprintDelayCounterStart >= _sprintDelay)
                 {
                     _sprintDelayCounterStart = 0;
                     _canSprint = true;
                 }
             }
-
-            Update(gameTime, _speed, _direction);
+            #endregion
         }
 
 
@@ -232,18 +268,18 @@ namespace Romero.Windows.Classes
             {
                 SpritePosition.X = 0;
             }
-            else if (SpritePosition.X >= Global.DeviceInUse.PreferredBackBufferWidth)
+            else if (SpritePosition.X >= 4096)
             {
-                SpritePosition.X = Global.DeviceInUse.PreferredBackBufferWidth - Size.X;
+                SpritePosition.X = 4096 - Size.X;
             }
 
             if (SpritePosition.Y <= 0)
             {
                 SpritePosition.Y = 0;
             }
-            else if (SpritePosition.Y >= Global.DeviceInUse.PreferredBackBufferHeight)
+            else if (SpritePosition.Y >= 4096)
             {
-                SpritePosition.Y = Global.DeviceInUse.PreferredBackBufferHeight - Size.Y;
+                SpritePosition.Y = 4096 - Size.Y;
             }
         }
 
@@ -266,7 +302,8 @@ namespace Romero.Windows.Classes
         private void UpdateSword(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamepadState)
         {
             Sword.Update(gameTime);
-            //Mouse swing
+
+            #region Mouse
             if (!Global.Gamepad)
             {
                 if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed && CurrentState == State.Running && _canSwing)
@@ -275,8 +312,9 @@ namespace Romero.Windows.Classes
                     _canSwing = false;
                 }
             }
+            #endregion
 
-            //Gamepad swing
+            #region Gamepad
             else
             {
                 if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing) && CurrentState == State.Running && _canSwing)
@@ -285,10 +323,8 @@ namespace Romero.Windows.Classes
                     _canSwing = false;
                 }
             }
+            #endregion
         }
-
-
-
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
@@ -297,7 +333,7 @@ namespace Romero.Windows.Classes
                 b.Update(gameTime);
             }
 
-            //Mouse shooting
+            #region Mouse
             if (!Global.Gamepad)
             {
                 if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed && CurrentState == State.Running)
@@ -308,12 +344,12 @@ namespace Romero.Windows.Classes
                         _canShoot = false;
                     }
 
-
                 }
 
             }
+            #endregion
 
-            //Gamepad shooting
+            #region Gamepad
             else
             {
                 if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot) && CurrentState == State.Running)
@@ -321,12 +357,12 @@ namespace Romero.Windows.Classes
                     if (_canShoot)
                     {
                         Shoot(currentGamePadState);
-
                         _canShoot = false;
                     }
 
                 }
             }
+            #endregion
 
         }
 
@@ -336,7 +372,7 @@ namespace Romero.Windows.Classes
         private void Shoot(MouseState currentMouseState)
         {
             var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
-            mousePos = Vector2.Transform(mousePos, cam.InverseTransform);
+            mousePos = Vector2.Transform(mousePos, _cam.InverseTransform); //Get the mouse pos relative to the camera
             var movement = mousePos - SpritePosition;
 
             if (movement != Vector2.Zero)
@@ -368,10 +404,13 @@ namespace Romero.Windows.Classes
 
         }
 
+        /// <summary>
+        /// Mouse swinging
+        /// </summary>
         private void Swing(MouseState currentMouseState)
         {
             var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
-            mousePos = Vector2.Transform(mousePos, cam.InverseTransform);
+            mousePos = Vector2.Transform(mousePos, _cam.InverseTransform); //Get the mouse pos relative to the camera
             var movement = mousePos - SpritePosition;
 
             if (movement != Vector2.Zero)
@@ -382,7 +421,9 @@ namespace Romero.Windows.Classes
 
         }
 
-
+        /// <summary>
+        /// Gamepad swinging
+        /// </summary>
         private void Swing(GamePadState currentGamePadState)
         {
             var swingThumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, -currentGamePadState.ThumbSticks.Right.Y);
@@ -396,17 +437,20 @@ namespace Romero.Windows.Classes
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {
-
             var curMouse = Mouse.GetState();
             var currentGamePadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
-            mouseLoc = Vector2.Transform(mouseLoc, cam.InverseTransform);
+            mouseLoc = Vector2.Transform(mouseLoc, _cam.InverseTransform); //Get the mouse pos relative to the camera
             var direction = (SpritePosition) - mouseLoc;
 
+            #region Mouse Angle
             if (!Global.Gamepad)
             {
                 _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
             }
+            #endregion
+
+            #region Gamepad Angle
             else
             {
                 var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
@@ -418,7 +462,7 @@ namespace Romero.Windows.Classes
                 }
 
             }
-
+            #endregion
 
             if (Sword.Visible)
             {
@@ -429,6 +473,7 @@ namespace Romero.Windows.Classes
             {
                 b.Draw(theSpriteBatch);
             }
+
             if (Visible)
             {
                 base.Draw(theSpriteBatch, _playerAngle);
@@ -436,6 +481,17 @@ namespace Romero.Windows.Classes
 
         }
 
+        /// <summary>
+        /// Get the camera from the GameplayScreen
+        /// </summary>
+        public void GetCamera(Camera2D cameraBeingUsed)
+        {
+            _cam = cameraBeingUsed;
+        }
+
+        /// <summary>
+        /// Update character movement
+        /// </summary>
         private void UpdateMovement(KeyboardState currentKeyboardState, GamePadState currentGamePadState)
         {
             switch (Global.Gamepad)
@@ -551,6 +607,7 @@ namespace Romero.Windows.Classes
                         #endregion
 
                         #region Gamepad Sprinting
+
                         case State.Sprinting:
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
@@ -580,6 +637,7 @@ namespace Romero.Windows.Classes
                             }
 
                             break;
+
                         #endregion
                     }
 
@@ -703,6 +761,7 @@ namespace Romero.Windows.Classes
                         #endregion
 
                         #region Keyboard Sprinting
+
                         case State.Sprinting:
 
                             _speed = Vector2.Zero;
@@ -732,6 +791,7 @@ namespace Romero.Windows.Classes
                                 _direction.Y = MoveDown;
                             }
                             break;
+
                         #endregion
                     }
                     break;
@@ -743,6 +803,6 @@ namespace Romero.Windows.Classes
         }
 
 
-       
+
     }
 }

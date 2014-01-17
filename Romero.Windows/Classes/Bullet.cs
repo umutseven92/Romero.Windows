@@ -8,11 +8,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Romero.Windows.Classes
 {
+    /// <summary>
+    /// The main projectile class
+    /// </summary>
     public class Bullet : Sprite
     {
         #region Declarations
         
-        //Max distance the bullet can travel
         const int MaxDistance = 5000;
         private new const string AssetName = "bullet";
         public bool Visible = false;
@@ -28,9 +30,6 @@ namespace Romero.Windows.Classes
             ScaleCalc = 1f;
         }
         
-        /// <summary>
-        /// Update only when visible
-        /// </summary>
         public void Update(GameTime theGameTime)
         {
             if (Vector2.Distance(_startPosition, SpritePosition) > MaxDistance)
@@ -45,9 +44,6 @@ namespace Romero.Windows.Classes
             }
         }
         
-        /// <summary>
-        /// Draw only when visible
-        /// </summary>
         public override void Draw(SpriteBatch theSpriteBatch)
         {
             if (Visible)
@@ -56,6 +52,9 @@ namespace Romero.Windows.Classes
             }
         }
 
+        /// <summary>
+        /// Set all the movement values
+        /// </summary>
         public void Fire(Vector2 theStartPosition, Vector2 theDirection)
         {
             SpritePosition = theStartPosition;

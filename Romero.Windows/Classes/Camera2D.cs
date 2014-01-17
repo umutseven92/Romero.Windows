@@ -1,59 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region Using Statements
+
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+#endregion
+
 namespace Romero.Windows.Classes
 {
-
+    /// <summary>
+    /// Camera that follows the player
+    /// </summary>
     public class Camera2D
-    {   
-        #region Fields
+    {
+        #region Declarations
+
+        protected Viewport Viewport;
+        protected MouseState MouseState;
+        protected KeyboardState KeyState;
+        protected Int32 Scroll;
+        private readonly Player _playerToFollow;
 
         protected float _zoom;
-        protected Matrix _transform;
-        protected Matrix _inverseTransform;
-        protected Vector2 _pos;
-        protected float _rotation;
-        protected Viewport _viewport;
-        protected MouseState _mState;
-        protected KeyboardState _keyState;
-        protected Int32 _scroll;
-        private Player playerToFollow;
-
-        #endregion
-
-        #region Properties
-
         public float Zoom
         {
             get { return _zoom; }
             set { _zoom = value; }
         }
-        /// <summary>
-        /// Camera View Matrix Property
-        /// </summary>
+
+
+        protected Matrix _transform;
         public Matrix Transform
         {
             get { return _transform; }
             set { _transform = value; }
         }
+
         /// <summary>
-        /// Inverse of the view matrix, can be used to get objects screen coordinates
-        /// from its object coordinates
+        /// Inverse of the view matrix, can be used to get objects screen coordinates from its object coordinates
         /// </summary>
+        protected Matrix _inverseTransform;
         public Matrix InverseTransform
         {
             get { return _inverseTransform; }
         }
+
+        protected Vector2 _pos;
         public Vector2 Pos
         {
             get { return _pos; }
             set { _pos = value; }
         }
+
+        protected float _rotation;
         public float Rotation
         {
             get { return _rotation; }
@@ -62,94 +62,68 @@ namespace Romero.Windows.Classes
 
         #endregion
 
-        #region Constructor
-
-        public Camera2D(Viewport viewport,Player player)
+        public Camera2D(Viewport viewport, Player player)
         {
             _zoom = 1.0f;
-            _scroll = 1;
+            Scroll = 1;
             _rotation = 0.0f;
             _pos = Vector2.Zero;
-            _viewport = viewport;
-            playerToFollow = player;
+            Viewport = viewport;
+            _playerToFollow = player;
         }
 
-        #endregion
 
-        #region Methods
-
-        /// <summary>
-        /// Update the camera view
-        /// </summary>
         public void Update()
         {
-            //Call Camera Input
-          //  Input();
-            _pos.X = -playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth/2;
-            _pos.Y = -playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2;
-            //Clamp zoom value
-            _zoom = MathHelper.Clamp(_zoom, 0.0f, 10.0f);
-            //Clamp rotation value
-            _rotation = ClampAngle(_rotation);
-            //Create view matrix
+            //CheckForInput();
+            _pos.X = -_playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth / 2;
+            _pos.Y = -_playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2;
+
+            _zoom = MathHelper.Clamp(_zoom, 0.0f, 10.0f); //Clamp zoom value
+            _rotation = ClampAngle(_rotation); //Clamp rotation value
             _transform = Matrix.CreateRotationZ(_rotation) *
-                            Matrix.CreateScale(new Vector3(_zoom, _zoom, 1)) *
-                            Matrix.CreateTranslation(_pos.X, _pos.Y, 0);
-            //Update inverse matrix
-            _inverseTransform = Matrix.Invert(_transform);
+                                       Matrix.CreateScale(new Vector3(_zoom, _zoom, 1)) *
+                                       Matrix.CreateTranslation(_pos.X, _pos.Y, 0); //Create view matrix
+            _inverseTransform = Matrix.Invert(_transform); //Update inverse matrix
         }
 
         /// <summary>
-        /// Example Input Method, rotates using cursor keys and zooms using mouse wheel
+        /// Zoom and rotation
         /// </summary>
-        protected virtual void Input()
+        protected virtual void CheckForInput()
         {
-            _mState = Mouse.GetState();
-            _keyState = Keyboard.GetState();
-            //Check zoom
-            if (_mState.ScrollWheelValue > _scroll)
+            MouseState = Mouse.GetState();
+            KeyState = Keyboard.GetState();
+
+            #region Zoom
+            if (MouseState.ScrollWheelValue > Scroll)
             {
                 _zoom += 0.1f;
-                _scroll = _mState.ScrollWheelValue;
+                Scroll = MouseState.ScrollWheelValue;
             }
-            else if (_mState.ScrollWheelValue < _scroll)
+            else if (MouseState.ScrollWheelValue < Scroll)
             {
                 _zoom -= 0.1f;
-                _scroll = _mState.ScrollWheelValue;
+                Scroll = MouseState.ScrollWheelValue;
             }
-            //Check rotation
-            if (_keyState.IsKeyDown(Keys.Left))
+            #endregion
+
+            #region Rotation
+            if (KeyState.IsKeyDown(Keys.Left))
             {
                 _rotation -= 0.1f;
             }
-            if (_keyState.IsKeyDown(Keys.Right))
+            if (KeyState.IsKeyDown(Keys.Right))
             {
                 _rotation += 0.1f;
             }
-            //Check Move
-            if (_keyState.IsKeyDown(Keys.A))
-            {
-                _pos.X += 0.5f;
-            }
-            if (_keyState.IsKeyDown(Keys.D))
-            {
-                _pos.X -= 0.5f;
-            }
-            if (_keyState.IsKeyDown(Keys.W))
-            {
-                _pos.Y += 0.5f;
-            }
-            if (_keyState.IsKeyDown(Keys.S))
-            {
-                _pos.Y -= 0.5f;
-            }
+            #endregion
+
         }
 
         /// <summary>
         /// Clamps a radian value between -pi and pi
         /// </summary>
-        /// <param name="radians">angle to be clamped</param>
-        /// <returns>clamped angle</returns>
         protected float ClampAngle(float radians)
         {
             while (radians < -MathHelper.Pi)
@@ -163,7 +137,7 @@ namespace Romero.Windows.Classes
             return radians;
         }
 
-        #endregion
+
     }
 }
 

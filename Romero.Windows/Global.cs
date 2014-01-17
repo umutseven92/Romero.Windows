@@ -1,6 +1,8 @@
-﻿
+﻿#region Using Statements
+
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+
+#endregion
 
 namespace Romero.Windows
 {
@@ -14,13 +16,19 @@ namespace Romero.Windows
         /// </summary>
         public static GraphicsDeviceManager DeviceInUse;
 
+        #region Zombie Spawn Values
         public static int ZombieSpawnDelay = 0;
 
         public static int ZombieSpawnTicker = 5;
 
-        public static int ZombieSpawnSeed;
+        public static int ZombieSpawnSeed; 
+        #endregion
 
+        /// <summary>
+        /// Main game currently running
+        /// </summary>
         public static Game GameInProgress;
+        
         /// <summary>
         /// Full screen
         /// </summary>

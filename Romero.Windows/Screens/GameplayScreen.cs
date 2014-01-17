@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -15,79 +16,46 @@ using Romero.Windows.ScreenManager;
 namespace Romero.Windows.Screens
 {
     /// <summary>
-    /// This screen implements the actual game logic.
+    /// This screen implements the actual game logic
     /// </summary>
     class GameplayScreen : GameScreen
     {
 
         #region Declarations
+
         ContentManager _content;
-        private readonly Player _player; //Player, for single player
-        private GameTime _gT; //Gametime for Player.Update()
-        private readonly List<Zombie> _lZombies; //Zombies on screen
+        private readonly Player _player;
+        private GameTime _gT;
+        private readonly List<Zombie> _lZombies;
         private SpriteFont _font;
         TimeSpan _elapsedTime = TimeSpan.Zero;
         float _pauseAlpha;
+        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096);
+        private readonly Camera2D _cam;
+        Texture2D _backgroundTexture;
+        private KeyboardState _previousKeyboardState;
+
+        #region Zombie Values
         private int _deadZombies;
         private int _zombieModifier; //Zombie base spawn rate, increases with higher difficulty
         private int _difficultyModifier; //Difficulty rate,  increases with higher difficulty
         private int _diagZombieCount; //Diagnostics - zombie count
         private int _wave;
+        int _zombieSpawnChecker;
+        #endregion
+
         int _frameRate;
         int _frameCounter;
-        Texture2D _backgroundTexture;
-        private KeyboardState _previousKeyboardState;
-        int _zombieSpawnChecker;
-        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096);
-        private readonly Camera2D _cam;
-        #endregion
-
-        #region Functions
-
-        /// <summary>
-        /// Add zombies to the game
-        /// </summary>
-        private void AddZombies(int count)
-        {
-            Global.ZombieSpawnDelay = 0;
-            for (var i = 0; i < count; i++)
-            {
-                _lZombies.Add(new Zombie { Id = i });
-            }
-            _diagZombieCount = count;
-        }
-
-        /// <summary>
-        /// Draw fps, collision and other diagnostics, press P to toggle. Make this inaccessible before release
-        /// </summary>
-        private void DrawDiagnostics(SpriteBatch spriteBatch)
-        {
-            _frameCounter++;
-            if (Global.IsDiagnosticsOpen)
-            {
-                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
-                spriteBatch.DrawString(_font,
-                      _player.Invulnerable
-                          ? string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}, Invulnerable",
-                              _player.Health, _player.FullCharacterName, _player.CurrentState)
-                          : string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}", _player.Health,
-                              _player.FullCharacterName, _player.CurrentState), new Vector2(1500, 45), Color.Green);
-            }
-
-        }
 
         #endregion
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
         public GameplayScreen()
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
+            #region Difficulty
 
-            //Set difficulty
             switch (Global.SelectedDifficulty)
             {
                 case Global.Difficulty.Easy:
@@ -108,11 +76,11 @@ namespace Romero.Windows.Screens
                     break;
             }
 
-            //Player (single player)
+            #endregion
+
             _player = new Player();
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _player);
             _player.GetCamera(_cam);
-            //Zombie Horde
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
@@ -162,8 +130,7 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
-
-            //All zombies on screen dead
+            //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {
                 _deadZombies = 0;
@@ -171,17 +138,15 @@ namespace Romero.Windows.Screens
                 _difficultyModifier++;
 
                 _lZombies.Clear();
-                AddZombies(_zombieModifier * _difficultyModifier);
+                AddZombies(_zombieModifier * _difficultyModifier); //Add the next batch
                 _wave++;
                 foreach (var z in _lZombies)
                 {
                     z.LoadContent(_content);
-
                 }
             }
 
-            //To update player
-            _gT = gameTime;
+            _gT = gameTime; //To update the player
 
             #region FPS calculation
 
@@ -195,6 +160,7 @@ namespace Romero.Windows.Screens
             }
 
             #endregion
+
             _cam.Update();
             base.Update(gameTime, otherScreenHasFocus, false);
 
@@ -202,6 +168,42 @@ namespace Romero.Windows.Screens
             _pauseAlpha = coveredByOtherScreen ? Math.Min(_pauseAlpha + 1f / 32, 1) : Math.Max(_pauseAlpha - 1f / 32, 0);
 
         }
+
+        public override void Draw(GameTime gameTime)
+        {
+            ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
+                                                 Color.DarkGreen, 0, 0);
+
+            var spriteBatch = ScreenManager.SpriteBatch;
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, _cam.Transform);
+
+            spriteBatch.Draw(_backgroundTexture, _bgRectangle, Color.White);
+            foreach (var z in _lZombies)
+            {
+                var direction = z.SpritePosition - _player.SpritePosition;
+                var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+                z.Draw(spriteBatch, angle);
+            }
+            _player.Draw(spriteBatch);
+
+            spriteBatch.End();
+
+            spriteBatch.Begin();
+
+            DrawDiagnostics(spriteBatch);
+
+            spriteBatch.End();
+
+            // If the game is transitioning on or off, fade it out to black.
+            if (TransitionPosition > 0 || _pauseAlpha > 0)
+            {
+                var alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
+                ScreenManager.FadeBackBufferToBlack(alpha);
+            }
+        }
+
 
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
@@ -219,36 +221,31 @@ namespace Romero.Windows.Screens
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
 
-            //Kill all zombies
+
+            #region Developer Kill Cheat
+
             if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
             {
-                foreach (var z in _lZombies)
+                foreach (var z in _lZombies.Where(z => !z.Dead && z.Visible))
                 {
-                    if (!z.Dead && z.Visible)
+                    z.Visible = false;
+                    z.Dead = true;
+                    _deadZombies++;
+                    _diagZombieCount--;
+                    if (_deadZombies % Global.ZombieSpawnTicker == 0)
                     {
-                        z.Visible = false;
-                        z.Dead = true;
-                        _deadZombies++;
-                        _diagZombieCount--;
-                        if (_deadZombies % Global.ZombieSpawnTicker == 0)
+                        foreach (var d in _lZombies.Where(d => !d.Dead && !d.Visible && _zombieSpawnChecker < Global.ZombieSpawnTicker))
                         {
-                            foreach (var d in _lZombies)
-                            {
-                                if (!d.Dead && !d.Visible && _zombieSpawnChecker < Global.ZombieSpawnTicker)
-                                {
-                                    d.Visible = true;
-                                    _zombieSpawnChecker++;
-                                }
-
-                            }
-
+                            d.Visible = true;
+                            _zombieSpawnChecker++;
                         }
-                        _zombieSpawnChecker = 0;
+
                     }
-
-
+                    _zombieSpawnChecker = 0;
                 }
             }
+
+            #endregion
 
             _previousKeyboardState = currentKeyboardState;
 
@@ -257,78 +254,118 @@ namespace Romero.Windows.Screens
                 // Pause (esc)
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
-
             else
             {
-                // Player movement
-                _player.Update(_gT, _cam);
+                _player.Update(_gT, _cam); // Player movement
             }
 
             foreach (var z in _lZombies)
             {
-                //Zombie movement
-                z.Update(_gT, _player);
+
+                z.Update(_gT, _player); //Zombie movement
             }
 
             #region Collision
 
-
-
             foreach (var z in _lZombies)
             {
-
+                #region Bullet - Zombie Collision
                 foreach (var b in _player.Bullets)
                 {
                     if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
                     {
-                        //Bullet - Zombie Collision
-                        b.Visible = false;
 
+                        b.Visible = false;
                         KillZombie(z, _zombieSpawnChecker);
+
                     }
                 }
+                #endregion
+
+                #region Zombie - Player Collision
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
                 {
-                    //Zombie-Player Collision
+
                     _player.Health -= 10;
                     _player.Invulnerable = true;
 
                 }
+                #endregion
+
+                #region Sword - Zombie Collision
                 if (z.BoundingBox.Intersects(_player.Sword.BoundingBox) && z.Visible && _player.Sword.Visible)
                 {
-                    //Sword - Zombie Collision
-                    //_player.Sword.Visible = false;
 
                     KillZombie(z, _zombieSpawnChecker);
+
                 }
-
+                #endregion
             }
-            /*
-                        for (var i = 0; i < _lZombies.Count; i++)
-                        {
-                            foreach (var z in _lZombies)
-                            {
-                                if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
-                                    _lZombies[i].Id != z.Id)
-                                {
-                                    //Zombie - Zombie Collision
 
-                                }
-                            }
-                        }
+            #region Zombie - Zombie Collision
+            /*
+            for (var i = 0; i < _lZombies.Count; i++)
+            {
+                foreach (var z in _lZombies)
+                {
+                    if (_lZombies[i].BoundingBox.Intersects(z.BoundingBox) && z.Visible && _lZombies[i].Visible &&
+                        _lZombies[i].Id != z.Id)
+                    {
+
+                    }
+                }
+            } 
             */
             #endregion
 
+            #endregion
+
+            #region Player Death & Game Over
             if (_player.Health <= 0 && !_player.Dead)
             {
-                //DEATH!
                 _player.Dead = true;
                 _player.Visible = false;
                 ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
             }
+            #endregion
 
         }
 
+        /// <summary>
+        /// Add zombies to the game
+        /// </summary>
+        private void AddZombies(int count)
+        {
+            Global.ZombieSpawnDelay = 0;
+            for (var i = 0; i < count; i++)
+            {
+                _lZombies.Add(new Zombie { Id = i });
+            }
+            _diagZombieCount = count;
+        }
+
+        /// <summary>
+        /// Draw fps, collision and other diagnostics, P to toggle
+        /// </summary>
+        private void DrawDiagnostics(SpriteBatch spriteBatch)
+        {
+            _frameCounter++;
+            if (Global.IsDiagnosticsOpen)
+            {
+                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
+                spriteBatch.DrawString(_font,
+                      _player.Invulnerable
+                          ? string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}, Invulnerable",
+                              _player.Health, _player.FullCharacterName, _player.CurrentState)
+                          : string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}", _player.Health,
+                              _player.FullCharacterName, _player.CurrentState), new Vector2(1500, 45), Color.Green);
+            }
+
+        }
+
+        /// <summary>
+        /// Kill the zombie safely
+        /// </summary>
         private void KillZombie(Zombie z, int zombieSpawnChecker)
         {
             z.Visible = false;
@@ -351,50 +388,6 @@ namespace Romero.Windows.Screens
             zombieSpawnChecker = 0;
         }
 
-        /// <summary>
-        /// Draws the gameplay screen.
-        /// </summary>
-        public override void Draw(GameTime gameTime)
-        {
-            // Background
-            ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
-                                               Color.CornflowerBlue, 0, 0);
-
-            var spriteBatch = ScreenManager.SpriteBatch;
-
-            //        spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap,
-            //DepthStencilState.Default, RasterizerState.CullNone);
-            //        spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White); --> Non tiled background
-            //        spriteBatch.Draw(_backgroundTexture, Vector2.Zero, _bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-            //        spriteBatch.End();
-
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, _cam.Transform);
-            spriteBatch.Draw(_backgroundTexture, _bgRectangle, Color.White);
-            foreach (var z in _lZombies)
-            {
-                var direction = z.SpritePosition - _player.SpritePosition;
-                var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
-
-                z.Draw(spriteBatch, angle);
-            }
-            _player.Draw(spriteBatch);
-
-
-            spriteBatch.End();
-
-            spriteBatch.Begin();
-
-
-            DrawDiagnostics(spriteBatch);
-
-            spriteBatch.End();
-            // If the game is transitioning on or off, fade it out to black.
-            if (TransitionPosition > 0 || _pauseAlpha > 0)
-            {
-                var alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
-                ScreenManager.FadeBackBufferToBlack(alpha);
-            }
-        }
 
 
     }
