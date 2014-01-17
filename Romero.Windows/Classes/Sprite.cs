@@ -80,12 +80,13 @@ namespace Romero.Windows.Classes
             Source = new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height);
             Size = new Rectangle(0, 0, (int)(SpriteTexture2D.Width * ScaleCalc), (int)(SpriteTexture2D.Height * ScaleCalc));
         }
-
+ 
         /// <summary>
         /// Draw without direction angle
         /// </summary>
         public virtual void Draw(SpriteBatch spriteBatch)
         {
+     
             if (Global.IsDiagnosticsOpen)
             {
                 spriteBatch.Draw(_boundingBoxTexture, BoundingBox, Color.Red);
@@ -94,6 +95,8 @@ namespace Romero.Windows.Classes
             spriteBatch.Draw(SpriteTexture2D, SpritePosition,
               new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
                 Color.White, 0.0f, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+
+          
         }
 
         /// <summary>
@@ -102,6 +105,7 @@ namespace Romero.Windows.Classes
         /// <param name="rotation">Direction angle as float</param>
         public virtual void Draw(SpriteBatch spriteBatch, float rotation)
         {
+           
             if (Global.IsDiagnosticsOpen)
             {
                 spriteBatch.Draw(_boundingBoxTexture, BoundingBox, Color.Red);
@@ -109,6 +113,7 @@ namespace Romero.Windows.Classes
 
             spriteBatch.Draw(SpriteTexture2D, SpritePosition,
               new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height), Color.White, rotation, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+
         }
 
        

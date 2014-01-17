@@ -23,8 +23,8 @@ namespace Romero.Windows.Classes
         public Sword Sword = new Sword();
         ContentManager _contentManager;
         public string PlayerAssetName;
-        const int StartPositionX = 960;
-        const int StartPositionY = 540;
+        const int StartPositionX = 2048;
+        const int StartPositionY = 2048;
         private readonly int _playerSpeed;
         const int MoveUp = -1;
         const int MoveDown = 1;
@@ -39,7 +39,7 @@ namespace Romero.Windows.Classes
         float _playerAngle;
         public bool Visible = true;
         private GameTime _gT;
-
+        private Camera2D cam;
         //Invulnerability Timer
         internal bool Invulnerable = false;
         const int InvulnTime = 2;
@@ -76,14 +76,18 @@ namespace Romero.Windows.Classes
         private MouseState _previousMouseState;
         private KeyboardState _previouseKeyboardState;
 
+ #endregion
 
-        #endregion
-
+        public void GetCamera(Camera2D cameraBeingUsed)
+        {
+             cam = cameraBeingUsed;
+        }
         /// <summary>
         /// Constructor
         /// </summary>
         public Player()
         {
+           
             switch (Global.SelectedCharacter)
             {
                 case Global.Character.Fraser:
@@ -153,8 +157,9 @@ namespace Romero.Windows.Classes
 
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime,Camera2D camera)
         {
+            cam = camera;
             _gT = gameTime;
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
@@ -331,6 +336,7 @@ namespace Romero.Windows.Classes
         private void Shoot(MouseState currentMouseState)
         {
             var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
+            mousePos = Vector2.Transform(mousePos, cam.InverseTransform);
             var movement = mousePos - SpritePosition;
 
             if (movement != Vector2.Zero)
@@ -365,6 +371,7 @@ namespace Romero.Windows.Classes
         private void Swing(MouseState currentMouseState)
         {
             var mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
+            mousePos = Vector2.Transform(mousePos, cam.InverseTransform);
             var movement = mousePos - SpritePosition;
 
             if (movement != Vector2.Zero)
@@ -393,7 +400,7 @@ namespace Romero.Windows.Classes
             var curMouse = Mouse.GetState();
             var currentGamePadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
-
+            mouseLoc = Vector2.Transform(mouseLoc, cam.InverseTransform);
             var direction = (SpritePosition) - mouseLoc;
 
             if (!Global.Gamepad)
@@ -736,6 +743,6 @@ namespace Romero.Windows.Classes
         }
 
 
-
+       
     }
 }

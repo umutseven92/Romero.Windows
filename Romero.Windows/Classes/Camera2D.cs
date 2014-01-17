@@ -10,7 +10,7 @@ namespace Romero.Windows.Classes
 {
 
     public class Camera2D
-    {
+    {   
         #region Fields
 
         protected float _zoom;
@@ -22,6 +22,7 @@ namespace Romero.Windows.Classes
         protected MouseState _mState;
         protected KeyboardState _keyState;
         protected Int32 _scroll;
+        private Player playerToFollow;
 
         #endregion
 
@@ -63,13 +64,14 @@ namespace Romero.Windows.Classes
 
         #region Constructor
 
-        public Camera2D(Viewport viewport)
+        public Camera2D(Viewport viewport,Player player)
         {
             _zoom = 1.0f;
             _scroll = 1;
             _rotation = 0.0f;
             _pos = Vector2.Zero;
             _viewport = viewport;
+            playerToFollow = player;
         }
 
         #endregion
@@ -82,7 +84,9 @@ namespace Romero.Windows.Classes
         public void Update()
         {
             //Call Camera Input
-            Input();
+          //  Input();
+            _pos.X = -playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth/2;
+            _pos.Y = -playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2;
             //Clamp zoom value
             _zoom = MathHelper.Clamp(_zoom, 0.0f, 10.0f);
             //Clamp rotation value

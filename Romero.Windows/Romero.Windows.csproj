@@ -135,12 +135,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Sprites\ground.xnb">
+    <Content Include="Content\Sprites\groundTile.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Sprites\groundTile.xnb">
+    <Content Include="Content\Sprites\ground.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

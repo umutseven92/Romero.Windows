@@ -38,8 +38,8 @@ namespace Romero.Windows.Screens
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         int _zombieSpawnChecker;
-        readonly Rectangle _bgRectangle = new Rectangle(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight);
-
+        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096);
+        private readonly Camera2D _cam;
         #endregion
 
         #region Functions
@@ -110,7 +110,8 @@ namespace Romero.Windows.Screens
 
             //Player (single player)
             _player = new Player();
-
+            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _player);
+            _player.GetCamera(_cam);
             //Zombie Horde
             _lZombies = new List<Zombie>();
             _wave = 1;
@@ -125,7 +126,7 @@ namespace Romero.Windows.Screens
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
 
-            _backgroundTexture = _content.Load<Texture2D>("groundTile");
+            _backgroundTexture = _content.Load<Texture2D>("ground");
             _player.LoadContent(_content);
 
             foreach (var z in _lZombies)
@@ -194,7 +195,7 @@ namespace Romero.Windows.Screens
             }
 
             #endregion
-
+            _cam.Update();
             base.Update(gameTime, otherScreenHasFocus, false);
 
             // Gradually fade in or out depending on whether we are covered by the pause screen.
@@ -260,7 +261,7 @@ namespace Romero.Windows.Screens
             else
             {
                 // Player movement
-                _player.Update(_gT);
+                _player.Update(_gT, _cam);
             }
 
             foreach (var z in _lZombies)
@@ -349,7 +350,7 @@ namespace Romero.Windows.Screens
             }
             zombieSpawnChecker = 0;
         }
-        Camera2D cam = new Camera2D(new Viewport(0, 0, 640, 480));
+
         /// <summary>
         /// Draws the gameplay screen.
         /// </summary>
@@ -361,15 +362,14 @@ namespace Romero.Windows.Screens
 
             var spriteBatch = ScreenManager.SpriteBatch;
 
-            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap,
-    DepthStencilState.Default, RasterizerState.CullNone);
-            // spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White); --> Non tiled background
-            spriteBatch.Draw(_backgroundTexture, Vector2.Zero, _bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-            spriteBatch.End();
+            //        spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap,
+            //DepthStencilState.Default, RasterizerState.CullNone);
+            //        spriteBatch.Draw(_backgroundTexture, screenRectangle, Color.White); --> Non tiled background
+            //        spriteBatch.Draw(_backgroundTexture, Vector2.Zero, _bgRectangle, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            //        spriteBatch.End();
 
-
-            spriteBatch.Begin();
-            _player.Draw(spriteBatch);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, _cam.Transform);
+            spriteBatch.Draw(_backgroundTexture, _bgRectangle, Color.White);
             foreach (var z in _lZombies)
             {
                 var direction = z.SpritePosition - _player.SpritePosition;
@@ -377,10 +377,17 @@ namespace Romero.Windows.Screens
 
                 z.Draw(spriteBatch, angle);
             }
+            _player.Draw(spriteBatch);
 
-            DrawDiagnostics(spriteBatch);
+
             spriteBatch.End();
 
+            spriteBatch.Begin();
+
+
+            DrawDiagnostics(spriteBatch);
+
+            spriteBatch.End();
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || _pauseAlpha > 0)
             {
