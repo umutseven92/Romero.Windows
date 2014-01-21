@@ -72,7 +72,7 @@ namespace Romero.Windows.Screens
         {
             var content = ScreenManager.Game.Content;
 
-            _gradientTexture = content.Load<Texture2D>("gradient");
+            _gradientTexture = content.Load<Texture2D>("Sprites/gradient");
         }
 
 

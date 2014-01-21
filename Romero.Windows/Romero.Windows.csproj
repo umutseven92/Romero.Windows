@@ -101,7 +101,7 @@
     <Content Include="Content\Sprites\bullet.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Sprites\font.xnb">
+    <Content Include="Content\Fonts\font.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Sprites\player.xnb">
@@ -110,7 +110,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Music\" />
-    <Folder Include="Content\Sounds\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Sprites\becky.xnb">
@@ -146,6 +145,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Sprites\zombieReworked.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Sounds\arrowShoot.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Sounds\arrowDraw.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -46,7 +46,7 @@ namespace Romero.Windows
 
             Graphics.ApplyChanges();
             Global.DeviceInUse = Graphics;
-            Content.RootDirectory = "Content/Sprites";
+            Content.RootDirectory = "Content";
             Global.GameInProgress = this;
             var screenManager = new ScreenManager.ScreenManager(this);
 
@@ -87,7 +87,7 @@ namespace Romero.Windows
 
             foreach (var asset in PreloadAssets)
             {
-                Content.Load<object>(asset);
+                Content.Load<object>("Sprites/"+asset);
             }
         }
 

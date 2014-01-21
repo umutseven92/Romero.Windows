@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -34,7 +35,7 @@ namespace Romero.Windows.Screens
         private readonly Camera2D _cam;
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
-
+       
         #region Zombie Values
         private int _deadZombies;
         private int _zombieModifier; //Zombie base spawn rate, increases with higher difficulty
@@ -50,11 +51,12 @@ namespace Romero.Windows.Screens
         #endregion
 
         #region Vibration Timer
+        /*
         internal bool Vibrate = false;
         const int VibrationTime = 2;
-        private float vibrationCounterStart; 
+        private float vibrationCounterStart;
+        */
         #endregion
-
 
         #endregion
 
@@ -90,6 +92,7 @@ namespace Romero.Windows.Screens
             _player = new Player();
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _player);
             _player.GetCamera(_cam);
+            
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
@@ -101,18 +104,18 @@ namespace Romero.Windows.Screens
         public override void LoadContent()
         {
             if (_content == null)
-                _content = new ContentManager(ScreenManager.Game.Services, "Content/Sprites");
+                _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
-            _backgroundTexture = _content.Load<Texture2D>("ground");
+            _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
             _player.LoadContent(_content);
 
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
             }
-
-            _font = _content.Load<SpriteFont>("font");
-
+           
+            _font = _content.Load<SpriteFont>("Fonts/font");
+            
             //Screen Delay
             Thread.Sleep(1000);
 

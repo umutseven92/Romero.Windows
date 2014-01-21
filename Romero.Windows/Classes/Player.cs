@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -162,6 +163,9 @@ namespace Romero.Windows.Classes
 
         }
 
+        private SoundEffect arrowShoot;
+        private SoundEffect arrowDraw;
+        private SoundEffectInstance arrowDrawInstance;
         public void LoadContent(ContentManager contentManager)
         {
             _contentManager = contentManager;
@@ -170,6 +174,10 @@ namespace Romero.Windows.Classes
             {
                 b.LoadContent(contentManager);
             }
+
+            arrowShoot = contentManager.Load<SoundEffect>("Sounds/arrowShoot");
+            arrowDraw = contentManager.Load<SoundEffect>("Sounds/arrowDraw");
+            arrowDrawInstance = arrowDraw.CreateInstance();
 
             Sword.LoadContent(_contentManager);
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
@@ -186,7 +194,7 @@ namespace Romero.Windows.Classes
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
-            
+
             StayInScreen();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
@@ -222,7 +230,6 @@ namespace Romero.Windows.Classes
             }
             #endregion
 
-            
             #region Swinging
             if (!_canSwing)
             {
@@ -316,7 +323,7 @@ namespace Romero.Windows.Classes
             #endregion
         }
 
-      
+        private bool didArrowDrawPlay = false;
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
             foreach (var b in Bullets)
@@ -329,8 +336,13 @@ namespace Romero.Windows.Classes
             {
                 if (currentMouseState.LeftButton == ButtonState.Pressed && CurrentState == State.Running)
                 {
-                    _bulletTimerCounter += (float) gameTime.ElapsedGameTime.TotalSeconds;
-
+                    _bulletTimerCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    if (!didArrowDrawPlay)
+                    {
+                         arrowDrawInstance.Play();
+                        didArrowDrawPlay = true;
+                    }
+                   
                     if (_bulletTimerCounter >= _bulletTimer)
                     {
                         _readyToShoot = true;
@@ -339,16 +351,20 @@ namespace Romero.Windows.Classes
 
                 if (currentMouseState.LeftButton == ButtonState.Released && !_readyToShoot)
                 {
+                    didArrowDrawPlay = false;
+                    arrowDrawInstance.Stop();
                     _bulletTimerCounter = 0;
                 }
 
                 if (currentMouseState.LeftButton == ButtonState.Released && CurrentState == State.Running && _readyToShoot)
                 {
+                    didArrowDrawPlay = false;
                     _bulletTimerCounter = 0;
                     Shoot(currentMouseState);
+                    arrowShoot.Play();
                     _readyToShoot = false;
                 }
-                
+
             }
             #endregion
 
@@ -357,7 +373,7 @@ namespace Romero.Windows.Classes
             {
                 if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot) && CurrentState == State.Running)
                 {
-                    
+
 
                 }
             }

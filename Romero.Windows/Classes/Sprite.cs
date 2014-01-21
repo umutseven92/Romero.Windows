@@ -70,7 +70,7 @@ namespace Romero.Windows.Classes
         public void LoadContent(ContentManager contentManager, string assetName)
         {
             _boundingBoxTexture.SetData(new[] { Color.White });
-            SpriteTexture2D = contentManager.Load<Texture2D>(assetName);
+            SpriteTexture2D = contentManager.Load<Texture2D>("Sprites/"+assetName);
             AssetName = assetName;
             Source = new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height);
             Size = new Rectangle(0, 0, (int)(SpriteTexture2D.Width * ScaleCalc), (int)(SpriteTexture2D.Height * ScaleCalc));

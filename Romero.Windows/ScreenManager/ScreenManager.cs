@@ -109,8 +109,8 @@ namespace Romero.Windows.ScreenManager
             var content = Game.Content;
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _font = content.Load<SpriteFont>("font");
-            _blankTexture = content.Load<Texture2D>("blank");
+            _font = content.Load<SpriteFont>("Fonts/font");
+            _blankTexture = content.Load<Texture2D>("Sprites/blank");
 
             // Tell each of the screens to load their content.
             foreach (var screen in _screens)
