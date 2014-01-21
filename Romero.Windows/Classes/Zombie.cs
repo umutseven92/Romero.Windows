@@ -17,8 +17,8 @@ namespace Romero.Windows.Classes
         #region Declarations
 
         public int Id { get; set; }
-        const string ZombieAssetName = "enemy";
-
+        const string ZombieAssetName = "zombieReworked";
+        
         private static readonly Random Random = new Random(); //Spawn position randomizer
         private static readonly Random HighSpeedRandom = new Random(); //Fast zombie randomizer
 

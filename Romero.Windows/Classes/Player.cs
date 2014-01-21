@@ -53,9 +53,9 @@ namespace Romero.Windows.Classes
         #endregion
 
         #region Shooting
-        private bool _canShoot = true;
-        private readonly float _shootDelay;
-        private float _shootCounterStart;
+        private readonly float _bulletTimer;
+        private float _bulletTimerCounter;
+        private bool _readyToShoot;
         #endregion
 
         #region Blinking
@@ -76,6 +76,7 @@ namespace Romero.Windows.Classes
         private readonly float _swingDelay;
         private float _swingCounterStart;
         #endregion
+
 
         public enum State
         {
@@ -103,13 +104,13 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "fraser";
                     FullCharacterName = "Knight Fraser";
                     _playerSpeed = 300;
-                    _shootDelay = 1;
                     Health = 300;
                     _canDodge = false;
                     _dodgeModifier = 0f;
                     _sprintTime = 3;
                     _sprintDelay = 5;
                     _swingDelay = 1;
+                    _bulletTimer = 1;
                     break;
                 #endregion
 
@@ -118,13 +119,13 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "becky";
                     FullCharacterName = "Lady Rebecca";
                     _playerSpeed = 450;
-                    _shootDelay = 0.8f;
                     Health = 120;
                     _canDodge = true;
                     _dodgeModifier = 50f;
                     _sprintTime = 7;
                     _sprintDelay = 4;
                     _swingDelay = 0.5f;
+                    _bulletTimer = 1;
                     break;
                 #endregion
 
@@ -133,13 +134,13 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "ben";
                     FullCharacterName = "Sire Benjamin";
                     _playerSpeed = 340;
-                    _shootDelay = 0.5f;
                     Health = 150;
                     _canDodge = false;
                     _dodgeModifier = 0f;
                     _sprintTime = 5;
                     _sprintDelay = 4;
                     _swingDelay = 0.7f;
+                    _bulletTimer = 0.5f;
                     break;
                 #endregion
 
@@ -148,13 +149,13 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "deacon";
                     FullCharacterName = "Cleric Diakonos";
                     _playerSpeed = 400;
-                    _shootDelay = 1;
                     Health = 100;
                     _canDodge = false;
                     _dodgeModifier = 0f;
                     _sprintTime = 4;
                     _sprintDelay = 4;
                     _swingDelay = 1;
+                    _bulletTimer = 1;
                     break;
                 #endregion
             }
@@ -185,7 +186,7 @@ namespace Romero.Windows.Classes
             var currentKeyboardState = Keyboard.GetState();
             var currentGamepadState = GamePad.GetState(PlayerIndex.One, GamePadDeadZone.Circular);
             var currentMouseState = Mouse.GetState();
-
+            
             StayInScreen();
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
@@ -221,18 +222,7 @@ namespace Romero.Windows.Classes
             }
             #endregion
 
-            #region Shooting
-            if (!_canShoot)
-            {
-                _shootCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_shootCounterStart >= _shootDelay)
-                {
-                    _canShoot = true;
-                    _shootCounterStart = 0f;
-                }
-            }
-            #endregion
-
+            
             #region Swinging
             if (!_canSwing)
             {
@@ -326,6 +316,7 @@ namespace Romero.Windows.Classes
             #endregion
         }
 
+      
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
             foreach (var b in Bullets)
@@ -336,16 +327,28 @@ namespace Romero.Windows.Classes
             #region Mouse
             if (!Global.Gamepad)
             {
-                if (currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton != ButtonState.Pressed && CurrentState == State.Running)
+                if (currentMouseState.LeftButton == ButtonState.Pressed && CurrentState == State.Running)
                 {
-                    if (_canShoot)
-                    {
-                        Shoot(currentMouseState);
-                        _canShoot = false;
-                    }
+                    _bulletTimerCounter += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
+                    if (_bulletTimerCounter >= _bulletTimer)
+                    {
+                        _readyToShoot = true;
+                    }
                 }
 
+                if (currentMouseState.LeftButton == ButtonState.Released && !_readyToShoot)
+                {
+                    _bulletTimerCounter = 0;
+                }
+
+                if (currentMouseState.LeftButton == ButtonState.Released && CurrentState == State.Running && _readyToShoot)
+                {
+                    _bulletTimerCounter = 0;
+                    Shoot(currentMouseState);
+                    _readyToShoot = false;
+                }
+                
             }
             #endregion
 
@@ -354,11 +357,7 @@ namespace Romero.Windows.Classes
             {
                 if (currentGamePadState.IsButtonDown(Keybinds.GamepadShoot) && !_previousGamePadState.IsButtonDown(Keybinds.GamepadShoot) && CurrentState == State.Running)
                 {
-                    if (_canShoot)
-                    {
-                        Shoot(currentGamePadState);
-                        _canShoot = false;
-                    }
+                    
 
                 }
             }

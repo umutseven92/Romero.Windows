@@ -44,8 +44,17 @@ namespace Romero.Windows.Screens
         int _zombieSpawnChecker;
         #endregion
 
+        #region FPS counter
         int _frameRate;
-        int _frameCounter;
+        int _frameCounter; 
+        #endregion
+
+        #region Vibration Timer
+        internal bool Vibrate = false;
+        const int VibrationTime = 2;
+        private float vibrationCounterStart; 
+        #endregion
+
 
         #endregion
 
@@ -147,7 +156,7 @@ namespace Romero.Windows.Screens
             }
 
             _gT = gameTime; //To update the player
-
+           
             #region FPS calculation
 
             _elapsedTime += gameTime.ElapsedGameTime;
@@ -285,6 +294,33 @@ namespace Romero.Windows.Screens
                 #region Zombie - Player Collision
                 if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
                 {
+
+                    #region Vibration
+                    /*
+                    if (Global.Gamepad)
+                    {
+                        if (!Vibrate)
+                        {
+                            Vibrate = true;
+                        }
+
+                        if (Vibrate)
+                        {
+                            GamePad.SetVibration(PlayerIndex.One, 1.0f, 1.0f);
+                            vibrationCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                            if (vibrationCounterStart >= VibrationTime)
+                            {
+                                GamePad.SetVibration(PlayerIndex.One, 0f, 0f);
+                                Vibrate = false;
+                                vibrationCounterStart = 0f;
+                            }
+
+                        }
+
+
+                    } 
+                     */
+                    #endregion
 
                     _player.Health -= 10;
                     _player.Invulnerable = true;
