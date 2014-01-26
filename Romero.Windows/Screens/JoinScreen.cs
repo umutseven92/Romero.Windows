@@ -1,11 +1,11 @@
-﻿
-using System.Threading;
-using System.Threading.Tasks;
-using Lidgren.Network;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Romero.Windows.Screens
 {
-    internal class LobbyScreen : MenuScreen
+    internal class JoinScreen : MenuScreen
     {
         private readonly MenuEntry _characterMenuEntry;
         private static readonly string[] Character =
@@ -14,80 +14,31 @@ namespace Romero.Windows.Screens
             "Cleric Diakonos"
         };
 
-        public NetClient Client;
-        readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
 
-        public LobbyScreen()
-            : base("Lobby")
+        public JoinScreen()
+            : base("Join")
         {
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
-            var play = new MenuEntry("Play");
+            var local = new MenuEntry("Join Locally");
             var back = new MenuEntry("Back");
-            var secondPlayer = new MenuEntry("Second Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
-            back.Selected += back_Selected;
-            play.Selected += play_Selected;
+            back.Selected += OnCancel;
+            local.Selected += local_Selected;
+
             MenuEntries.Add(_characterMenuEntry);
-            MenuEntries.Add(secondPlayer);
-            MenuEntries.Add(play);
+            MenuEntries.Add(local);
             MenuEntries.Add(back);
 
-            var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
-
-            StartClient(14242, "romero");
-            serverTask.Start();
-
         }
 
-        void back_Selected(object sender, PlayerIndexEventArgs e)
+        void local_Selected(object sender, PlayerIndexEventArgs e)
         {
-            _serverTaskCancelSource.Cancel();
-            ExitScreen();
-        }
 
-        private void StartClient(int port, string configName)
-        {
-            var config = new NetPeerConfiguration(configName);
-            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-            Client = new NetClient(config);
-            Client.Start();
-            Client.DiscoverLocalPeers(port);
-
-        }
-
-        private void ConnectToServer()
-        {
-            while (true)
-            {
-                NetIncomingMessage msg;
-                while ((msg = Client.ReadMessage()) != null)
-                {
-                    switch (msg.MessageType)
-                    {
-                        case NetIncomingMessageType.DiscoveryResponse:
-                            // just connect to first server discovered
-                            Client.Connect(msg.SenderEndpoint);
-                            break;
-                        case NetIncomingMessageType.Data:
-
-                            break;
-                    }
-                }
-            }
-
-        }
-
-
-
-        void play_Selected(object sender, PlayerIndexEventArgs e)
-        {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
         }
 
         void _characterMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
-
             switch (_characterMenuEntry.Text)
             {
                 case "Character: Knight Fraser":
@@ -124,7 +75,5 @@ namespace Romero.Windows.Screens
                     break;
             }
         }
-
     }
-
 }

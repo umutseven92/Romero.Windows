@@ -58,7 +58,7 @@ namespace Romero.Windows.Screens
 
         void multiplayerJoinMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
-
+            ScreenManager.AddScreen(new JoinScreen(), e.PlayerIndex);
         }
 
         void multiplayerCreateMenuEntry_Selected(object sender, PlayerIndexEventArgs e)

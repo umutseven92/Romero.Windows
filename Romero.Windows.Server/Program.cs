@@ -12,16 +12,16 @@ namespace Romero.Windows.Server
     {
         static void Main(string[] args)
         {
-            NetPeerConfiguration config = new NetPeerConfiguration("romero");
+            var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
 
             // create and start server
-            NetServer server = new NetServer(config);
+            var server = new NetServer(config);
             server.Start();
 
             // schedule initial sending of position updates
-            double nextSendUpdates = NetTime.Now;
+            var nextSendUpdates = NetTime.Now;
 
             // run until escape is pressed
             while (!Console.KeyAvailable || Console.ReadKey().Key != ConsoleKey.Escape)
@@ -47,7 +47,7 @@ namespace Romero.Windows.Server
                             Console.WriteLine(msg.ReadString());
                             break;
                         case NetIncomingMessageType.StatusChanged:
-                            NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+                            var status = (NetConnectionStatus)msg.ReadByte();
                             if (status == NetConnectionStatus.Connected)
                             {
                                 //
