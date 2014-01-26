@@ -36,8 +36,8 @@ namespace Romero.Windows
 
         public static float GamepadXMovement = 0.3f;
         public static float GamepadYMovement = 0.3f;
-        public static Buttons GamepadSprint = Buttons.LeftStick;
-        public static Buttons GamepadDodge = Buttons.RightStick;
+        public static Buttons GamepadSprint = Buttons.RightTrigger;
+        public static Buttons GamepadDodge = Buttons.LeftTrigger;
         public static Buttons GamepadShoot = Buttons.RightShoulder;
         public static Buttons GamepadSwing = Buttons.LeftShoulder; 
 

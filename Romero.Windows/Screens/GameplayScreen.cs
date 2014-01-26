@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -35,7 +36,7 @@ namespace Romero.Windows.Screens
         private readonly Camera2D _cam;
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
-       
+
         #region Zombie Values
         private int _deadZombies;
         private int _zombieModifier; //Zombie base spawn rate, increases with higher difficulty
@@ -47,7 +48,7 @@ namespace Romero.Windows.Screens
 
         #region FPS counter
         int _frameRate;
-        int _frameCounter; 
+        int _frameCounter;
         #endregion
 
         #region Vibration Timer
@@ -92,7 +93,7 @@ namespace Romero.Windows.Screens
             _player = new Player();
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _player);
             _player.GetCamera(_cam);
-            
+
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
@@ -109,13 +110,14 @@ namespace Romero.Windows.Screens
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
             _player.LoadContent(_content);
 
+
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
             }
-           
+
             _font = _content.Load<SpriteFont>("Fonts/font");
-            
+
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -159,7 +161,7 @@ namespace Romero.Windows.Screens
             }
 
             _gT = gameTime; //To update the player
-           
+
             #region FPS calculation
 
             _elapsedTime += gameTime.ElapsedGameTime;
@@ -181,6 +183,7 @@ namespace Romero.Windows.Screens
 
         }
 
+
         public override void Draw(GameTime gameTime)
         {
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
@@ -199,6 +202,7 @@ namespace Romero.Windows.Screens
                 z.Draw(spriteBatch, angle);
             }
             _player.Draw(spriteBatch);
+
 
             spriteBatch.End();
 
@@ -269,6 +273,8 @@ namespace Romero.Windows.Screens
             else
             {
                 _player.Update(_gT, _cam); // Player movement
+
+
             }
 
             foreach (var z in _lZombies)

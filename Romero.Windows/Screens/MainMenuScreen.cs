@@ -20,21 +20,26 @@ namespace Romero.Windows.Screens
             : base("Main Menu")
         {
             // Create our menu entries.
-            var playGameMenuEntry = new MenuEntry("Play Game");
+            var playGameMenuEntry = new MenuEntry("Play Singleplayer");
+            var multiplayerCreateMenuEntry = new MenuEntry("Create Multiplayer Game");
+            var multiplayerJoinMenuEntry = new MenuEntry("Join Multiplayer Game");
             var optionsMenuEntry = new MenuEntry("Options");
             var exitMenuEntry = new MenuEntry("Exit");
 
             // Hook up menu event handlers.
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
+            multiplayerCreateMenuEntry.Selected += multiplayerCreateMenuEntry_Selected;
+            multiplayerJoinMenuEntry.Selected += multiplayerJoinMenuEntry_Selected;
             optionsMenuEntry.Selected += OptionsMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
             MenuEntries.Add(playGameMenuEntry);
+            MenuEntries.Add(multiplayerCreateMenuEntry);
+            MenuEntries.Add(multiplayerJoinMenuEntry);
             MenuEntries.Add(optionsMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
-
 
         #endregion
 
@@ -49,6 +54,16 @@ namespace Romero.Windows.Screens
             ScreenManager.AddScreen(new CharacterSelectScreen(), e.PlayerIndex);
 
             //LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
+        }
+
+        void multiplayerJoinMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+
+        }
+
+        void multiplayerCreateMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            ScreenManager.AddScreen(new LobbyScreen(), e.PlayerIndex);
         }
 
 
