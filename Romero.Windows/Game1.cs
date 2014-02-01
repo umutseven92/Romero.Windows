@@ -32,7 +32,7 @@ namespace Romero.Windows
 
         public Game1()
         {
-            if (!File.Exists(Path.Combine(_userConfigPath, "config.xml")))
+            if (!File.Exists(Path.Combine(_userConfigPath, "config.us")))
             {
                 CreateUserConfig();
             }
@@ -134,7 +134,7 @@ namespace Romero.Windows
                     new XElement("SelectedDifficulty", "Normal"),
                     new XElement("IsDiagnosticsOpen", "true"))
                     );
-            doc.Save(Path.Combine(_userConfigPath, "config.xml"));
+            doc.Save(Path.Combine(_userConfigPath, "config.us"));
 
         }
 
