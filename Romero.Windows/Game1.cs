@@ -21,7 +21,7 @@ namespace Romero.Windows
         SpriteBatch _spriteBatch;
 
         private readonly string _userConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "Romero","UserConfig");
+            "Romero", "UserConfig");
 
         // By preloading any assets used by UI rendering, we avoid framerate glitches
         // when they suddenly need to be loaded in the middle of a menu transition.
@@ -32,15 +32,15 @@ namespace Romero.Windows
 
         public Game1()
         {
-            if (!File.Exists(Path.Combine(_userConfigPath,"config.xml")))
+            if (!File.Exists(Path.Combine(_userConfigPath, "config.xml")))
             {
                 CreateUserConfig();
             }
 
             Graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferHeight = 1080,
-                PreferredBackBufferWidth = 1920,
+                PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height,
+                PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width,
                 IsFullScreen = Global.IsFullScreen
             };
 
@@ -52,14 +52,10 @@ namespace Romero.Windows
 
             Components.Add(screenManager);
 
-            if (GamePad.GetState(PlayerIndex.One).IsConnected)
-            {
-                Global.Gamepad = true;
-            }
 
             // Activate the first screens.
             screenManager.AddScreen(new BackgroundScreen(), null);
-            screenManager.AddScreen(new MainMenuScreen(), null);
+            screenManager.AddScreen(new IntroScreen(), null);
         }
 
 
@@ -87,7 +83,7 @@ namespace Romero.Windows
 
             foreach (var asset in PreloadAssets)
             {
-                Content.Load<object>("Sprites/"+asset);
+                Content.Load<object>("Sprites/" + asset);
             }
         }
 
@@ -138,7 +134,7 @@ namespace Romero.Windows
                     new XElement("SelectedDifficulty", "Normal"),
                     new XElement("IsDiagnosticsOpen", "true"))
                     );
-            doc.Save(Path.Combine(_userConfigPath,"config.xml"));
+            doc.Save(Path.Combine(_userConfigPath, "config.xml"));
 
         }
 

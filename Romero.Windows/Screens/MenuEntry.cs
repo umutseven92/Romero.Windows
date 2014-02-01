@@ -3,6 +3,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using OpenTK.Input;
 
 #endregion
 
@@ -78,6 +79,7 @@ namespace Romero.Windows.Screens
         /// </summary>
         protected internal virtual void OnSelectEntry(PlayerIndex playerIndex)
         {
+            
             if (Selected != null)
                 Selected(this, new PlayerIndexEventArgs(playerIndex));
         }

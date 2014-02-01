@@ -159,13 +159,11 @@ namespace Romero.Windows.ScreenManager
         public bool IsMenuSelect(PlayerIndex? controllingPlayer,
             out PlayerIndex playerIndex)
         {
-
-            return IsNewButtonPress(Buttons.A, controllingPlayer, out playerIndex) ||
-              IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex) || IsNewKeyPress(Keys.Space, controllingPlayer, out playerIndex) ||
-                   IsNewKeyPress(Keys.Enter, controllingPlayer, out playerIndex);
-
-
-
+            
+                return IsNewButtonPress(Buttons.A, controllingPlayer, out playerIndex) ||
+             IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex) || IsNewKeyPress(Keys.Space, controllingPlayer, out playerIndex) ||
+                  IsNewKeyPress(Keys.Enter, controllingPlayer, out playerIndex);
+            
 
 
         }
@@ -181,11 +179,8 @@ namespace Romero.Windows.ScreenManager
             out PlayerIndex playerIndex)
         {
 
-
             return IsNewButtonPress(Buttons.B, controllingPlayer, out playerIndex) ||
                IsNewButtonPress(Buttons.Back, controllingPlayer, out playerIndex) || IsNewKeyPress(Keys.Escape, controllingPlayer, out playerIndex);
-
-
 
         }
 

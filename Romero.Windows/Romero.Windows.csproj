@@ -65,6 +65,7 @@
     <Compile Include="Screens\CharacterSelectScreen.cs" />
     <Compile Include="Screens\GameOverScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
+    <Compile Include="Screens\IntroScreen.cs" />
     <Compile Include="Screens\JoinScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\LobbyScreen.cs" />

@@ -28,12 +28,16 @@ namespace Romero.Windows
         /// Main game currently running
         /// </summary>
         public static Game GameInProgress;
+
+
         
+
         /// <summary>
         /// Full screen
         /// </summary>
         public static bool IsFullScreen = true;
 
+        public static bool Windowed = false;
         /// <summary>
         /// Trigger to change fullscreen
         /// </summary>
