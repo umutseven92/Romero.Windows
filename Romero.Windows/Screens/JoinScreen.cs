@@ -2,11 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Lidgren.Network;
 
 namespace Romero.Windows.Screens
 {
     internal class JoinScreen : MenuScreen
     {
+
+        public NetClient Client;
+        readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
+        Dictionary<long, string> names = new Dictionary<long, string>();
+
         private readonly MenuEntry _characterMenuEntry;
         private static readonly string[] Character =
         {
@@ -23,7 +31,7 @@ namespace Romero.Windows.Screens
             var local = new MenuEntry("Join Locally");
             var back = new MenuEntry("Back");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
-            back.Selected += OnCancel;
+            back.Selected += back_Selected;
             local.Selected += local_Selected;
 
             MenuEntries.Add(_characterMenuEntry);
@@ -32,8 +40,61 @@ namespace Romero.Windows.Screens
 
         }
 
+        void back_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            _serverTaskCancelSource.Cancel();
+            ExitScreen();
+        }
+
         void local_Selected(object sender, PlayerIndexEventArgs e)
         {
+            StartClient(14242, "romero");
+            var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
+            serverTask.Start();
+           
+        }
+
+        private void SendDataToServer()
+        {
+            var om = Client.CreateMessage();
+            om.Write("Player Two");
+            Client.SendMessage(om, NetDeliveryMethod.Unreliable);
+        }
+
+        private void StartClient(int port, string configName)
+        {
+            var config = new NetPeerConfiguration(configName);
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            Client = new NetClient(config);
+            Client.Start();
+            Client.DiscoverLocalPeers(port);
+
+        }
+
+        private void ConnectToServer()
+        {
+            
+            while (true)
+            {
+                SendDataToServer();
+
+                NetIncomingMessage msg;
+                while ((msg = Client.ReadMessage()) != null)
+                {
+                    switch (msg.MessageType)
+                    {
+                        case NetIncomingMessageType.DiscoveryResponse:
+                            // just connect to first server discovered
+                            Client.Connect(msg.SenderEndpoint);
+                            break;
+                        case NetIncomingMessageType.Data:
+                            long who = msg.ReadInt64();
+                            string p2 = msg.ReadString();
+                            names[who] = p2;
+                            break;
+                    }
+                }
+            }
 
         }
 

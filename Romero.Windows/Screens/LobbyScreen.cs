@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lidgren.Network;
@@ -14,8 +17,12 @@ namespace Romero.Windows.Screens
             "Cleric Diakonos"
         };
 
+        Dictionary<long, string> names = new Dictionary<long, string>();
         public NetClient Client;
         readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
+        private MenuEntry secondPlayer;
+        private MenuEntry thirdPlayer;
+        private MenuEntry fourthPlayer;
 
         public LobbyScreen()
             : base("Lobby")
@@ -24,12 +31,16 @@ namespace Romero.Windows.Screens
             SetMenuEntryText();
             var play = new MenuEntry("Play");
             var back = new MenuEntry("Back");
-            var secondPlayer = new MenuEntry("Second Player: Not Connected");
+            secondPlayer = new MenuEntry("Second Player: Not Connected");
+            thirdPlayer = new MenuEntry("Third Player: Not Connected");
+            fourthPlayer = new MenuEntry("Fourth Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
             back.Selected += back_Selected;
             play.Selected += play_Selected;
             MenuEntries.Add(_characterMenuEntry);
             MenuEntries.Add(secondPlayer);
+            MenuEntries.Add(thirdPlayer);
+            MenuEntries.Add(fourthPlayer);
             MenuEntries.Add(play);
             MenuEntries.Add(back);
 
@@ -38,6 +49,13 @@ namespace Romero.Windows.Screens
             StartClient(14242, "romero");
             serverTask.Start();
 
+        }
+
+        private void SendDataToServer()
+        {
+            var om = Client.CreateMessage();
+            om.Write("Player One");
+            Client.SendMessage(om, NetDeliveryMethod.Unreliable);
         }
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
@@ -58,8 +76,10 @@ namespace Romero.Windows.Screens
 
         private void ConnectToServer()
         {
+
             while (true)
             {
+                SendDataToServer();
                 NetIncomingMessage msg;
                 while ((msg = Client.ReadMessage()) != null)
                 {
@@ -70,10 +90,28 @@ namespace Romero.Windows.Screens
                             Client.Connect(msg.SenderEndpoint);
                             break;
                         case NetIncomingMessageType.Data:
+                            long who = msg.ReadInt64();
+                            string p2 = msg.ReadString();
+                            names[who] = p2;
 
                             break;
+
                     }
                 }
+                if (names.Count > 1)
+                {
+                    secondPlayer.Text = names.ToArray()[1].ToString();
+                }
+                if (names.Count > 2)
+                {
+                    thirdPlayer.Text = names.ToArray()[2].ToString();
+                }
+                if (names.Count > 3)
+                {
+                    fourthPlayer.Text = names.ToArray()[3].ToString();
+                }
+
+
             }
 
         }

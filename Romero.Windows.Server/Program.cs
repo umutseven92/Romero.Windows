@@ -12,6 +12,8 @@ namespace Romero.Windows.Server
     {
         static void Main(string[] args)
         {
+            var p2 = "";
+
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
@@ -55,26 +57,19 @@ namespace Romero.Windows.Server
                                 //
                                 Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected!");
 
-                                // randomize his position and store in connection tag
-                                msg.SenderConnection.Tag = new int[] {
-									NetRandom.Instance.Next(10, 100),
-									NetRandom.Instance.Next(10, 100)
-								};
-                            }
+
+                            };
+
 
                             break;
                         case NetIncomingMessageType.Data:
                             //
                             // The client sent input to the server
                             //
-                            int xinput = msg.ReadInt32();
-                            int yinput = msg.ReadInt32();
-
-                            int[] pos = msg.SenderConnection.Tag as int[];
-
+                            p2 = msg.ToString();
+                            
                             // fancy movement logic goes here; we just append input to position
-                            pos[0] += xinput;
-                            pos[1] += yinput;
+
                             break;
                     }
 
@@ -98,12 +93,8 @@ namespace Romero.Windows.Server
                                 // write who this position is for
                                 om.Write(otherPlayer.RemoteUniqueIdentifier);
 
-                                if (otherPlayer.Tag == null)
-                                    otherPlayer.Tag = new int[2];
+                                om.Write(p2);
 
-                                int[] pos = otherPlayer.Tag as int[];
-                                om.Write(pos[0]);
-                                om.Write(pos[1]);
 
                                 // send message
                                 server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
@@ -119,7 +110,7 @@ namespace Romero.Windows.Server
                 Thread.Sleep(1);
             }
 
-            server.Shutdown("app exiting");
+            server.Shutdown("bye");
         }
     }
 }
