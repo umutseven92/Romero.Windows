@@ -1,10 +1,13 @@
-﻿using System;
+﻿#region Using Statements
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lidgren.Network;
+using Microsoft.Xna.Framework;
+
+#endregion
 
 namespace Romero.Windows.Screens
 {
@@ -13,7 +16,8 @@ namespace Romero.Windows.Screens
 
         public NetClient Client;
         readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
-        Dictionary<long, string> names = new Dictionary<long, string>();
+        readonly Dictionary<long, string> _names = new Dictionary<long, string>();
+       
 
         private readonly MenuEntry _characterMenuEntry;
         private static readonly string[] Character =
@@ -42,6 +46,7 @@ namespace Romero.Windows.Screens
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
         {
+            Client.Disconnect("Disconnect by user");
             _serverTaskCancelSource.Cancel();
             ExitScreen();
         }
@@ -49,12 +54,12 @@ namespace Romero.Windows.Screens
         void local_Selected(object sender, PlayerIndexEventArgs e)
         {
             StartClient(14242, "romero");
-            var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
-            serverTask.Start();
-           
+            //var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
+            //serverTask.Start();
+            ScreenManager.AddScreen(new LobbyScreen(Client), PlayerIndex.One);
         }
 
-        private void SendDataToServer()
+        private void SendNameToServer()
         {
             var om = Client.CreateMessage();
             om.Write("Player Two");
@@ -73,10 +78,10 @@ namespace Romero.Windows.Screens
 
         private void ConnectToServer()
         {
-            
+
             while (true)
             {
-                SendDataToServer();
+                SendNameToServer();
 
                 NetIncomingMessage msg;
                 while ((msg = Client.ReadMessage()) != null)
@@ -85,12 +90,22 @@ namespace Romero.Windows.Screens
                     {
                         case NetIncomingMessageType.DiscoveryResponse:
                             // just connect to first server discovered
-                            Client.Connect(msg.SenderEndpoint);
+                            try
+                            {
+                                Client.Connect(msg.SenderEndpoint);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
+                            }
+                            
+                            //Connected
+                            ScreenManager.AddScreen(new CharacterSelectScreen(), PlayerIndex.One);
                             break;
                         case NetIncomingMessageType.Data:
-                            long who = msg.ReadInt64();
-                            string p2 = msg.ReadString();
-                            names[who] = p2;
+                            var who = msg.ReadInt64();
+                            var p2 = msg.ReadString();
+                            _names[who] = p2;
                             break;
                     }
                 }

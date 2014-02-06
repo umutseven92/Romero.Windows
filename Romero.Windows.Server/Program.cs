@@ -1,18 +1,21 @@
-﻿using System;
+﻿#region Using Statements
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Lidgren.Network;
+
+#endregion
 
 namespace Romero.Windows.Server
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var p2 = "";
+            var playerName = string.Empty;
+            List<string> names = new List<string>();
+
 
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
@@ -55,8 +58,9 @@ namespace Romero.Windows.Server
                                 //
                                 // A new player just connected!
                                 //
+                                
                                 Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected!");
-
+                                msg.SenderConnection.Tag = "Not yet named";
 
                             };
 
@@ -66,8 +70,8 @@ namespace Romero.Windows.Server
                             //
                             // The client sent input to the server
                             //
-                            p2 = msg.ToString();
-                            
+                            playerName = msg.ReadString();
+                            msg.SenderConnection.Tag = playerName;
                             // fancy movement logic goes here; we just append input to position
 
                             break;
@@ -93,7 +97,7 @@ namespace Romero.Windows.Server
                                 // write who this position is for
                                 om.Write(otherPlayer.RemoteUniqueIdentifier);
 
-                                om.Write(p2);
+                                om.Write(otherPlayer.Tag.ToString());
 
 
                                 // send message
