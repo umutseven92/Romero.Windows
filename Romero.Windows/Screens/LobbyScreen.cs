@@ -20,18 +20,18 @@ namespace Romero.Windows.Screens
             "Cleric Diakonos"
         };
 
-        private int playerCount = 1;
+
 
         readonly Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
         readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
-        
+
         private readonly MenuEntry _secondPlayer;
         private readonly MenuEntry _thirdPlayer;
         private readonly MenuEntry _fourthPlayer;
         private readonly MenuEntry _firstPlayer;
 
-        private readonly MenuEntry[] _menuEntryArray; 
+        private readonly MenuEntry[] _menuEntryArray;
 
         /// <summary>
         /// Creating a lobby screen
@@ -58,24 +58,22 @@ namespace Romero.Windows.Screens
             MenuEntries.Add(play);
             MenuEntries.Add(back);
 
-            _menuEntryArray = new[] {_firstPlayer, _secondPlayer, _thirdPlayer, _fourthPlayer};
+            _menuEntryArray = new[] { _firstPlayer, _secondPlayer, _thirdPlayer, _fourthPlayer };
 
-            var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
             StartClient(14242, "romero");
-            serverTask.Start();
 
         }
 
         /// <summary>
         /// Joining an existing lobby
         /// </summary>
-        /// <param name="client"></param>
+        /// <param name="client">Existing client (created in JoinScreen)</param>
         public LobbyScreen(NetClient client)
             : base("Lobby")
         {
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
-            var play = new MenuEntry("Play");
+
             var back = new MenuEntry("Back");
             _firstPlayer = new MenuEntry("First Player: Not Connected");
             _secondPlayer = new MenuEntry("Second Player: Not Connected");
@@ -83,33 +81,36 @@ namespace Romero.Windows.Screens
             _fourthPlayer = new MenuEntry("Fourth Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
             back.Selected += back_Selected;
-            play.Selected += play_Selected;
+
             MenuEntries.Add(_characterMenuEntry);
             MenuEntries.Add(_firstPlayer);
             MenuEntries.Add(_secondPlayer);
             MenuEntries.Add(_thirdPlayer);
             MenuEntries.Add(_fourthPlayer);
-            MenuEntries.Add(play);
+
             MenuEntries.Add(back);
 
             _menuEntryArray = new[] { _firstPlayer, _secondPlayer, _thirdPlayer, _fourthPlayer };
 
             Client = client;
-            var serverTask = new Task(ConnectToServer, _serverTaskCancelSource.Token);
-            serverTask.Start();
+
         }
 
         private void SendNameToServer()
         {
             var om = Client.CreateMessage();
-            om.Write("Player " + playerCount);
-            Client.SendMessage(om, NetDeliveryMethod.Unreliable);
+            om.Write("Player One");
+            if (Client.ConnectionStatus == NetConnectionStatus.Connected)
+            {
+                Client.SendMessage(om, NetDeliveryMethod.Unreliable);
+            }
+
         }
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
         {
+
             Client.Shutdown("Disconnect by user");
-            _serverTaskCancelSource.Cancel();
             ExitScreen();
         }
 
@@ -123,51 +124,64 @@ namespace Romero.Windows.Screens
 
         }
 
-        private void ConnectToServer()
+        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-
-            while (true)
+            SendNameToServer();
+            NetIncomingMessage msg;
+            while ((msg = Client.ReadMessage()) != null)
             {
-                SendNameToServer();
-                NetIncomingMessage msg;
-                while ((msg = Client.ReadMessage()) != null)
+                switch (msg.MessageType)
                 {
-                    switch (msg.MessageType)
-                    {
-                        case NetIncomingMessageType.DiscoveryResponse:
-                            // just connect to first server discovered
-
+                    case NetIncomingMessageType.DiscoveryResponse:
+                        //just connect to first server discovered
+                        //is the server full
+                        var canConnect = msg.ReadBoolean();
+                        if (canConnect)
+                        {
                             Client.Connect(msg.SenderEndpoint);
+                        }
+                        else
+                        {
+                            var confirmExitMessageBox = new MessageBoxScreen("Lobby is full.");
+                            ScreenManager.AddScreen(confirmExitMessageBox, PlayerIndex.One);
+                            confirmExitMessageBox.Accepted += confirmExitMessageBox_Accepted;
+                            confirmExitMessageBox.Cancelled += confirmExitMessageBox_Cancelled;
+                            Client.Disconnect("full server");
+                        }
+                        break;
+                    case NetIncomingMessageType.Data:
+                        var who = msg.ReadInt64();
+                        var p2 = msg.ReadString();
+                        _names[who] = p2;
 
-                            break;
-                        case NetIncomingMessageType.Data:
-                            var who = msg.ReadInt64();
-                            var p2 = msg.ReadString();
-                            _names[who] = p2;
+                        break;
+                    case NetIncomingMessageType.WarningMessage:
 
-                            break;
-                        case NetIncomingMessageType.WarningMessage:
+                        break;
 
-                            break;
-
-                    }
                 }
-
-                playerCount = _names.Count;
-
-                var i = 0;
-
-                foreach (var p in _names)
-                {
-                    _menuEntryArray[i].Text = p.Value.ToString();
-                    i++;
-                }
-
-
             }
 
+            var i = 0;
+
+            foreach (var p in _names)
+            {
+                _menuEntryArray[i].Text = p.Value.ToString();
+                i++;
+            }
+
+            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
+        void confirmExitMessageBox_Cancelled(object sender, PlayerIndexEventArgs e)
+        {
+            ExitScreen();
+        }
+
+        void confirmExitMessageBox_Accepted(object sender, PlayerIndexEventArgs e)
+        {
+            ExitScreen();
+        }
 
 
         void play_Selected(object sender, PlayerIndexEventArgs e)

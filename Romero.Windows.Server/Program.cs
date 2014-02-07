@@ -13,9 +13,7 @@ namespace Romero.Windows.Server
     {
         static void Main()
         {
-            var playerName = string.Empty;
-            List<string> names = new List<string>();
-
+            var connectedPlayers = 0;
 
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
@@ -40,7 +38,21 @@ namespace Romero.Windows.Server
                             //
                             // Server received a discovery request from a client; send a discovery response (with no extra data attached)
                             //
-                            server.SendDiscoveryResponse(null, msg.SenderEndpoint);
+                            var om = server.CreateMessage();
+
+                            if (connectedPlayers < 4)
+                            {
+                                om.Write(true);
+                                server.SendDiscoveryResponse(om, msg.SenderEndpoint);
+                                connectedPlayers++;
+                                Console.WriteLine(connectedPlayers + " players connected.");
+                            }
+                            else
+                            {
+                                om.Write(false);
+                                server.SendDiscoveryResponse(om, msg.SenderEndpoint);
+                            }
+
                             break;
                         case NetIncomingMessageType.VerboseDebugMessage:
                         case NetIncomingMessageType.DebugMessage:
@@ -58,23 +70,30 @@ namespace Romero.Windows.Server
                                 //
                                 // A new player just connected!
                                 //
-                                
-                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected!");
-                                msg.SenderConnection.Tag = "Not yet named";
+
+                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected.");
+                                msg.SenderConnection.Tag = NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier);
 
                             };
-
+                            if (status == NetConnectionStatus.Disconnected)
+                            {
+                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " disconnected.");
+                                connectedPlayers--;
+                            }
 
                             break;
                         case NetIncomingMessageType.Data:
                             //
                             // The client sent input to the server
                             //
-                            playerName = msg.ReadString();
-                            msg.SenderConnection.Tag = playerName;
-                            // fancy movement logic goes here; we just append input to position
+
+                            //Get name here - bind it to tag
+
+
+                            // fancy movement logic goes here
 
                             break;
+
                     }
 
                     //
@@ -86,6 +105,7 @@ namespace Romero.Windows.Server
                         // Yes, it's time to send position updates
 
                         // for each player...
+
                         foreach (NetConnection player in server.Connections)
                         {
                             // ... send information about every other player (actually including self)
