@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using Microsoft.Xna.Framework.Media;
 
 namespace Romero.Windows.Screens
 {
@@ -33,6 +35,7 @@ namespace Romero.Windows.Screens
 
         void play_Selected(object sender, PlayerIndexEventArgs e)
         {
+            
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
         }
 

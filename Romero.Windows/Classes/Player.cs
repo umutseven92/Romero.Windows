@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 #endregion
 
@@ -181,6 +182,7 @@ namespace Romero.Windows.Classes
 
             _arrowShoot = contentManager.Load<SoundEffect>("Sounds/arrowShoot");
             _arrowDraw = contentManager.Load<SoundEffect>("Sounds/arrowDraw");
+
             _arrowDrawInstance = _arrowDraw.CreateInstance();
 
             Sword.LoadContent(_contentManager);

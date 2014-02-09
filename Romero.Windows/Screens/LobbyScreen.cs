@@ -22,9 +22,9 @@ namespace Romero.Windows.Screens
 
 
 
-        readonly Dictionary<long, string> _names = new Dictionary<long, string>();
+         Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
-        readonly CancellationTokenSource _serverTaskCancelSource = new CancellationTokenSource();
+       
 
         private readonly MenuEntry _secondPlayer;
         private readonly MenuEntry _thirdPlayer;
@@ -109,7 +109,7 @@ namespace Romero.Windows.Screens
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
         {
-
+            Client.Disconnect("Disconnect by user");
             Client.Shutdown("Disconnect by user");
             ExitScreen();
         }
@@ -126,10 +126,12 @@ namespace Romero.Windows.Screens
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+            var names = new Dictionary<long, string>();
             SendNameToServer();
             NetIncomingMessage msg;
             while ((msg = Client.ReadMessage()) != null)
             {
+                
                 switch (msg.MessageType)
                 {
                     case NetIncomingMessageType.DiscoveryResponse:
@@ -152,8 +154,9 @@ namespace Romero.Windows.Screens
                     case NetIncomingMessageType.Data:
                         var who = msg.ReadInt64();
                         var p2 = msg.ReadString();
-                        _names[who] = p2;
-
+                        names[who] = p2;
+                        //_names[who] = p2;
+                        _names = names;
                         break;
                     case NetIncomingMessageType.WarningMessage:
 
@@ -164,13 +167,24 @@ namespace Romero.Windows.Screens
 
             var i = 0;
 
+            ClearMenuEntries();
+
             foreach (var p in _names)
             {
                 _menuEntryArray[i].Text = p.Value.ToString();
                 i++;
             }
 
+            
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+        }
+
+        private void ClearMenuEntries()
+        {
+            _firstPlayer.Text = "First Player: Not Connected";
+            _secondPlayer.Text = "Second Player: Not Connected";
+            _thirdPlayer.Text = "Third Player: Not Connected";
+            _fourthPlayer.Text = "Fourth Player: Not Connected";
         }
 
         void confirmExitMessageBox_Cancelled(object sender, PlayerIndexEventArgs e)

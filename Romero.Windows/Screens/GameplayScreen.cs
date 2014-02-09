@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using Romero.Windows.Classes;
 using Romero.Windows.ScreenManager;
 
@@ -36,6 +37,7 @@ namespace Romero.Windows.Screens
         private readonly Camera2D _cam;
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
+        float _songFadeCounterStart;
 
         #region Zombie Values
         private int _deadZombies;
@@ -110,7 +112,6 @@ namespace Romero.Windows.Screens
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
             _player.LoadContent(_content);
 
-
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
@@ -136,6 +137,27 @@ namespace Romero.Windows.Screens
             _content.Unload();
         }
 
+
+        private void FadeOutSong(GameTime gameTime, float fadeDuration, float valueToMuteIn,
+            float valueToFade)
+        {
+            if (MediaPlayer.Volume > valueToMuteIn && MediaPlayer.State == MediaState.Playing)
+            {
+                _songFadeCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (_songFadeCounterStart >= fadeDuration)
+                {
+                    MediaPlayer.Volume -= valueToFade;
+                    _songFadeCounterStart = 0;
+                }
+
+            }
+            if (MediaPlayer.Volume < 0)
+            {
+                MediaPlayer.Stop();
+            }
+        }
+
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -144,6 +166,8 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
+            FadeOutSong(gameTime, 0.1f, 0.01f, 0.05f);
+
             //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {

@@ -1,18 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 
 namespace Romero.Windows.Screens
 {
     class IntroScreen : MenuScreen
     {
-        private bool readyToGo = false;
+        private bool _readyToGo;
+        ContentManager _content;
+        private Song _nightShift;
+
+
+        public override void LoadContent()
+        {
+            if (_content == null)
+                _content = new ContentManager(ScreenManager.Game.Services, "Content");
+            _nightShift = _content.Load<Song>("Music/nightshift.wav");
+            MediaPlayer.Play(_nightShift);
+
+            base.LoadContent();
+        }
 
         public IntroScreen()
             : base("Romero")
@@ -27,7 +37,7 @@ namespace Romero.Windows.Screens
 
         void anyKeyMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {
-            if (readyToGo)
+            if (_readyToGo)
             {
                  ScreenManager.AddScreen(new MainMenuScreen(), e.PlayerIndex);
             }
@@ -59,12 +69,12 @@ namespace Romero.Windows.Screens
             if (keyboardState.IsKeyDown(Keys.Enter))
             {
                 Global.Gamepad = false;
-                readyToGo = true;
+                _readyToGo = true;
             }
             else if (gamepadState.IsButtonDown(Buttons.A))
             {
                 Global.Gamepad = true;
-                readyToGo = true;
+                _readyToGo = true;
             }
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }

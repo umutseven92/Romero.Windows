@@ -44,8 +44,7 @@ namespace Romero.Windows.Server
                             {
                                 om.Write(true);
                                 server.SendDiscoveryResponse(om, msg.SenderEndpoint);
-                                connectedPlayers++;
-                                Console.WriteLine(connectedPlayers + " players connected.");
+
                             }
                             else
                             {
@@ -65,6 +64,7 @@ namespace Romero.Windows.Server
                             break;
                         case NetIncomingMessageType.StatusChanged:
                             var status = (NetConnectionStatus)msg.ReadByte();
+
                             if (status == NetConnectionStatus.Connected)
                             {
                                 //
@@ -73,11 +73,13 @@ namespace Romero.Windows.Server
 
                                 Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected.");
                                 msg.SenderConnection.Tag = NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier);
-
+                                connectedPlayers++;
+                                Console.WriteLine(connectedPlayers + " players connected.");
                             };
                             if (status == NetConnectionStatus.Disconnected)
                             {
                                 Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " disconnected.");
+
                                 connectedPlayers--;
                             }
 
@@ -106,6 +108,7 @@ namespace Romero.Windows.Server
 
                         // for each player...
 
+
                         foreach (NetConnection player in server.Connections)
                         {
                             // ... send information about every other player (actually including self)
@@ -113,20 +116,21 @@ namespace Romero.Windows.Server
                             {
                                 // send position update about 'otherPlayer' to 'player'
                                 NetOutgoingMessage om = server.CreateMessage();
+                                if (otherPlayer != null && otherPlayer.Tag != null)
+                                {
+                                    // write who this position is for
+                                    om.Write(otherPlayer.RemoteUniqueIdentifier);
 
-                                // write who this position is for
-                                om.Write(otherPlayer.RemoteUniqueIdentifier);
+                                    om.Write(otherPlayer.Tag.ToString());
+                                    // send message
+                                    server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
+                                }
 
-                                om.Write(otherPlayer.Tag.ToString());
-
-
-                                // send message
-                                server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
                             }
                         }
 
                         // schedule next update
-                        nextSendUpdates += (1.0 / 30.0);
+                        nextSendUpdates += (1.0 / 60.0);
                     }
                 }
 

@@ -1,6 +1,9 @@
 #region Using Statements
 
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Media;
 
 #endregion
 
@@ -11,6 +14,10 @@ namespace Romero.Windows.Screens
     /// </summary>
     class MainMenuScreen : MenuScreen
     {
+
+        ContentManager _content;
+        private Song _nightShift;
+
         #region Initialization
 
         /// <summary>
@@ -19,6 +26,7 @@ namespace Romero.Windows.Screens
         public MainMenuScreen()
             : base("Main Menu")
         {
+
             // Create our menu entries.
             var playGameMenuEntry = new MenuEntry("Play Singleplayer");
             var multiplayerCreateMenuEntry = new MenuEntry("Create Multiplayer Game");
@@ -43,8 +51,21 @@ namespace Romero.Windows.Screens
 
         #endregion
 
-        #region Handle Input
+        public override void LoadContent()
+        {
+            if (_content == null)
+                _content = new ContentManager(ScreenManager.Game.Services, "Content");
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                _nightShift = _content.Load<Song>("Music/nightshift.wav");
+                MediaPlayer.Volume = 1;
+                MediaPlayer.Play(_nightShift);
+            }
 
+            base.LoadContent();
+        }
+
+        #region Handle Input
 
         /// <summary>
         /// Event handler for when the Play Game menu entry is selected.
