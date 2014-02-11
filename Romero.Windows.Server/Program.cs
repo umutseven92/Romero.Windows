@@ -32,6 +32,9 @@ namespace Romero.Windows.Server
                 NetIncomingMessage msg;
                 while ((msg = server.ReadMessage()) != null)
                 {
+                    var xinput = 0;
+                    var yinput = 0;
+
                     switch (msg.MessageType)
                     {
                         case NetIncomingMessageType.DiscoveryRequest:
@@ -93,6 +96,8 @@ namespace Romero.Windows.Server
 
 
                             // fancy movement logic goes here
+                            xinput = msg.ReadInt32();
+                            yinput = msg.ReadInt32();
 
                             break;
 
@@ -122,6 +127,10 @@ namespace Romero.Windows.Server
                                     om.Write(otherPlayer.RemoteUniqueIdentifier);
 
                                     om.Write(otherPlayer.Tag.ToString());
+
+                                    om.Write(xinput);
+                                    om.Write(yinput);
+
                                     // send message
                                     server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
                                 }

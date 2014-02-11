@@ -1,7 +1,9 @@
 ﻿#region Using Statements
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Lidgren.Network;
@@ -20,9 +22,7 @@ namespace Romero.Windows.Screens
             "Cleric Diakonos"
         };
 
-
-
-         Dictionary<long, string> _names = new Dictionary<long, string>();
+        Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
        
 
@@ -124,6 +124,8 @@ namespace Romero.Windows.Screens
 
         }
 
+        private long id;
+
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             var names = new Dictionary<long, string>();
@@ -141,6 +143,7 @@ namespace Romero.Windows.Screens
                         if (canConnect)
                         {
                             Client.Connect(msg.SenderEndpoint);
+                            
                         }
                         else
                         {
@@ -200,7 +203,7 @@ namespace Romero.Windows.Screens
 
         void play_Selected(object sender, PlayerIndexEventArgs e)
         {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
+            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(_names, Client));
         }
 
         void _characterMenuEntry_Selected(object sender, PlayerIndexEventArgs e)

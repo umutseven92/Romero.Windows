@@ -27,7 +27,7 @@ namespace Romero.Windows.Screens
         #region Declarations
 
         ContentManager _content;
-        private readonly Player _player;
+        private readonly Player _singlePlayerPlayer;
         private GameTime _gT;
         private readonly List<Zombie> _lZombies;
         private SpriteFont _font;
@@ -38,6 +38,18 @@ namespace Romero.Windows.Screens
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
+        private readonly NetClient _client;
+        private Dictionary<long, string> PlayerNames;
+        private Dictionary<long, Vector2> PlayerPositions = new Dictionary<long, Vector2>();
+        private Dictionary<long, PlayerPuppet> Players = new Dictionary<long, PlayerPuppet>();
+
+        enum GameMode
+        {
+            Singleplayer,
+            Multiplayer
+        }
+
+        private readonly GameMode _currentGameMode;
 
         #region Zombie Values
         private int _deadZombies;
@@ -63,10 +75,15 @@ namespace Romero.Windows.Screens
 
         #endregion
 
+        /// <summary>
+        /// Singleplayer Constructor
+        /// </summary>
         public GameplayScreen()
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
+
+            _currentGameMode = GameMode.Singleplayer;
 
             #region Difficulty
 
@@ -91,10 +108,89 @@ namespace Romero.Windows.Screens
             }
 
             #endregion
+            _singlePlayerPlayer = new Player();
+            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _singlePlayerPlayer);
+            _singlePlayerPlayer.GetCamera(_cam);
 
-            _player = new Player();
-            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _player);
-            _player.GetCamera(_cam);
+
+            _lZombies = new List<Zombie>();
+            _wave = 1;
+            AddZombies(_zombieModifier * _difficultyModifier);
+        }
+
+        private Player multiPlayerOne;
+        private PlayerPuppet multiPlayerTwo;
+        private PlayerPuppet multiPlayerThree;
+        private PlayerPuppet multiPlayerFour;
+
+        private List<PlayerPuppet> otherPlayers;
+
+        /// <summary>
+        /// Multiplayer Constructor
+        /// </summary>
+        /// <param name="players">Dictionary of players</param>
+        /// <param name="client">NetClient of the player</param>
+        public GameplayScreen(Dictionary<long, string> players, NetClient client)
+        {
+            TransitionOnTime = TimeSpan.FromSeconds(1.5);
+            TransitionOffTime = TimeSpan.FromSeconds(0.5);
+            #region Difficulty
+
+            switch (Global.SelectedDifficulty)
+            {
+                case Global.Difficulty.Easy:
+                    _zombieModifier = 1;
+                    _difficultyModifier = 5;
+                    break;
+                case Global.Difficulty.Normal:
+                    _zombieModifier = 2;
+                    _difficultyModifier = 6;
+                    break;
+                case Global.Difficulty.Hard:
+                    _zombieModifier = 3;
+                    _difficultyModifier = 7;
+                    break;
+                case Global.Difficulty.Insane:
+                    _zombieModifier = 5;
+                    _difficultyModifier = 8;
+                    break;
+            }
+
+            #endregion
+
+
+            _currentGameMode = GameMode.Multiplayer;
+            _client = client;
+            PlayerNames = players;
+
+            switch (PlayerNames.Count)
+            {
+                case 2:
+                    multiPlayerOne = new Player();
+                    multiPlayerTwo = new PlayerPuppet();
+                    otherPlayers.Add(multiPlayerTwo);
+                    
+                    break;
+                case 3:
+                    multiPlayerOne = new Player();
+                    multiPlayerTwo = new PlayerPuppet();
+                    multiPlayerThree = new PlayerPuppet();
+                    otherPlayers.Add(multiPlayerTwo);
+                    otherPlayers.Add(multiPlayerThree);
+                    break;
+                case 4:
+                    multiPlayerOne = new Player();
+                    multiPlayerTwo = new PlayerPuppet();
+                    multiPlayerThree = new PlayerPuppet();
+                    multiPlayerFour = new PlayerPuppet();
+                    otherPlayers.Add(multiPlayerTwo);
+                    otherPlayers.Add(multiPlayerThree);
+                    otherPlayers.Add(multiPlayerFour);
+                    break;
+            }
+
+            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), multiPlayerOne);
+            multiPlayerOne.GetCamera(_cam);
 
             _lZombies = new List<Zombie>();
             _wave = 1;
@@ -110,7 +206,34 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
-            _player.LoadContent(_content);
+
+            if (_currentGameMode == GameMode.Singleplayer)
+            {
+                _singlePlayerPlayer.LoadContent(_content);
+            }
+            else
+            {
+                //Multiplayer player content load
+                switch (PlayerNames.Count)
+                {
+                    case 2:
+                        multiPlayerOne.LoadContent(_content);
+                        multiPlayerTwo.LoadContent(_content);
+                        break;
+                    case 3:
+                        multiPlayerOne.LoadContent(_content);
+                        multiPlayerTwo.LoadContent(_content);
+                        multiPlayerThree.LoadContent(_content);
+                        break;
+                    case 4:
+                        multiPlayerOne.LoadContent(_content);
+                        multiPlayerTwo.LoadContent(_content);
+                        multiPlayerThree.LoadContent(_content);
+                        multiPlayerFour.LoadContent(_content);
+                        break;
+                }
+            }
+
 
             foreach (var z in _lZombies)
             {
@@ -168,6 +291,16 @@ namespace Romero.Windows.Screens
         {
             FadeOutSong(gameTime, 0.1f, 0.01f, 0.05f);
 
+            if (_currentGameMode == GameMode.Multiplayer)
+            {
+                NetOutgoingMessage om = _client.CreateMessage();
+                om.Write(multiPlayerOne.SpritePosition.X); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
+                om.Write(multiPlayerOne.SpritePosition.Y);
+                _client.SendMessage(om, NetDeliveryMethod.Unreliable);
+                ServerWork();
+            }
+
+
             //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {
@@ -207,6 +340,29 @@ namespace Romero.Windows.Screens
 
         }
 
+        private void ServerWork()
+        {
+            NetIncomingMessage msg;
+            while ((msg = _client.ReadMessage()) != null)
+            {
+
+                switch (msg.MessageType)
+                {
+
+                    case NetIncomingMessageType.Data:
+                        long who = msg.ReadInt64();
+                        int x = msg.ReadInt32();
+                        int y = msg.ReadInt32();
+                        PlayerPositions[who] = new Vector2(x, y);
+                        break;
+                    case NetIncomingMessageType.WarningMessage:
+
+                        break;
+
+                }
+            }
+        }
+
 
         public override void Draw(GameTime gameTime)
         {
@@ -220,12 +376,27 @@ namespace Romero.Windows.Screens
             spriteBatch.Draw(_backgroundTexture, _bgRectangle, Color.White);
             foreach (var z in _lZombies)
             {
-                var direction = z.SpritePosition - _player.SpritePosition;
+                var direction = z.SpritePosition - _singlePlayerPlayer.SpritePosition;
                 var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                 z.Draw(spriteBatch, angle);
             }
-            _player.Draw(spriteBatch);
+
+            if (_currentGameMode == GameMode.Singleplayer)
+            {
+                _singlePlayerPlayer.Draw(spriteBatch);
+            }
+            else
+            {
+                //Multiplayer Draw
+                multiPlayerOne.Draw(spriteBatch);
+                int i = 0;
+                foreach (var playerPosition in PlayerPositions)
+                {
+                    otherPlayers[i].Draw(spriteBatch,playerPosition.Key);
+                    i++;
+                }
+            }
 
 
             spriteBatch.End();
@@ -296,7 +467,15 @@ namespace Romero.Windows.Screens
             }
             else
             {
-                _player.Update(_gT, _cam); // Player movement
+                if (_currentGameMode == GameMode.Singleplayer)
+                {
+                    _singlePlayerPlayer.Update(_gT, _cam); // Player movement
+                }
+                else
+                {
+                    //Multiplayer movement update
+                    multiPlayerOne.Update(_gT, _cam);
+                }
 
 
             }
@@ -304,7 +483,7 @@ namespace Romero.Windows.Screens
             foreach (var z in _lZombies)
             {
 
-                z.Update(_gT, _player); //Zombie movement
+                z.Update(_gT, _singlePlayerPlayer); //Zombie movement
             }
 
             #region Collision
@@ -312,7 +491,7 @@ namespace Romero.Windows.Screens
             foreach (var z in _lZombies)
             {
                 #region Bullet - Zombie Collision
-                foreach (var b in _player.Bullets)
+                foreach (var b in _singlePlayerPlayer.Bullets)
                 {
                     if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
                     {
@@ -325,7 +504,7 @@ namespace Romero.Windows.Screens
                 #endregion
 
                 #region Zombie - Player Collision
-                if (z.BoundingBox.Intersects(_player.BoundingBox) && z.Visible && _player.CurrentState != Player.State.Dodging && !_player.Invulnerable)
+                if (z.BoundingBox.Intersects(_singlePlayerPlayer.BoundingBox) && z.Visible && _singlePlayerPlayer.CurrentState != Player.State.Dodging && !_singlePlayerPlayer.Invulnerable)
                 {
 
                     #region Vibration
@@ -355,14 +534,14 @@ namespace Romero.Windows.Screens
                      */
                     #endregion
 
-                    _player.Health -= 10;
-                    _player.Invulnerable = true;
+                    _singlePlayerPlayer.Health -= 10;
+                    _singlePlayerPlayer.Invulnerable = true;
 
                 }
                 #endregion
 
                 #region Sword - Zombie Collision
-                if (z.BoundingBox.Intersects(_player.Sword.BoundingBox) && z.Visible && _player.Sword.Visible)
+                if (z.BoundingBox.Intersects(_singlePlayerPlayer.Sword.BoundingBox) && z.Visible && _singlePlayerPlayer.Sword.Visible)
                 {
 
                     KillZombie(z, _zombieSpawnChecker);
@@ -390,10 +569,10 @@ namespace Romero.Windows.Screens
             #endregion
 
             #region Player Death & Game Over
-            if (_player.Health <= 0 && !_player.Dead)
+            if (_singlePlayerPlayer.Health <= 0 && !_singlePlayerPlayer.Dead)
             {
-                _player.Dead = true;
-                _player.Visible = false;
+                _singlePlayerPlayer.Dead = true;
+                _singlePlayerPlayer.Visible = false;
                 ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
             }
             #endregion
@@ -423,11 +602,11 @@ namespace Romero.Windows.Screens
             {
                 spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
                 spriteBatch.DrawString(_font,
-                      _player.Invulnerable
+                      _singlePlayerPlayer.Invulnerable
                           ? string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}, Invulnerable",
-                              _player.Health, _player.FullCharacterName, _player.CurrentState)
-                          : string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}", _player.Health,
-                              _player.FullCharacterName, _player.CurrentState), new Vector2(1500, 45), Color.Green);
+                              _singlePlayerPlayer.Health, _singlePlayerPlayer.FullCharacterName, _singlePlayerPlayer.CurrentState)
+                          : string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}", _singlePlayerPlayer.Health,
+                              _singlePlayerPlayer.FullCharacterName, _singlePlayerPlayer.CurrentState), new Vector2(1500, 45), Color.Green);
             }
 
         }
