@@ -18,6 +18,10 @@ namespace Romero.Windows.Server
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
+            
+            var xinput = 0;
+            var yinput = 0;
+            var dummyName = string.Empty;
 
             // create and start server
             var server = new NetServer(config);
@@ -32,8 +36,7 @@ namespace Romero.Windows.Server
                 NetIncomingMessage msg;
                 while ((msg = server.ReadMessage()) != null)
                 {
-                    var xinput = 0;
-                    var yinput = 0;
+
 
                     switch (msg.MessageType)
                     {
@@ -74,14 +77,14 @@ namespace Romero.Windows.Server
                                 // A new player just connected!
                                 //
 
-                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected.");
-                                msg.SenderConnection.Tag = NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier);
+                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected.");
+                                msg.SenderConnection.Tag = msg.SenderConnection.RemoteUniqueIdentifier;
                                 connectedPlayers++;
                                 Console.WriteLine(connectedPlayers + " players connected.");
                             };
                             if (status == NetConnectionStatus.Disconnected)
                             {
-                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " disconnected.");
+                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " disconnected.");
 
                                 connectedPlayers--;
                             }
@@ -94,8 +97,11 @@ namespace Romero.Windows.Server
 
                             //Get name here - bind it to tag
 
+                          //  dummyName = msg.ReadString();
 
                             // fancy movement logic goes here
+                            
+
                             xinput = msg.ReadInt32();
                             yinput = msg.ReadInt32();
 
@@ -127,9 +133,12 @@ namespace Romero.Windows.Server
                                     om.Write(otherPlayer.RemoteUniqueIdentifier);
 
                                     om.Write(otherPlayer.Tag.ToString());
+                                    
 
                                     om.Write(xinput);
                                     om.Write(yinput);
+
+
 
                                     // send message
                                     server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
@@ -139,7 +148,7 @@ namespace Romero.Windows.Server
                         }
 
                         // schedule next update
-                        nextSendUpdates += (1.0 / 60.0);
+                        nextSendUpdates += (1.0 / 30.0);
                     }
                 }
 

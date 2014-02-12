@@ -22,9 +22,11 @@ namespace Romero.Windows.Screens
             "Cleric Diakonos"
         };
 
+        private bool host;
+   
         Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
-       
+
 
         private readonly MenuEntry _secondPlayer;
         private readonly MenuEntry _thirdPlayer;
@@ -39,6 +41,7 @@ namespace Romero.Windows.Screens
         public LobbyScreen()
             : base("Lobby")
         {
+            host = true;
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
             var play = new MenuEntry("Play");
@@ -71,9 +74,10 @@ namespace Romero.Windows.Screens
         public LobbyScreen(NetClient client)
             : base("Lobby")
         {
+            host = false;
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
-
+            var playTest = new MenuEntry("Play");
             var back = new MenuEntry("Back");
             _firstPlayer = new MenuEntry("First Player: Not Connected");
             _secondPlayer = new MenuEntry("Second Player: Not Connected");
@@ -81,13 +85,13 @@ namespace Romero.Windows.Screens
             _fourthPlayer = new MenuEntry("Fourth Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
             back.Selected += back_Selected;
-
+            playTest.Selected += playTest_Selected;
             MenuEntries.Add(_characterMenuEntry);
             MenuEntries.Add(_firstPlayer);
             MenuEntries.Add(_secondPlayer);
             MenuEntries.Add(_thirdPlayer);
             MenuEntries.Add(_fourthPlayer);
-
+            MenuEntries.Add(playTest);
             MenuEntries.Add(back);
 
             _menuEntryArray = new[] { _firstPlayer, _secondPlayer, _thirdPlayer, _fourthPlayer };
@@ -95,6 +99,13 @@ namespace Romero.Windows.Screens
             Client = client;
 
         }
+
+        void playTest_Selected(object sender, PlayerIndexEventArgs e)
+        {
+            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(_names, Client));
+        }
+
+
 
         private void SendNameToServer()
         {
@@ -106,6 +117,8 @@ namespace Romero.Windows.Screens
             }
 
         }
+
+
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
         {
@@ -129,11 +142,13 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             var names = new Dictionary<long, string>();
-            SendNameToServer();
+            //  SendNameToServer();
+
+         
             NetIncomingMessage msg;
             while ((msg = Client.ReadMessage()) != null)
             {
-                
+
                 switch (msg.MessageType)
                 {
                     case NetIncomingMessageType.DiscoveryResponse:
@@ -143,7 +158,7 @@ namespace Romero.Windows.Screens
                         if (canConnect)
                         {
                             Client.Connect(msg.SenderEndpoint);
-                            
+
                         }
                         else
                         {
@@ -157,6 +172,7 @@ namespace Romero.Windows.Screens
                     case NetIncomingMessageType.Data:
                         var who = msg.ReadInt64();
                         var p2 = msg.ReadString();
+                        
                         names[who] = p2;
                         //_names[who] = p2;
                         _names = names;
@@ -178,9 +194,11 @@ namespace Romero.Windows.Screens
                 i++;
             }
 
-            
+
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
+
+
 
         private void ClearMenuEntries()
         {
@@ -203,8 +221,11 @@ namespace Romero.Windows.Screens
 
         void play_Selected(object sender, PlayerIndexEventArgs e)
         {
+            
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(_names, Client));
         }
+
+
 
         void _characterMenuEntry_Selected(object sender, PlayerIndexEventArgs e)
         {

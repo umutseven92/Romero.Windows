@@ -42,6 +42,12 @@ namespace Romero.Windows.Screens
         private Dictionary<long, string> PlayerNames;
         private Dictionary<long, Vector2> PlayerPositions = new Dictionary<long, Vector2>();
         private Dictionary<long, PlayerPuppet> Players = new Dictionary<long, PlayerPuppet>();
+        private Player multiPlayerOne;
+        private PlayerPuppet multiPlayerTwo;
+        private PlayerPuppet multiPlayerThree;
+        private PlayerPuppet multiPlayerFour;
+
+        private List<PlayerPuppet> otherPlayers = new List<PlayerPuppet>();
 
         enum GameMode
         {
@@ -118,12 +124,7 @@ namespace Romero.Windows.Screens
             AddZombies(_zombieModifier * _difficultyModifier);
         }
 
-        private Player multiPlayerOne;
-        private PlayerPuppet multiPlayerTwo;
-        private PlayerPuppet multiPlayerThree;
-        private PlayerPuppet multiPlayerFour;
 
-        private List<PlayerPuppet> otherPlayers;
 
         /// <summary>
         /// Multiplayer Constructor
@@ -169,7 +170,6 @@ namespace Romero.Windows.Screens
                     multiPlayerOne = new Player();
                     multiPlayerTwo = new PlayerPuppet();
                     otherPlayers.Add(multiPlayerTwo);
-                    
                     break;
                 case 3:
                     multiPlayerOne = new Player();
@@ -293,12 +293,13 @@ namespace Romero.Windows.Screens
 
             if (_currentGameMode == GameMode.Multiplayer)
             {
-                NetOutgoingMessage om = _client.CreateMessage();
-                om.Write(multiPlayerOne.SpritePosition.X); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
-                om.Write(multiPlayerOne.SpritePosition.Y);
+                var om = _client.CreateMessage();
+                om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
+                om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.Y));
                 _client.SendMessage(om, NetDeliveryMethod.Unreliable);
                 ServerWork();
             }
+
 
 
             //All zombies in the wave are dead
@@ -351,6 +352,7 @@ namespace Romero.Windows.Screens
 
                     case NetIncomingMessageType.Data:
                         long who = msg.ReadInt64();
+                        string name = msg.ReadString();
                         int x = msg.ReadInt32();
                         int y = msg.ReadInt32();
                         PlayerPositions[who] = new Vector2(x, y);
@@ -376,7 +378,17 @@ namespace Romero.Windows.Screens
             spriteBatch.Draw(_backgroundTexture, _bgRectangle, Color.White);
             foreach (var z in _lZombies)
             {
-                var direction = z.SpritePosition - _singlePlayerPlayer.SpritePosition;
+                Vector2 direction;
+
+                if (_currentGameMode == GameMode.Singleplayer)
+                {
+                    direction = z.SpritePosition - _singlePlayerPlayer.SpritePosition;
+                }
+                else
+                {
+                    direction = z.SpritePosition - multiPlayerOne.SpritePosition;
+                }
+
                 var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                 z.Draw(spriteBatch, angle);
@@ -391,9 +403,10 @@ namespace Romero.Windows.Screens
                 //Multiplayer Draw
                 multiPlayerOne.Draw(spriteBatch);
                 int i = 0;
+                PlayerPositions.Remove(_client.UniqueIdentifier);
                 foreach (var playerPosition in PlayerPositions)
                 {
-                    otherPlayers[i].Draw(spriteBatch,playerPosition.Key);
+                    otherPlayers[i].Draw(spriteBatch, playerPosition.Value);
                     i++;
                 }
             }
@@ -432,7 +445,7 @@ namespace Romero.Windows.Screens
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
 
-
+            
             #region Developer Kill Cheat
 
             if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
@@ -482,8 +495,14 @@ namespace Romero.Windows.Screens
 
             foreach (var z in _lZombies)
             {
-
-                z.Update(_gT, _singlePlayerPlayer); //Zombie movement
+                if (_currentGameMode == GameMode.Singleplayer)
+                {
+                    z.Update(_gT, _singlePlayerPlayer); //Zombie movement
+                }
+                else
+                {
+                    z.Update(_gT, multiPlayerOne);
+                }
             }
 
             #region Collision
@@ -491,24 +510,45 @@ namespace Romero.Windows.Screens
             foreach (var z in _lZombies)
             {
                 #region Bullet - Zombie Collision
-                foreach (var b in _singlePlayerPlayer.Bullets)
+
+                if (_currentGameMode == GameMode.Singleplayer)
                 {
-                    if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
+                    foreach (var b in _singlePlayerPlayer.Bullets)
                     {
+                        if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
+                        {
 
-                        b.Visible = false;
-                        KillZombie(z, _zombieSpawnChecker);
+                            b.Visible = false;
+                            KillZombie(z, _zombieSpawnChecker);
 
+                        }
                     }
                 }
+                else
+                {
+                    foreach (var b in multiPlayerOne.Bullets)
+                    {
+                        if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
+                        {
+
+                            b.Visible = false;
+                            KillZombie(z, _zombieSpawnChecker);
+
+                        }
+                    }
+                }
+
                 #endregion
 
                 #region Zombie - Player Collision
-                if (z.BoundingBox.Intersects(_singlePlayerPlayer.BoundingBox) && z.Visible && _singlePlayerPlayer.CurrentState != Player.State.Dodging && !_singlePlayerPlayer.Invulnerable)
-                {
 
-                    #region Vibration
-                    /*
+                if (_currentGameMode == GameMode.Singleplayer)
+                {
+                    if (z.BoundingBox.Intersects(_singlePlayerPlayer.BoundingBox) && z.Visible && _singlePlayerPlayer.CurrentState != Player.State.Dodging && !_singlePlayerPlayer.Invulnerable)
+                    {
+
+                        #region Vibration
+                        /*
                     if (Global.Gamepad)
                     {
                         if (!Vibrate)
@@ -532,21 +572,49 @@ namespace Romero.Windows.Screens
 
                     } 
                      */
-                    #endregion
+                        #endregion
 
-                    _singlePlayerPlayer.Health -= 10;
-                    _singlePlayerPlayer.Invulnerable = true;
+                        _singlePlayerPlayer.Health -= 10;
+                        _singlePlayerPlayer.Invulnerable = true;
 
+                    }
                 }
+                else
+                {
+                    if (z.BoundingBox.Intersects(multiPlayerOne.BoundingBox) && z.Visible && multiPlayerOne.CurrentState != Player.State.Dodging && !multiPlayerOne.Invulnerable)
+                    {
+
+                        multiPlayerOne.Health -= 10;
+                        multiPlayerOne.Invulnerable = true;
+
+                    }
+                }
+
+
                 #endregion
 
                 #region Sword - Zombie Collision
-                if (z.BoundingBox.Intersects(_singlePlayerPlayer.Sword.BoundingBox) && z.Visible && _singlePlayerPlayer.Sword.Visible)
+
+                if (_currentGameMode == GameMode.Singleplayer)
                 {
+                    if (z.BoundingBox.Intersects(_singlePlayerPlayer.Sword.BoundingBox) && z.Visible && _singlePlayerPlayer.Sword.Visible)
+                    {
 
-                    KillZombie(z, _zombieSpawnChecker);
+                        KillZombie(z, _zombieSpawnChecker);
 
+                    }
                 }
+                else
+                {
+                    if (z.BoundingBox.Intersects(multiPlayerOne.Sword.BoundingBox) && z.Visible && multiPlayerOne.Sword.Visible)
+                    {
+
+                        KillZombie(z, _zombieSpawnChecker);
+
+                    }
+                }
+
+
                 #endregion
             }
 
@@ -569,11 +637,25 @@ namespace Romero.Windows.Screens
             #endregion
 
             #region Player Death & Game Over
-            if (_singlePlayerPlayer.Health <= 0 && !_singlePlayerPlayer.Dead)
+            
+
+            if (_currentGameMode == GameMode.Singleplayer)
             {
-                _singlePlayerPlayer.Dead = true;
-                _singlePlayerPlayer.Visible = false;
-                ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
+                if (_singlePlayerPlayer.Health <= 0 && !_singlePlayerPlayer.Dead)
+                {
+                    _singlePlayerPlayer.Dead = true;
+                    _singlePlayerPlayer.Visible = false;
+                    ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
+                }
+            }
+            else
+            {
+                if (multiPlayerOne.Health <= 0 && !multiPlayerOne.Dead)
+                {
+                    multiPlayerOne.Dead = true;
+                    multiPlayerOne.Visible = false;
+                    ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
+                }
             }
             #endregion
 
