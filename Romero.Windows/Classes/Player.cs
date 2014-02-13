@@ -43,6 +43,8 @@ namespace Romero.Windows.Classes
         const int MoveLeft = -1;
         const int MoveRight = 1;
 
+        public float angle;
+
         #region Sound Effects
         private SoundEffect _arrowShoot;
         private SoundEffect _arrowDraw;
@@ -498,6 +500,7 @@ namespace Romero.Windows.Classes
             if (!Global.Gamepad)
             {
                 _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                
             }
             #endregion
 
@@ -516,6 +519,8 @@ namespace Romero.Windows.Classes
 
             }
             #endregion
+
+            angle = _playerAngle;
 
             if (Sword.Visible)
             {

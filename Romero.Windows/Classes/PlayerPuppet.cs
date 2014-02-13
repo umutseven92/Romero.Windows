@@ -33,5 +33,12 @@ namespace Romero.Windows.Classes
                 Color.White, 0.0f, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
 
         }
+
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, float angle)
+        {
+            spriteBatch.Draw(SpriteTexture2D, position,
+              new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
+                Color.White, angle, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
+        }
     }
 }

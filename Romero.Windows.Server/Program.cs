@@ -22,11 +22,12 @@ namespace Romero.Windows.Server
             //var xinput = 0;
             //var yinput = 0;
             var dummyName = string.Empty;
+            float angle = 0;
 
             // create and start server
             var server = new NetServer(config);
             server.Start();
-
+           
             // schedule initial sending of position updates
             var nextSendUpdates = NetTime.Now;
 
@@ -100,9 +101,11 @@ namespace Romero.Windows.Server
 
                             // fancy movement logic goes here
 
-                            int xinput = msg.ReadInt32();
-                            int yinput = msg.ReadInt32();
-                            int[] pos = msg.SenderConnection.Tag as int[];
+                            var xinput = msg.ReadInt32();
+                            var yinput = msg.ReadInt32();
+                            var playerAngle = msg.ReadFloat();
+                            angle = playerAngle;
+                            var pos = msg.SenderConnection.Tag as int[];
                             pos[0] = xinput;
                             pos[1] = yinput;
                             break;
@@ -112,7 +115,7 @@ namespace Romero.Windows.Server
                     //
                     // send position updates 30 times per second
                     //
-                    double now = NetTime.Now;
+                    var now = NetTime.Now;
                     if (now > nextSendUpdates)
                     {
                         // Yes, it's time to send position updates
@@ -120,13 +123,13 @@ namespace Romero.Windows.Server
                         // for each player...
 
 
-                        foreach (NetConnection player in server.Connections)
+                        foreach (var player in server.Connections)
                         {
                             // ... send information about every other player (actually including self)
-                            foreach (NetConnection otherPlayer in server.Connections)
+                            foreach (var otherPlayer in server.Connections)
                             {
                                 // send position update about 'otherPlayer' to 'player'
-                                NetOutgoingMessage om = server.CreateMessage();
+                                var om = server.CreateMessage();
                                 if (otherPlayer != null)
                                 {
                                     // write who this position is for
@@ -137,9 +140,10 @@ namespace Romero.Windows.Server
                                     if (otherPlayer.Tag == null)
                                         otherPlayer.Tag = new int[2];
 
-                                    int[] pos = otherPlayer.Tag as int[];
+                                    var pos = otherPlayer.Tag as int[];
                                     om.Write(pos[0]);
                                     om.Write(pos[1]);
+                                    om.Write(angle);
                                     //om.Write(xinput);
                                     //om.Write(yinput);
 

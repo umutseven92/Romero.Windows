@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using Romero.Windows.Screens;
 
 #endregion
@@ -51,7 +52,7 @@ namespace Romero.Windows
             var screenManager = new ScreenManager.ScreenManager(this);
 
             Components.Add(screenManager);
-
+            MediaPlayer.IsMuted = true;
 
             // Activate the first screens.
             screenManager.AddScreen(new BackgroundScreen(), null);

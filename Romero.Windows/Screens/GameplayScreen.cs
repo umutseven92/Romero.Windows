@@ -41,6 +41,7 @@ namespace Romero.Windows.Screens
         private readonly NetClient _client;
         private Dictionary<long, string> PlayerNames;
         private Dictionary<long, Vector2> PlayerPositions = new Dictionary<long, Vector2>();
+        private Dictionary<long,float> PlayerAngles = new Dictionary<long, float>(); 
         
         private Player multiPlayerOne;
         private PlayerPuppet multiPlayerTwo;
@@ -90,7 +91,7 @@ namespace Romero.Windows.Screens
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-
+            
             _currentGameMode = GameMode.Singleplayer;
 
             #region Difficulty
@@ -286,8 +287,9 @@ namespace Romero.Windows.Screens
             }
         }
 
-        private int previousSpritePositionX = 2048;
-        private int previousSpritePositionY = 2048;
+        private int _previousSpritePositionX = 2048;
+        private int _previousSpritePositionY = 2048;
+        private float _previousAngle = 0;
 
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
@@ -301,15 +303,17 @@ namespace Romero.Windows.Screens
 
             if (_currentGameMode == GameMode.Multiplayer)
             {
-                if (Convert.ToInt32(multiPlayerOne.SpritePosition.X) != previousSpritePositionX ||
-                    Convert.ToInt32(multiPlayerOne.SpritePosition.Y) != previousSpritePositionY)
+                if (Convert.ToInt32(multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
+                    Convert.ToInt32(multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || multiPlayerOne.angle != _previousAngle)
                 {
                     var om = _client.CreateMessage();
                     om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
                     om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.Y));
+                    om.Write(multiPlayerOne.angle);
                     _client.SendMessage(om, NetDeliveryMethod.Unreliable);
-                    previousSpritePositionX = Convert.ToInt32(multiPlayerOne.SpritePosition.X);
-                    previousSpritePositionY = Convert.ToInt32(multiPlayerOne.SpritePosition.Y);
+                    _previousSpritePositionX = Convert.ToInt32(multiPlayerOne.SpritePosition.X);
+                    _previousSpritePositionY = Convert.ToInt32(multiPlayerOne.SpritePosition.Y);
+                    _previousAngle = multiPlayerOne.angle;
                 }
 
                 ServerWork();
@@ -370,6 +374,8 @@ namespace Romero.Windows.Screens
                         string name = msg.ReadString();
                         int x = msg.ReadInt32();
                         int y = msg.ReadInt32();
+                        float ang = msg.ReadFloat();
+                        PlayerAngles[who] = ang;
                         PlayerPositions[who] = new Vector2(x, y);
                         break;
                     case NetIncomingMessageType.WarningMessage:
@@ -417,11 +423,13 @@ namespace Romero.Windows.Screens
             {
                 //Multiplayer Draw
                 multiPlayerOne.Draw(spriteBatch);
-                int i = 0;
+                var i = 0;
                 PlayerPositions.Remove(_client.UniqueIdentifier);
                 foreach (var playerPosition in PlayerPositions)
                 {
-                    otherPlayers[i].Draw(spriteBatch, playerPosition.Value);
+                    var angle = PlayerAngles.Single(a => a.Key == playerPosition.Key);
+                    
+                    otherPlayers[i].Draw(spriteBatch, playerPosition.Value,angle.Value);
                     i++;
                 }
 
