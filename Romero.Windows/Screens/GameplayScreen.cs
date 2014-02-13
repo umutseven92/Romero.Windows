@@ -46,6 +46,8 @@ namespace Romero.Windows.Screens
         private PlayerPuppet multiPlayerTwo;
         private PlayerPuppet multiPlayerThree;
         private PlayerPuppet multiPlayerFour;
+        private Texture2D fakePlayerTexture;
+
 
         private List<PlayerPuppet> otherPlayers = new List<PlayerPuppet>();
 
@@ -170,6 +172,7 @@ namespace Romero.Windows.Screens
                     multiPlayerOne = new Player();
                     multiPlayerTwo = new PlayerPuppet();
                     otherPlayers.Add(multiPlayerTwo);
+
                     break;
                 case 3:
                     multiPlayerOne = new Player();
@@ -177,6 +180,7 @@ namespace Romero.Windows.Screens
                     multiPlayerThree = new PlayerPuppet();
                     otherPlayers.Add(multiPlayerTwo);
                     otherPlayers.Add(multiPlayerThree);
+
                     break;
                 case 4:
                     multiPlayerOne = new Player();
@@ -186,6 +190,7 @@ namespace Romero.Windows.Screens
                     otherPlayers.Add(multiPlayerTwo);
                     otherPlayers.Add(multiPlayerThree);
                     otherPlayers.Add(multiPlayerFour);
+
                     break;
             }
 
@@ -206,7 +211,7 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
-
+            fakePlayerTexture = _content.Load<Texture2D>("Sprites/deacon");
             if (_currentGameMode == GameMode.Singleplayer)
             {
                 _singlePlayerPlayer.LoadContent(_content);
@@ -281,6 +286,9 @@ namespace Romero.Windows.Screens
             }
         }
 
+        private int previousSpritePositionX = 2048;
+        private int previousSpritePositionY = 2048;
+
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -293,10 +301,17 @@ namespace Romero.Windows.Screens
 
             if (_currentGameMode == GameMode.Multiplayer)
             {
-                var om = _client.CreateMessage();
-                om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
-                om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.Y));
-                _client.SendMessage(om, NetDeliveryMethod.Unreliable);
+                if (Convert.ToInt32(multiPlayerOne.SpritePosition.X) != previousSpritePositionX ||
+                    Convert.ToInt32(multiPlayerOne.SpritePosition.Y) != previousSpritePositionY)
+                {
+                    var om = _client.CreateMessage();
+                    om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
+                    om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.Y));
+                    _client.SendMessage(om, NetDeliveryMethod.Unreliable);
+                    previousSpritePositionX = Convert.ToInt32(multiPlayerOne.SpritePosition.X);
+                    previousSpritePositionY = Convert.ToInt32(multiPlayerOne.SpritePosition.Y);
+                }
+
                 ServerWork();
             }
 
@@ -409,6 +424,7 @@ namespace Romero.Windows.Screens
                     otherPlayers[i].Draw(spriteBatch, playerPosition.Value);
                     i++;
                 }
+
             }
 
 
@@ -445,7 +461,7 @@ namespace Romero.Windows.Screens
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
 
-            
+
             #region Developer Kill Cheat
 
             if (currentKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll) && !_previousKeyboardState.IsKeyDown(Keybinds.DeveloperKillAll))
@@ -637,7 +653,7 @@ namespace Romero.Windows.Screens
             #endregion
 
             #region Player Death & Game Over
-            
+
 
             if (_currentGameMode == GameMode.Singleplayer)
             {

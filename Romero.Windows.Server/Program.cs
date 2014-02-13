@@ -18,7 +18,9 @@ namespace Romero.Windows.Server
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
-            
+
+            int[] pos;
+
             var xinput = 0;
             var yinput = 0;
             var dummyName = string.Empty;
@@ -148,7 +150,7 @@ namespace Romero.Windows.Server
                         }
 
                         // schedule next update
-                        nextSendUpdates += (1.0 / 30.0);
+                        nextSendUpdates += (1.0 / 60.0);
                     }
                 }
 
