@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -43,7 +44,7 @@ namespace Romero.Windows.Classes
         const int MoveLeft = -1;
         const int MoveRight = 1;
 
-        public float angle;
+        public float Angle;
 
         #region Sound Effects
         private SoundEffect _arrowShoot;
@@ -453,6 +454,13 @@ namespace Romero.Windows.Classes
                 bullet.Fire(SpritePosition, thumb);
                 Bullets.Add(bullet);
             }
+            else
+            {
+                var bullet = new Bullet();
+                bullet.LoadContent(_contentManager);
+                bullet.Fire(SpritePosition, new Vector2(previousThumb.X, -previousThumb.Y));
+                Bullets.Add(bullet);
+            }
 
         }
 
@@ -473,7 +481,7 @@ namespace Romero.Windows.Classes
 
         }
 
-        
+
         /// <summary>
         /// Gamepad swinging
         /// </summary>
@@ -483,10 +491,14 @@ namespace Romero.Windows.Classes
             if ((swingThumb.X > ThumbstickDeadZone || swingThumb.X < -ThumbstickDeadZone) || (swingThumb.Y > ThumbstickDeadZone || swingThumb.Y < -ThumbstickDeadZone))
             {
                 Sword.Swing(SpritePosition, swingThumb);
-
             }
-
+            else
+            {
+                Sword.Swing(SpritePosition,new Vector2(previousThumb.X,-previousThumb.Y));
+            }
         }
+
+        private Vector2 previousThumb;
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {
@@ -500,27 +512,31 @@ namespace Romero.Windows.Classes
             if (!Global.Gamepad)
             {
                 _playerAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
-                
+
             }
             #endregion
 
             #region Gamepad Angle
             else
             {
-                var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
-                if (thumb != Vector2.Zero)
+                if ((currentGamePadState.ThumbSticks.Right.X <= -0.7f || currentGamePadState.ThumbSticks.Right.Y >= 0.7f) || (currentGamePadState.ThumbSticks.Right.X >= 0.7f || currentGamePadState.ThumbSticks.Right.Y <= -0.7f))
                 {
-                    _playerAngle =
-                    (float)
-                        (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
-
+                    var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
+                    if (thumb != Vector2.Zero)
+                    {
+                        _playerAngle =
+                        (float)
+                            (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
+                        previousThumb = thumb;
+                    }
                 }
+
 
 
             }
             #endregion
 
-            angle = _playerAngle;
+            Angle = _playerAngle;
 
             if (Sword.Visible)
             {
@@ -603,25 +619,25 @@ namespace Romero.Windows.Classes
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
-                            if (currentGamePadState.ThumbSticks.Left.X <= -0.3)
+                            if (currentGamePadState.ThumbSticks.Left.X <= -0.7)
                             {
                                 _speed.X = _playerSpeed;
                                 _direction.X = MoveLeft;
                             }
 
-                            else if (currentGamePadState.ThumbSticks.Left.X >= 0.3)
+                            else if (currentGamePadState.ThumbSticks.Left.X >= 0.7)
                             {
                                 _speed.X = _playerSpeed;
                                 _direction.X = MoveRight;
                             }
 
-                            if (currentGamePadState.ThumbSticks.Left.Y >= 0.3)
+                            if (currentGamePadState.ThumbSticks.Left.Y >= 0.7)
                             {
                                 _speed.Y = _playerSpeed;
                                 _direction.Y = MoveUp;
                             }
 
-                            else if (currentGamePadState.ThumbSticks.Left.Y <= -0.3)
+                            else if (currentGamePadState.ThumbSticks.Left.Y <= -0.7)
                             {
                                 _speed.Y = _playerSpeed;
                                 _direction.Y = MoveDown;
