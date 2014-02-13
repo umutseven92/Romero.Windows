@@ -105,9 +105,10 @@ namespace Romero.Windows.Server
                             var yinput = msg.ReadInt32();
                             var playerAngle = msg.ReadFloat();
                             angle = playerAngle;
-                            var pos = msg.SenderConnection.Tag as int[];
+                            var pos = msg.SenderConnection.Tag as float[];
                             pos[0] = xinput;
                             pos[1] = yinput;
+                            pos[2] = angle;
                             break;
 
                     }
@@ -138,12 +139,12 @@ namespace Romero.Windows.Server
                                     om.Write(otherPlayer.RemoteUniqueIdentifier.ToString());
 
                                     if (otherPlayer.Tag == null)
-                                        otherPlayer.Tag = new int[2];
+                                        otherPlayer.Tag = new float[3];
 
-                                    var pos = otherPlayer.Tag as int[];
+                                    var pos = otherPlayer.Tag as float[];
                                     om.Write(pos[0]);
                                     om.Write(pos[1]);
-                                    om.Write(angle);
+                                    om.Write(pos[2]);
                                     //om.Write(xinput);
                                     //om.Write(yinput);
 
