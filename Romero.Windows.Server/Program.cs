@@ -19,10 +19,8 @@ namespace Romero.Windows.Server
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
 
-            int[] pos;
-
-            var xinput = 0;
-            var yinput = 0;
+            //var xinput = 0;
+            //var yinput = 0;
             var dummyName = string.Empty;
 
             // create and start server
@@ -80,7 +78,6 @@ namespace Romero.Windows.Server
                                 //
 
                                 Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected.");
-                                msg.SenderConnection.Tag = msg.SenderConnection.RemoteUniqueIdentifier;
                                 connectedPlayers++;
                                 Console.WriteLine(connectedPlayers + " players connected.");
                             };
@@ -99,14 +96,15 @@ namespace Romero.Windows.Server
 
                             //Get name here - bind it to tag
 
-                          //  dummyName = msg.ReadString();
+                            //  dummyName = msg.ReadString();
 
                             // fancy movement logic goes here
-                            
 
-                            xinput = msg.ReadInt32();
-                            yinput = msg.ReadInt32();
-
+                            int xinput = msg.ReadInt32();
+                            int yinput = msg.ReadInt32();
+                            int[] pos = msg.SenderConnection.Tag as int[];
+                            pos[0] = xinput;
+                            pos[1] = yinput;
                             break;
 
                     }
@@ -129,16 +127,21 @@ namespace Romero.Windows.Server
                             {
                                 // send position update about 'otherPlayer' to 'player'
                                 NetOutgoingMessage om = server.CreateMessage();
-                                if (otherPlayer != null && otherPlayer.Tag != null)
+                                if (otherPlayer != null)
                                 {
                                     // write who this position is for
                                     om.Write(otherPlayer.RemoteUniqueIdentifier);
 
-                                    om.Write(otherPlayer.Tag.ToString());
-                                    
+                                    om.Write(otherPlayer.RemoteUniqueIdentifier.ToString());
 
-                                    om.Write(xinput);
-                                    om.Write(yinput);
+                                    if (otherPlayer.Tag == null)
+                                        otherPlayer.Tag = new int[2];
+
+                                    int[] pos = otherPlayer.Tag as int[];
+                                    om.Write(pos[0]);
+                                    om.Write(pos[1]);
+                                    //om.Write(xinput);
+                                    //om.Write(yinput);
 
 
 

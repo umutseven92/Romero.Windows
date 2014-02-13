@@ -41,7 +41,7 @@ namespace Romero.Windows.Screens
         private readonly NetClient _client;
         private Dictionary<long, string> PlayerNames;
         private Dictionary<long, Vector2> PlayerPositions = new Dictionary<long, Vector2>();
-        private Dictionary<long, PlayerPuppet> Players = new Dictionary<long, PlayerPuppet>();
+        
         private Player multiPlayerOne;
         private PlayerPuppet multiPlayerTwo;
         private PlayerPuppet multiPlayerThree;
