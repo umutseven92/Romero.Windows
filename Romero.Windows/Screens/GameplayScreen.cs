@@ -372,8 +372,8 @@ namespace Romero.Windows.Screens
                     case NetIncomingMessageType.Data:
                         long who = msg.ReadInt64();
                         string name = msg.ReadString();
-                        int x = msg.ReadInt32();
-                        int y = msg.ReadInt32();
+                        var x = msg.ReadFloat();
+                        var y = msg.ReadFloat();
                         float angle = msg.ReadFloat();
                         PlayerAngles[who] = angle;
                         PlayerPositions[who] = new Vector2(x, y);

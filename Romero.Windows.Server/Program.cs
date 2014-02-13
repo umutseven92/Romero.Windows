@@ -104,11 +104,11 @@ namespace Romero.Windows.Server
                             var xinput = msg.ReadInt32();
                             var yinput = msg.ReadInt32();
                             var playerAngle = msg.ReadFloat();
-                            angle = playerAngle;
+                            
                             var pos = msg.SenderConnection.Tag as float[];
                             pos[0] = xinput;
                             pos[1] = yinput;
-                            pos[2] = angle;
+                            pos[2] = playerAngle;
                             break;
 
                     }
