@@ -111,9 +111,11 @@ namespace Romero.Windows.Screens
         private void SendNameToServer()
         {
             var om = Client.CreateMessage();
-            om.Write(true);
+           
             om.Write(Global.PlayerName);
-
+            om.Write(0);
+            om.Write(0);
+            om.Write(0.0f);
             if (Client.ConnectionStatus == NetConnectionStatus.Connected)
             {
                 Client.SendMessage(om, NetDeliveryMethod.Unreliable);

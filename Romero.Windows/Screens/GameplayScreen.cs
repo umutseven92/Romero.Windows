@@ -306,7 +306,7 @@ namespace Romero.Windows.Screens
                     Convert.ToInt32(_multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || _multiPlayerOne.Angle != _previousAngle)
                 {
                     var om = _client.CreateMessage();
-                    om.Write(false);
+                    om.Write(Global.PlayerName);
                     om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
                     om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.Y));
                     om.Write(_multiPlayerOne.Angle);
