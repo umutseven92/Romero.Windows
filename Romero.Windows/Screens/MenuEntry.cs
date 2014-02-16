@@ -62,6 +62,7 @@ namespace Romero.Windows.Screens
             set { _position = value; }
         }
 
+        public bool Disabled = false;
 
         #endregion
 
@@ -79,9 +80,12 @@ namespace Romero.Windows.Screens
         /// </summary>
         protected internal virtual void OnSelectEntry(PlayerIndex playerIndex)
         {
-            
-            if (Selected != null)
-                Selected(this, new PlayerIndexEventArgs(playerIndex));
+
+            if (Selected != null && Disabled == false)
+            {
+                 Selected(this, new PlayerIndexEventArgs(playerIndex));
+            }
+               
         }
 
 
@@ -133,6 +137,12 @@ namespace Romero.Windows.Screens
 
             // Draw the selected entry in yellow, otherwise white.
             var color = isSelected ? Color.Red : Color.White;
+
+            if (Disabled)
+            {
+                 color = isSelected ? Color.PaleVioletRed : Color.Gray;
+                
+            }
 
             // Pulsate the size of the selected menu entry.
             var time = gameTime.TotalGameTime.TotalSeconds;

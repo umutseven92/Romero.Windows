@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Xml;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -48,7 +49,7 @@ namespace Romero.Windows.Screens
         private readonly PlayerPuppet _multiPlayerTwo;
         private readonly PlayerPuppet _multiPlayerThree;
         private readonly PlayerPuppet _multiPlayerFour;
-        private readonly List<PlayerPuppet> _otherPlayers = new List<PlayerPuppet>(); 
+        private readonly List<PlayerPuppet> _otherPlayers = new List<PlayerPuppet>();
         #endregion
 
         private int _previousSpritePositionX = 2048;
@@ -165,7 +166,7 @@ namespace Romero.Windows.Screens
 
             #endregion
 
-
+            Global.GameInProgress.Exiting += GameInProgress_Exiting;
             _currentGameMode = GameMode.Multiplayer;
             _client = client;
             _playerNames = players;
@@ -194,16 +195,27 @@ namespace Romero.Windows.Screens
                     _otherPlayers.Add(_multiPlayerTwo);
                     _otherPlayers.Add(_multiPlayerThree);
                     _otherPlayers.Add(_multiPlayerFour);
+                    
 
                     break;
             }
 
+            
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _multiPlayerOne);
             _multiPlayerOne.GetCamera(_cam);
 
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
+        }
+
+        void GameInProgress_Exiting(object sender, EventArgs e)
+        {
+            if (_currentGameMode == GameMode.Multiplayer)
+            {
+                _client.Disconnect("Client shutdown");
+                _client.Shutdown("Client shutdown");
+            }
         }
 
         /// <summary>
@@ -243,6 +255,15 @@ namespace Romero.Windows.Screens
                 }
             }
 
+            var i = 0;
+            _playerNames.Remove(_client.UniqueIdentifier);
+            foreach (var p in _playerNames)
+            {
+                _otherPlayers[i].id = p.Key;
+                _otherPlayers[i].playerName = p.Value;
+                i++;
+            }
+            _playerNames.Clear();
 
             foreach (var z in _lZombies)
             {
@@ -319,8 +340,9 @@ namespace Romero.Windows.Screens
                 ServerWork();
             }
 
+            
 
-
+            
             //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {
@@ -375,6 +397,7 @@ namespace Romero.Windows.Screens
                         var x = msg.ReadFloat();
                         var y = msg.ReadFloat();
                         float angle = msg.ReadFloat();
+                        _playerNames[who] = name;
                         _playerAngles[who] = angle;
                         _playerPositions[who] = new Vector2(x, y);
                         break;

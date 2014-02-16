@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Lidgren.Network;
 
@@ -19,6 +20,8 @@ namespace Romero.Windows.Server
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
 
+            var PlayerNames = new Dictionary<long, string>();
+
             //var xinput = 0;
             //var yinput = 0;
             var dummyName = string.Empty;
@@ -27,6 +30,7 @@ namespace Romero.Windows.Server
             // create and start server
             var server = new NetServer(config);
             server.Start();
+            Console.WriteLine("Server online");
 
             // schedule initial sending of position updates
             var nextSendUpdates = NetTime.Now;
@@ -78,16 +82,18 @@ namespace Romero.Windows.Server
                                 // A new player just connected!
                                 //
 
-                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected.");
+                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected. (IP Address: " + msg.SenderEndpoint.Address + ")");
                                 connectedPlayers++;
-                                Console.WriteLine(connectedPlayers + " players connected.");
+                                Console.WriteLine(connectedPlayers + " players ingame");
                             };
+
                             if (status == NetConnectionStatus.Disconnected)
                             {
-                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " disconnected.");
-
+                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " disconnected. (IP Address: " + msg.SenderEndpoint.Address + ")");
                                 connectedPlayers--;
+                                Console.WriteLine(connectedPlayers + " players ingame");
                             }
+
 
                             break;
                         case NetIncomingMessageType.Data:
@@ -96,7 +102,11 @@ namespace Romero.Windows.Server
                             //
 
                             dummyName = msg.ReadString();
-
+                            if (!PlayerNames.ContainsKey(msg.SenderConnection.RemoteUniqueIdentifier))
+                            {
+                                  PlayerNames.Add(msg.SenderConnection.RemoteUniqueIdentifier, dummyName);
+                            }
+                          
 
                             // fancy movement logic goes here
 
@@ -105,9 +115,13 @@ namespace Romero.Windows.Server
                             var playerAngle = msg.ReadFloat();
 
                             var pos = msg.SenderConnection.Tag as float[];
-                            pos[0] = xinput;
-                            pos[1] = yinput;
-                            pos[2] = playerAngle;
+
+                            if (pos != null)
+                            {
+                                pos[0] = xinput;
+                                pos[1] = yinput;
+                                pos[2] = playerAngle;
+                            }
 
 
                             break;
@@ -115,7 +129,7 @@ namespace Romero.Windows.Server
                     }
 
                     //
-                    // send position updates 30 times per second
+                    // send position updates 60 times per second
                     //
                     var now = NetTime.Now;
                     if (now > nextSendUpdates)
@@ -136,22 +150,20 @@ namespace Romero.Windows.Server
                                 {
                                     // write who this position is for
                                     om.Write(otherPlayer.RemoteUniqueIdentifier);
+                                    if (PlayerNames.ContainsKey(otherPlayer.RemoteUniqueIdentifier))
+                                    {
+                                        om.Write(PlayerNames.Single(i => i.Key == otherPlayer.RemoteUniqueIdentifier).Value);
+                                    }
 
-                                    om.Write(dummyName);
 
                                     if (otherPlayer.Tag == null)
                                         otherPlayer.Tag = new float[3];
 
                                     var pos = otherPlayer.Tag as float[];
+
                                     om.Write(pos[0]);
                                     om.Write(pos[1]);
                                     om.Write(pos[2]);
-
-
-                                    //om.Write(xinput);
-                                    //om.Write(yinput);
-
-
 
                                     // send message
                                     server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
@@ -168,7 +180,7 @@ namespace Romero.Windows.Server
                 // sleep to allow other processes to run smoothly
                 Thread.Sleep(1);
             }
-
+            Console.WriteLine("Server powering down..");
             server.Shutdown("bye");
         }
     }

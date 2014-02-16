@@ -13,6 +13,8 @@ namespace Romero.Windows.Classes
         const int StartPositionX = 2048;
         const int StartPositionY = 2048;
         public string PlayerAssetName = "deacon";
+        public long id;
+        public string playerName;
 
         public void LoadContent(ContentManager contentManager)
         {

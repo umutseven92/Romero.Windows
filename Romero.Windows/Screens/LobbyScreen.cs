@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using OpenTK.Graphics.ES10;
 
 #endregion
 
@@ -27,7 +28,7 @@ namespace Romero.Windows.Screens
         Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
 
-
+        MenuEntry play = new MenuEntry("Play");
         private readonly MenuEntry _secondPlayer;
         private readonly MenuEntry _thirdPlayer;
         private readonly MenuEntry _fourthPlayer;
@@ -45,13 +46,14 @@ namespace Romero.Windows.Screens
             host = true;
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
-            var play = new MenuEntry("Play");
+
             var back = new MenuEntry("Back");
             _firstPlayer = new MenuEntry("First Player: Not Connected");
             _secondPlayer = new MenuEntry("Second Player: Not Connected");
             _thirdPlayer = new MenuEntry("Third Player: Not Connected");
             _fourthPlayer = new MenuEntry("Fourth Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
+            Global.GameInProgress.Exiting += GameInProgress_Exiting;
             back.Selected += back_Selected;
             play.Selected += play_Selected;
             MenuEntries.Add(_characterMenuEntry);
@@ -67,6 +69,7 @@ namespace Romero.Windows.Screens
             StartClient(14242, "romero");
 
         }
+
 
         /// <summary>
         /// Joining an existing lobby
@@ -85,6 +88,8 @@ namespace Romero.Windows.Screens
             _thirdPlayer = new MenuEntry("Third Player: Not Connected");
             _fourthPlayer = new MenuEntry("Fourth Player: Not Connected");
             _characterMenuEntry.Selected += _characterMenuEntry_Selected;
+            Global.GameInProgress.Exiting += GameInProgress_Exiting;
+
             back.Selected += back_Selected;
             playTest.Selected += playTest_Selected;
             MenuEntries.Add(_characterMenuEntry);
@@ -101,6 +106,12 @@ namespace Romero.Windows.Screens
 
         }
 
+        void GameInProgress_Exiting(object sender, EventArgs e)
+        {
+            Client.Disconnect("Client shutdown");
+            Client.Shutdown("Client shutdown");
+        }
+
         void playTest_Selected(object sender, PlayerIndexEventArgs e)
         {
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(_names, Client));
@@ -111,7 +122,7 @@ namespace Romero.Windows.Screens
         private void SendNameToServer()
         {
             var om = Client.CreateMessage();
-           
+
             om.Write(Global.PlayerName);
             om.Write(0);
             om.Write(0);
@@ -122,7 +133,6 @@ namespace Romero.Windows.Screens
             }
 
         }
-
 
 
         void back_Selected(object sender, PlayerIndexEventArgs e)
@@ -142,10 +152,11 @@ namespace Romero.Windows.Screens
 
         }
 
-        private long id;
+
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+
             var names = new Dictionary<long, string>();
             SendNameToServer();
 
@@ -191,6 +202,8 @@ namespace Romero.Windows.Screens
             var i = 0;
 
             ClearMenuEntries();
+
+            play.Disabled = _names.Count < 2;
 
             foreach (var p in _names)
             {
