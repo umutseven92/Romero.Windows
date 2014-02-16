@@ -23,7 +23,7 @@ namespace Romero.Windows.Screens
         };
 
         private bool host;
-   
+
         Dictionary<long, string> _names = new Dictionary<long, string>();
         public NetClient Client;
 
@@ -41,6 +41,7 @@ namespace Romero.Windows.Screens
         public LobbyScreen()
             : base("Lobby")
         {
+
             host = true;
             _characterMenuEntry = new MenuEntry(string.Empty);
             SetMenuEntryText();
@@ -110,7 +111,9 @@ namespace Romero.Windows.Screens
         private void SendNameToServer()
         {
             var om = Client.CreateMessage();
-            om.Write("Player One");
+            om.Write(true);
+            om.Write(Global.PlayerName);
+
             if (Client.ConnectionStatus == NetConnectionStatus.Connected)
             {
                 Client.SendMessage(om, NetDeliveryMethod.Unreliable);
@@ -142,9 +145,8 @@ namespace Romero.Windows.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             var names = new Dictionary<long, string>();
-            //  SendNameToServer();
+            SendNameToServer();
 
-         
             NetIncomingMessage msg;
             while ((msg = Client.ReadMessage()) != null)
             {
@@ -172,7 +174,7 @@ namespace Romero.Windows.Screens
                     case NetIncomingMessageType.Data:
                         var who = msg.ReadInt64();
                         var p2 = msg.ReadString();
-                        
+
                         names[who] = p2;
                         //_names[who] = p2;
                         _names = names;
@@ -221,7 +223,7 @@ namespace Romero.Windows.Screens
 
         void play_Selected(object sender, PlayerIndexEventArgs e)
         {
-            
+
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(_names, Client));
         }
 

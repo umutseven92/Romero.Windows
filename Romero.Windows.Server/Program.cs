@@ -18,7 +18,7 @@ namespace Romero.Windows.Server
             var config = new NetPeerConfiguration("romero");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
-
+            bool inLobby = true;
             //var xinput = 0;
             //var yinput = 0;
             var dummyName = string.Empty;
@@ -27,7 +27,7 @@ namespace Romero.Windows.Server
             // create and start server
             var server = new NetServer(config);
             server.Start();
-           
+
             // schedule initial sending of position updates
             var nextSendUpdates = NetTime.Now;
 
@@ -94,21 +94,26 @@ namespace Romero.Windows.Server
                             //
                             // The client sent input to the server
                             //
+                            inLobby = msg.ReadBoolean();
 
-                            //Get name here - bind it to tag
-
-                            //  dummyName = msg.ReadString();
+                            if (inLobby)
+                            {
+                                dummyName = msg.ReadString();
+                            }
 
                             // fancy movement logic goes here
+                            if (!inLobby)
+                            {
+                                var xinput = msg.ReadInt32();
+                                var yinput = msg.ReadInt32();
+                                var playerAngle = msg.ReadFloat();
 
-                            var xinput = msg.ReadInt32();
-                            var yinput = msg.ReadInt32();
-                            var playerAngle = msg.ReadFloat();
-                            
-                            var pos = msg.SenderConnection.Tag as float[];
-                            pos[0] = xinput;
-                            pos[1] = yinput;
-                            pos[2] = playerAngle;
+                                var pos = msg.SenderConnection.Tag as float[];
+                                pos[0] = xinput;
+                                pos[1] = yinput;
+                                pos[2] = playerAngle;
+                            }
+
                             break;
 
                     }
@@ -136,7 +141,7 @@ namespace Romero.Windows.Server
                                     // write who this position is for
                                     om.Write(otherPlayer.RemoteUniqueIdentifier);
 
-                                    om.Write(otherPlayer.RemoteUniqueIdentifier.ToString());
+                                    om.Write(dummyName);
 
                                     if (otherPlayer.Tag == null)
                                         otherPlayer.Tag = new float[3];

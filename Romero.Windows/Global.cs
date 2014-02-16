@@ -29,8 +29,7 @@ namespace Romero.Windows
         /// </summary>
         public static Game GameInProgress;
 
-
-        
+        public static string PlayerName;
 
         /// <summary>
         /// Full screen

@@ -38,23 +38,22 @@ namespace Romero.Windows.Screens
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
+
+        #region Multiplayer
         private readonly NetClient _client;
-        private Dictionary<long, string> PlayerNames;
-        private Dictionary<long, Vector2> PlayerPositions = new Dictionary<long, Vector2>();
-        private Dictionary<long,float> PlayerAngles = new Dictionary<long, float>();
+        private readonly Dictionary<long, string> _playerNames;
+        private readonly Dictionary<long, Vector2> _playerPositions = new Dictionary<long, Vector2>();
+        private readonly Dictionary<long, float> _playerAngles = new Dictionary<long, float>();
+        private readonly Player _multiPlayerOne;
+        private readonly PlayerPuppet _multiPlayerTwo;
+        private readonly PlayerPuppet _multiPlayerThree;
+        private readonly PlayerPuppet _multiPlayerFour;
+        private readonly List<PlayerPuppet> _otherPlayers = new List<PlayerPuppet>(); 
+        #endregion
 
         private int _previousSpritePositionX = 2048;
         private int _previousSpritePositionY = 2048;
         private float _previousAngle = 0;
-
-
-        private Player multiPlayerOne;
-        private PlayerPuppet multiPlayerTwo;
-        private PlayerPuppet multiPlayerThree;
-        private PlayerPuppet multiPlayerFour;
-
-
-        private List<PlayerPuppet> otherPlayers = new List<PlayerPuppet>();
 
         enum GameMode
         {
@@ -95,7 +94,7 @@ namespace Romero.Windows.Screens
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-            
+
             _currentGameMode = GameMode.Singleplayer;
 
             #region Difficulty
@@ -169,38 +168,38 @@ namespace Romero.Windows.Screens
 
             _currentGameMode = GameMode.Multiplayer;
             _client = client;
-            PlayerNames = players;
+            _playerNames = players;
 
-            switch (PlayerNames.Count)
+            switch (_playerNames.Count)
             {
                 case 2:
-                    multiPlayerOne = new Player();
-                    multiPlayerTwo = new PlayerPuppet();
-                    otherPlayers.Add(multiPlayerTwo);
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
 
                     break;
                 case 3:
-                    multiPlayerOne = new Player();
-                    multiPlayerTwo = new PlayerPuppet();
-                    multiPlayerThree = new PlayerPuppet();
-                    otherPlayers.Add(multiPlayerTwo);
-                    otherPlayers.Add(multiPlayerThree);
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _multiPlayerThree = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
+                    _otherPlayers.Add(_multiPlayerThree);
 
                     break;
                 case 4:
-                    multiPlayerOne = new Player();
-                    multiPlayerTwo = new PlayerPuppet();
-                    multiPlayerThree = new PlayerPuppet();
-                    multiPlayerFour = new PlayerPuppet();
-                    otherPlayers.Add(multiPlayerTwo);
-                    otherPlayers.Add(multiPlayerThree);
-                    otherPlayers.Add(multiPlayerFour);
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _multiPlayerThree = new PlayerPuppet();
+                    _multiPlayerFour = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
+                    _otherPlayers.Add(_multiPlayerThree);
+                    _otherPlayers.Add(_multiPlayerFour);
 
                     break;
             }
 
-            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), multiPlayerOne);
-            multiPlayerOne.GetCamera(_cam);
+            _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _multiPlayerOne);
+            _multiPlayerOne.GetCamera(_cam);
 
             _lZombies = new List<Zombie>();
             _wave = 1;
@@ -216,7 +215,7 @@ namespace Romero.Windows.Screens
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
-            
+
             if (_currentGameMode == GameMode.Singleplayer)
             {
                 _singlePlayerPlayer.LoadContent(_content);
@@ -224,22 +223,22 @@ namespace Romero.Windows.Screens
             else
             {
                 //Multiplayer player content load
-                switch (PlayerNames.Count)
+                switch (_playerNames.Count)
                 {
                     case 2:
-                        multiPlayerOne.LoadContent(_content);
-                        multiPlayerTwo.LoadContent(_content);
+                        _multiPlayerOne.LoadContent(_content);
+                        _multiPlayerTwo.LoadContent(_content);
                         break;
                     case 3:
-                        multiPlayerOne.LoadContent(_content);
-                        multiPlayerTwo.LoadContent(_content);
-                        multiPlayerThree.LoadContent(_content);
+                        _multiPlayerOne.LoadContent(_content);
+                        _multiPlayerTwo.LoadContent(_content);
+                        _multiPlayerThree.LoadContent(_content);
                         break;
                     case 4:
-                        multiPlayerOne.LoadContent(_content);
-                        multiPlayerTwo.LoadContent(_content);
-                        multiPlayerThree.LoadContent(_content);
-                        multiPlayerFour.LoadContent(_content);
+                        _multiPlayerOne.LoadContent(_content);
+                        _multiPlayerTwo.LoadContent(_content);
+                        _multiPlayerThree.LoadContent(_content);
+                        _multiPlayerFour.LoadContent(_content);
                         break;
                 }
             }
@@ -303,17 +302,18 @@ namespace Romero.Windows.Screens
 
             if (_currentGameMode == GameMode.Multiplayer)
             {
-                if (Convert.ToInt32(multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
-                    Convert.ToInt32(multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || multiPlayerOne.Angle != _previousAngle)
+                if (Convert.ToInt32(_multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
+                    Convert.ToInt32(_multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || _multiPlayerOne.Angle != _previousAngle)
                 {
                     var om = _client.CreateMessage();
-                    om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
-                    om.Write(Convert.ToInt32(multiPlayerOne.SpritePosition.Y));
-                    om.Write(multiPlayerOne.Angle);
+                    om.Write(false);
+                    om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
+                    om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.Y));
+                    om.Write(_multiPlayerOne.Angle);
                     _client.SendMessage(om, NetDeliveryMethod.Unreliable);
-                    _previousSpritePositionX = Convert.ToInt32(multiPlayerOne.SpritePosition.X);
-                    _previousSpritePositionY = Convert.ToInt32(multiPlayerOne.SpritePosition.Y);
-                    _previousAngle = multiPlayerOne.Angle;
+                    _previousSpritePositionX = Convert.ToInt32(_multiPlayerOne.SpritePosition.X);
+                    _previousSpritePositionY = Convert.ToInt32(_multiPlayerOne.SpritePosition.Y);
+                    _previousAngle = _multiPlayerOne.Angle;
                 }
 
                 ServerWork();
@@ -375,8 +375,8 @@ namespace Romero.Windows.Screens
                         var x = msg.ReadFloat();
                         var y = msg.ReadFloat();
                         float angle = msg.ReadFloat();
-                        PlayerAngles[who] = angle;
-                        PlayerPositions[who] = new Vector2(x, y);
+                        _playerAngles[who] = angle;
+                        _playerPositions[who] = new Vector2(x, y);
                         break;
                     case NetIncomingMessageType.WarningMessage:
 
@@ -407,7 +407,7 @@ namespace Romero.Windows.Screens
                 }
                 else
                 {
-                    direction = z.SpritePosition - multiPlayerOne.SpritePosition;
+                    direction = z.SpritePosition - _multiPlayerOne.SpritePosition;
                 }
 
                 var angle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
@@ -422,14 +422,14 @@ namespace Romero.Windows.Screens
             else
             {
                 //Multiplayer Draw
-                multiPlayerOne.Draw(spriteBatch);
+                _multiPlayerOne.Draw(spriteBatch);
                 var i = 0;
-                PlayerPositions.Remove(_client.UniqueIdentifier);
-                foreach (var playerPosition in PlayerPositions)
+                _playerPositions.Remove(_client.UniqueIdentifier);
+                foreach (var playerPosition in _playerPositions)
                 {
-                    var angle = PlayerAngles.Single(a => a.Key == playerPosition.Key);
-                    
-                    otherPlayers[i].Draw(spriteBatch, playerPosition.Value,angle.Value);
+                    var angle = _playerAngles.Single(a => a.Key == playerPosition.Key);
+
+                    _otherPlayers[i].Draw(spriteBatch, playerPosition.Value, angle.Value);
                     i++;
                 }
 
@@ -511,7 +511,7 @@ namespace Romero.Windows.Screens
                 else
                 {
                     //Multiplayer movement update
-                    multiPlayerOne.Update(_gT, _cam);
+                    _multiPlayerOne.Update(_gT, _cam);
                 }
 
 
@@ -525,7 +525,7 @@ namespace Romero.Windows.Screens
                 }
                 else
                 {
-                    z.Update(_gT, multiPlayerOne);
+                    z.Update(_gT, _multiPlayerOne);
                 }
             }
 
@@ -550,7 +550,7 @@ namespace Romero.Windows.Screens
                 }
                 else
                 {
-                    foreach (var b in multiPlayerOne.Bullets)
+                    foreach (var b in _multiPlayerOne.Bullets)
                     {
                         if (z.BoundingBox.Intersects(b.BoundingBox) && z.Visible && b.Visible)
                         {
@@ -605,11 +605,11 @@ namespace Romero.Windows.Screens
                 }
                 else
                 {
-                    if (z.BoundingBox.Intersects(multiPlayerOne.BoundingBox) && z.Visible && multiPlayerOne.CurrentState != Player.State.Dodging && !multiPlayerOne.Invulnerable)
+                    if (z.BoundingBox.Intersects(_multiPlayerOne.BoundingBox) && z.Visible && _multiPlayerOne.CurrentState != Player.State.Dodging && !_multiPlayerOne.Invulnerable)
                     {
 
-                        multiPlayerOne.Health -= 10;
-                        multiPlayerOne.Invulnerable = true;
+                        _multiPlayerOne.Health -= 10;
+                        _multiPlayerOne.Invulnerable = true;
 
                     }
                 }
@@ -630,7 +630,7 @@ namespace Romero.Windows.Screens
                 }
                 else
                 {
-                    if (z.BoundingBox.Intersects(multiPlayerOne.Sword.BoundingBox) && z.Visible && multiPlayerOne.Sword.Visible)
+                    if (z.BoundingBox.Intersects(_multiPlayerOne.Sword.BoundingBox) && z.Visible && _multiPlayerOne.Sword.Visible)
                     {
 
                         KillZombie(z, _zombieSpawnChecker);
@@ -674,10 +674,10 @@ namespace Romero.Windows.Screens
             }
             else
             {
-                if (multiPlayerOne.Health <= 0 && !multiPlayerOne.Dead)
+                if (_multiPlayerOne.Health <= 0 && !_multiPlayerOne.Dead)
                 {
-                    multiPlayerOne.Dead = true;
-                    multiPlayerOne.Visible = false;
+                    _multiPlayerOne.Dead = true;
+                    _multiPlayerOne.Visible = false;
                     ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
                 }
             }

@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -37,6 +38,10 @@ namespace Romero.Windows
             {
                 CreateUserConfig();
             }
+
+            var config = XDocument.Load(Path.Combine(_userConfigPath, "config.us"));
+            var username = config.Root.Element("Username");
+            Global.PlayerName = username.Value;
 
             Graphics = new GraphicsDeviceManager(this)
             {
@@ -130,10 +135,8 @@ namespace Romero.Windows
             Directory.CreateDirectory(_userConfigPath);
             var doc = new XDocument
                 (new XComment("User configuration files"),
-                new XElement("Root",
-                    new XElement("SelectedCharacter", "Fraser"),
-                    new XElement("SelectedDifficulty", "Normal"),
-                    new XElement("IsDiagnosticsOpen", "true"))
+                    new XElement("Root",
+                    new XElement("Username", "Player 1"))
                     );
             doc.Save(Path.Combine(_userConfigPath, "config.us"));
 
