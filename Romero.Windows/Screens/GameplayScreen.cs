@@ -31,7 +31,8 @@ namespace Romero.Windows.Screens
         private readonly Player _singlePlayerPlayer;
         private GameTime _gT;
         private readonly List<Zombie> _lZombies;
-        private SpriteFont _font;
+        private SpriteFont _diagnosticFont;
+        private SpriteFont _waveFont;
         TimeSpan _elapsedTime = TimeSpan.Zero;
         float _pauseAlpha;
         readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096);
@@ -39,6 +40,8 @@ namespace Romero.Windows.Screens
         Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
+        private bool _everythingIsLoaded;
+        private SoundEffect bell;
 
         #region Multiplayer
         private readonly NetClient _client;
@@ -54,7 +57,7 @@ namespace Romero.Windows.Screens
 
         private int _previousSpritePositionX = 2048;
         private int _previousSpritePositionY = 2048;
-        private float _previousAngle = 0;
+        private float _previousAngle;
 
         enum GameMode
         {
@@ -85,6 +88,10 @@ namespace Romero.Windows.Screens
         private float vibrationCounterStart;
         */
         #endregion
+
+        private bool waveNotify = false;
+        private int notifyTime = 3;
+        private float notifyCounterStart;
 
         #endregion
 
@@ -129,6 +136,7 @@ namespace Romero.Windows.Screens
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
+
         }
 
 
@@ -207,6 +215,7 @@ namespace Romero.Windows.Screens
             _lZombies = new List<Zombie>();
             _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
+      
         }
 
         void GameInProgress_Exiting(object sender, EventArgs e)
@@ -272,8 +281,9 @@ namespace Romero.Windows.Screens
                 z.LoadContent(_content);
             }
 
-            _font = _content.Load<SpriteFont>("Fonts/font");
-
+            _diagnosticFont = _content.Load<SpriteFont>("Fonts/font");
+            _waveFont = _content.Load<SpriteFont>("Fonts/waveFont");
+            bell = _content.Load<SoundEffect>("Sounds/bell");
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -281,6 +291,7 @@ namespace Romero.Windows.Screens
             // timing mechanism that we have just finished a very long frame, and that
             // it should not try to catch up.
             ScreenManager.Game.ResetElapsedTime();
+            waveNotify = true;
         }
 
 
@@ -320,9 +331,11 @@ namespace Romero.Windows.Screens
         /// </summary>
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
-        {
+        { 
+            _gT = gameTime;
             FadeOutSong(gameTime, 0.1f, 0.01f, 0.05f);
 
+            #region Multiplayer
             if (_currentGameMode == GameMode.Multiplayer)
             {
                 if (Convert.ToInt32(_multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
@@ -341,27 +354,38 @@ namespace Romero.Windows.Screens
 
                 ServerWork();
             }
+            #endregion
 
+            if (waveNotify)
+            {
+                notifyCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                if (notifyCounterStart >= notifyTime)
+                {
 
-
+                    waveNotify = false;
+                    notifyCounterStart = 0f;
+                }
+            }
 
             //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {
+                waveNotify = true;
                 _deadZombies = 0;
                 _zombieModifier++;
                 _difficultyModifier++;
-
+                 
                 _lZombies.Clear();
                 AddZombies(_zombieModifier * _difficultyModifier); //Add the next batch
                 _wave++;
+
                 foreach (var z in _lZombies)
                 {
                     z.LoadContent(_content);
                 }
+                bell.Play();
             }
 
-            _gT = gameTime; //To update the player
 
             #region FPS calculation
 
@@ -467,6 +491,11 @@ namespace Romero.Windows.Screens
 
             DrawDiagnostics(spriteBatch);
 
+            if (waveNotify && _everythingIsLoaded)
+            {
+                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth/2-70,Global.DeviceInUse.PreferredBackBufferHeight * 2/8), Color.Red);
+            }
+
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.
@@ -474,6 +503,11 @@ namespace Romero.Windows.Screens
             {
                 var alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
                 ScreenManager.FadeBackBufferToBlack(alpha);
+            }
+            
+            if (!_everythingIsLoaded)
+            {
+                _everythingIsLoaded = true;
             }
         }
 
@@ -731,8 +765,8 @@ namespace Romero.Windows.Screens
             _frameCounter++;
             if (Global.IsDiagnosticsOpen)
             {
-                spriteBatch.DrawString(_font, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
-                spriteBatch.DrawString(_font,
+                spriteBatch.DrawString(_diagnosticFont, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);
+                spriteBatch.DrawString(_diagnosticFont,
                       _singlePlayerPlayer.Invulnerable
                           ? string.Format("Player health: {0}\nCharacter Name: {1}\nState: {2}, Invulnerable",
                               _singlePlayerPlayer.Health, _singlePlayerPlayer.FullCharacterName, _singlePlayerPlayer.CurrentState)

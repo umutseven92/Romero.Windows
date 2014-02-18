@@ -81,6 +81,7 @@
     <Compile Include="Classes\Sprite.cs" />
     <Compile Include="Classes\Sword.cs" />
     <Compile Include="Classes\Zombie.cs" />
+    <Compile Include="Screens\WaveNotifier.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
@@ -131,7 +132,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Content\Fonts\waveFont.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Sprites\becky.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -203,6 +208,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Music\nightshift.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Sounds\bell.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
