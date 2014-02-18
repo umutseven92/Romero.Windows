@@ -34,7 +34,7 @@ namespace Romero.Windows
         /// <summary>
         /// Full screen
         /// </summary>
-        public static bool IsFullScreen = false;
+        public static bool IsFullScreen = true;
 
         public static bool Windowed = false;
         /// <summary>

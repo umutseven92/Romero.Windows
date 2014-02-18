@@ -195,12 +195,12 @@ namespace Romero.Windows.Screens
                     _otherPlayers.Add(_multiPlayerTwo);
                     _otherPlayers.Add(_multiPlayerThree);
                     _otherPlayers.Add(_multiPlayerFour);
-                    
+
 
                     break;
             }
 
-            
+
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _multiPlayerOne);
             _multiPlayerOne.GetCamera(_cam);
 
@@ -253,17 +253,19 @@ namespace Romero.Windows.Screens
                         _multiPlayerFour.LoadContent(_content);
                         break;
                 }
+
+
+                var i = 0;
+                _playerNames.Remove(_client.UniqueIdentifier);
+                foreach (var p in _playerNames)
+                {
+                    _otherPlayers[i].id = p.Key;
+                    _otherPlayers[i].playerName = p.Value;
+                    i++;
+                }
+                _playerNames.Clear();
             }
 
-            var i = 0;
-            _playerNames.Remove(_client.UniqueIdentifier);
-            foreach (var p in _playerNames)
-            {
-                _otherPlayers[i].id = p.Key;
-                _otherPlayers[i].playerName = p.Value;
-                i++;
-            }
-            _playerNames.Clear();
 
             foreach (var z in _lZombies)
             {
@@ -340,9 +342,9 @@ namespace Romero.Windows.Screens
                 ServerWork();
             }
 
-            
 
-            
+
+
             //All zombies in the wave are dead
             if (_deadZombies == _lZombies.Count)
             {
