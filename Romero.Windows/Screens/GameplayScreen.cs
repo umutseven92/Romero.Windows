@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Xml;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -24,40 +23,47 @@ namespace Romero.Windows.Screens
     /// </summary>
     class GameplayScreen : GameScreen
     {
-
         #region Declarations
 
         ContentManager _content;
         private readonly Player _singlePlayerPlayer;
         private GameTime _gT;
         private readonly List<Zombie> _lZombies;
-        private SpriteFont _diagnosticFont;
-        private SpriteFont _waveFont;
         TimeSpan _elapsedTime = TimeSpan.Zero;
         float _pauseAlpha;
-        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096);
+        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096); //Map size
         private readonly Camera2D _cam;
-        Texture2D _backgroundTexture;
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
         private bool _everythingIsLoaded;
-        private SoundEffect bell;
+
+        #region Texture & Song & Font & Sound Effect
+
+        Texture2D _backgroundTexture;
+        private SpriteFont _diagnosticFont;
+        private SpriteFont _waveFont;
+        private SoundEffect _bell;
+
+        #endregion
 
         #region Multiplayer
+
         private readonly NetClient _client;
         private readonly Dictionary<long, string> _playerNames;
         private readonly Dictionary<long, Vector2> _playerPositions = new Dictionary<long, Vector2>();
         private readonly Dictionary<long, float> _playerAngles = new Dictionary<long, float>();
-        private readonly Player _multiPlayerOne;
-        private readonly PlayerPuppet _multiPlayerTwo;
-        private readonly PlayerPuppet _multiPlayerThree;
-        private readonly PlayerPuppet _multiPlayerFour;
+        private Player _multiPlayerOne;
+        private PlayerPuppet _multiPlayerTwo;
+        private PlayerPuppet _multiPlayerThree;
+        private PlayerPuppet _multiPlayerFour;
         private readonly List<PlayerPuppet> _otherPlayers = new List<PlayerPuppet>();
-        #endregion
-
         private int _previousSpritePositionX = 2048;
         private int _previousSpritePositionY = 2048;
         private float _previousAngle;
+
+        #endregion
+
+        #region Game Mode
 
         enum GameMode
         {
@@ -67,18 +73,26 @@ namespace Romero.Windows.Screens
 
         private readonly GameMode _currentGameMode;
 
+        #endregion
+
         #region Zombie Values
+
         private int _deadZombies;
         private int _zombieModifier; //Zombie base spawn rate, increases with higher difficulty
         private int _difficultyModifier; //Difficulty rate,  increases with higher difficulty
         private int _diagZombieCount; //Diagnostics - zombie count
-        private int _wave;
+        private int _wave = 1;
         int _zombieSpawnChecker;
+        private int _howManyZombiesEachRound = 10;
+        private const float HowManyZombieModifier = 1.5f;
+
         #endregion
 
-        #region FPS counter
+        #region FPS Counter
+
         int _frameRate;
         int _frameCounter;
+
         #endregion
 
         #region Vibration Timer
@@ -89,9 +103,13 @@ namespace Romero.Windows.Screens
         */
         #endregion
 
-        private bool waveNotify = false;
-        private int notifyTime = 3;
-        private float notifyCounterStart;
+        #region Wave Notifier
+
+        private bool _waveNotify;
+        private const int NotifyTime = 3;
+        private float _notifyCounterStart;
+
+        #endregion
 
         #endregion
 
@@ -105,41 +123,16 @@ namespace Romero.Windows.Screens
 
             _currentGameMode = GameMode.Singleplayer;
 
-            #region Difficulty
+            SetDifficulty();
 
-            switch (Global.SelectedDifficulty)
-            {
-                case Global.Difficulty.Easy:
-                    _zombieModifier = 1;
-                    _difficultyModifier = 5;
-                    break;
-                case Global.Difficulty.Normal:
-                    _zombieModifier = 2;
-                    _difficultyModifier = 6;
-                    break;
-                case Global.Difficulty.Hard:
-                    _zombieModifier = 3;
-                    _difficultyModifier = 7;
-                    break;
-                case Global.Difficulty.Insane:
-                    _zombieModifier = 5;
-                    _difficultyModifier = 8;
-                    break;
-            }
-
-            #endregion
             _singlePlayerPlayer = new Player();
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _singlePlayerPlayer);
             _singlePlayerPlayer.GetCamera(_cam);
 
-
             _lZombies = new List<Zombie>();
-            _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
 
         }
-
-
 
         /// <summary>
         /// Multiplayer Constructor
@@ -150,82 +143,24 @@ namespace Romero.Windows.Screens
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-            #region Difficulty
 
-            switch (Global.SelectedDifficulty)
-            {
-                case Global.Difficulty.Easy:
-                    _zombieModifier = 1;
-                    _difficultyModifier = 5;
-                    break;
-                case Global.Difficulty.Normal:
-                    _zombieModifier = 2;
-                    _difficultyModifier = 6;
-                    break;
-                case Global.Difficulty.Hard:
-                    _zombieModifier = 3;
-                    _difficultyModifier = 7;
-                    break;
-                case Global.Difficulty.Insane:
-                    _zombieModifier = 5;
-                    _difficultyModifier = 8;
-                    break;
-            }
-
-            #endregion
+            SetDifficulty();
 
             Global.GameInProgress.Exiting += GameInProgress_Exiting;
             _currentGameMode = GameMode.Multiplayer;
             _client = client;
             _playerNames = players;
 
-            switch (_playerNames.Count)
-            {
-                case 2:
-                    _multiPlayerOne = new Player();
-                    _multiPlayerTwo = new PlayerPuppet();
-                    _otherPlayers.Add(_multiPlayerTwo);
-
-                    break;
-                case 3:
-                    _multiPlayerOne = new Player();
-                    _multiPlayerTwo = new PlayerPuppet();
-                    _multiPlayerThree = new PlayerPuppet();
-                    _otherPlayers.Add(_multiPlayerTwo);
-                    _otherPlayers.Add(_multiPlayerThree);
-
-                    break;
-                case 4:
-                    _multiPlayerOne = new Player();
-                    _multiPlayerTwo = new PlayerPuppet();
-                    _multiPlayerThree = new PlayerPuppet();
-                    _multiPlayerFour = new PlayerPuppet();
-                    _otherPlayers.Add(_multiPlayerTwo);
-                    _otherPlayers.Add(_multiPlayerThree);
-                    _otherPlayers.Add(_multiPlayerFour);
-
-
-                    break;
-            }
-
+            InitializeMultiplayerPlayers(_playerNames.Count);
 
             _cam = new Camera2D(new Viewport(0, 0, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferWidth, Global.DeviceInUse.GraphicsDevice.PresentationParameters.BackBufferHeight), _multiPlayerOne);
             _multiPlayerOne.GetCamera(_cam);
 
             _lZombies = new List<Zombie>();
-            _wave = 1;
             AddZombies(_zombieModifier * _difficultyModifier);
-      
+
         }
 
-        void GameInProgress_Exiting(object sender, EventArgs e)
-        {
-            if (_currentGameMode == GameMode.Multiplayer)
-            {
-                _client.Disconnect("Client shutdown");
-                _client.Shutdown("Client shutdown");
-            }
-        }
 
         /// <summary>
         /// Load graphics content for the game.
@@ -235,7 +170,16 @@ namespace Romero.Windows.Screens
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
+            #region Load Assets
+
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
+            _diagnosticFont = _content.Load<SpriteFont>("Fonts/font");
+            _waveFont = _content.Load<SpriteFont>("Fonts/waveFont");
+            _bell = _content.Load<SoundEffect>("Sounds/bell");
+
+            #endregion
+
+            #region Load Players
 
             if (_currentGameMode == GameMode.Singleplayer)
             {
@@ -243,26 +187,7 @@ namespace Romero.Windows.Screens
             }
             else
             {
-                //Multiplayer player content load
-                switch (_playerNames.Count)
-                {
-                    case 2:
-                        _multiPlayerOne.LoadContent(_content);
-                        _multiPlayerTwo.LoadContent(_content);
-                        break;
-                    case 3:
-                        _multiPlayerOne.LoadContent(_content);
-                        _multiPlayerTwo.LoadContent(_content);
-                        _multiPlayerThree.LoadContent(_content);
-                        break;
-                    case 4:
-                        _multiPlayerOne.LoadContent(_content);
-                        _multiPlayerTwo.LoadContent(_content);
-                        _multiPlayerThree.LoadContent(_content);
-                        _multiPlayerFour.LoadContent(_content);
-                        break;
-                }
-
+                LoadMultiplayerPlayers(_playerNames.Count);
 
                 var i = 0;
                 _playerNames.Remove(_client.UniqueIdentifier);
@@ -275,15 +200,17 @@ namespace Romero.Windows.Screens
                 _playerNames.Clear();
             }
 
+            #endregion
+
+            #region Load Zombies
 
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
             }
 
-            _diagnosticFont = _content.Load<SpriteFont>("Fonts/font");
-            _waveFont = _content.Load<SpriteFont>("Fonts/waveFont");
-            bell = _content.Load<SoundEffect>("Sounds/bell");
+            #endregion
+
             //Screen Delay
             Thread.Sleep(1000);
 
@@ -291,9 +218,8 @@ namespace Romero.Windows.Screens
             // timing mechanism that we have just finished a very long frame, and that
             // it should not try to catch up.
             ScreenManager.Game.ResetElapsedTime();
-            waveNotify = true;
+            _waveNotify = true;
         }
-
 
         /// <summary>
         /// Unload graphics content used by the game.
@@ -303,27 +229,6 @@ namespace Romero.Windows.Screens
             _content.Unload();
         }
 
-
-        private void FadeOutSong(GameTime gameTime, float fadeDuration, float valueToMuteIn,
-            float valueToFade)
-        {
-            if (MediaPlayer.Volume > valueToMuteIn && MediaPlayer.State == MediaState.Playing)
-            {
-                _songFadeCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (_songFadeCounterStart >= fadeDuration)
-                {
-                    MediaPlayer.Volume -= valueToFade;
-                    _songFadeCounterStart = 0;
-                }
-
-            }
-            if (MediaPlayer.Volume < 0)
-            {
-                MediaPlayer.Stop();
-            }
-        }
-
         /// <summary>
         /// Updates the state of the game. This method checks the GameScreen.IsActive
         /// property, so the game will stop updating when the pause menu is active,
@@ -331,66 +236,35 @@ namespace Romero.Windows.Screens
         /// </summary>
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
-        { 
+        {
             _gT = gameTime;
             FadeOutSong(gameTime, 0.1f, 0.01f, 0.05f);
 
-            #region Multiplayer
             if (_currentGameMode == GameMode.Multiplayer)
             {
-                if (Convert.ToInt32(_multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
-                    Convert.ToInt32(_multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || _multiPlayerOne.Angle != _previousAngle)
-                {
-                    var om = _client.CreateMessage();
-                    om.Write(Global.PlayerName);
-                    om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
-                    om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.Y));
-                    om.Write(_multiPlayerOne.Angle);
-                    _client.SendMessage(om, NetDeliveryMethod.Unreliable);
-                    _previousSpritePositionX = Convert.ToInt32(_multiPlayerOne.SpritePosition.X);
-                    _previousSpritePositionY = Convert.ToInt32(_multiPlayerOne.SpritePosition.Y);
-                    _previousAngle = _multiPlayerOne.Angle;
-                }
-
-                ServerWork();
+                SendInfoToServer();
+                ReadInfoFromServer();
             }
+
+            #region Wave Notifier
+
+            if (_waveNotify)
+            {
+                _notifyCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
+                if (_notifyCounterStart >= NotifyTime)
+                {
+                    _waveNotify = false;
+                    _notifyCounterStart = 0f;
+                }
+            }
+
             #endregion
 
-            if (waveNotify)
-            {
-                notifyCounterStart += (float)_gT.ElapsedGameTime.TotalSeconds;
-                if (notifyCounterStart >= notifyTime)
-                {
-
-                    waveNotify = false;
-                    notifyCounterStart = 0f;
-                }
-            }
-
-            //All zombies in the wave are dead
-            if (_deadZombies == _lZombies.Count)
-            {
-                waveNotify = true;
-                _deadZombies = 0;
-                _zombieModifier++;
-                _difficultyModifier++;
-                 
-                _lZombies.Clear();
-                AddZombies(_zombieModifier * _difficultyModifier); //Add the next batch
-                _wave++;
-
-                foreach (var z in _lZombies)
-                {
-                    z.LoadContent(_content);
-                }
-                bell.Play();
-            }
-
+            CheckZombieDeaths();
 
             #region FPS calculation
 
             _elapsedTime += gameTime.ElapsedGameTime;
-
             if (_elapsedTime > TimeSpan.FromSeconds(1))
             {
                 _elapsedTime -= TimeSpan.FromSeconds(1);
@@ -408,40 +282,14 @@ namespace Romero.Windows.Screens
 
         }
 
-        private void ServerWork()
-        {
-            NetIncomingMessage msg;
-            while ((msg = _client.ReadMessage()) != null)
-            {
-
-                switch (msg.MessageType)
-                {
-
-                    case NetIncomingMessageType.Data:
-                        long who = msg.ReadInt64();
-                        string name = msg.ReadString();
-                        var x = msg.ReadFloat();
-                        var y = msg.ReadFloat();
-                        float angle = msg.ReadFloat();
-                        _playerNames[who] = name;
-                        _playerAngles[who] = angle;
-                        _playerPositions[who] = new Vector2(x, y);
-                        break;
-                    case NetIncomingMessageType.WarningMessage:
-
-                        break;
-
-                }
-            }
-        }
-
-
         public override void Draw(GameTime gameTime)
         {
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
                                                  Color.DarkGreen, 0, 0);
 
             var spriteBatch = ScreenManager.SpriteBatch;
+
+            #region Draw Everything But GUI
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, _cam.Transform);
 
@@ -464,39 +312,50 @@ namespace Romero.Windows.Screens
                 z.Draw(spriteBatch, angle);
             }
 
+            #region Draw Players
+
             if (_currentGameMode == GameMode.Singleplayer)
             {
                 _singlePlayerPlayer.Draw(spriteBatch);
             }
             else
             {
-                //Multiplayer Draw
                 _multiPlayerOne.Draw(spriteBatch);
                 var i = 0;
                 _playerPositions.Remove(_client.UniqueIdentifier);
                 foreach (var playerPosition in _playerPositions)
                 {
                     var angle = _playerAngles.Single(a => a.Key == playerPosition.Key);
-
                     _otherPlayers[i].Draw(spriteBatch, playerPosition.Value, angle.Value);
                     i++;
                 }
 
             }
 
+            #endregion
 
             spriteBatch.End();
+
+            #endregion
+
+            #region Draw GUI
 
             spriteBatch.Begin();
 
             DrawDiagnostics(spriteBatch);
 
-            if (waveNotify && _everythingIsLoaded)
+            #region Draw Wave Notifier
+
+            if (_waveNotify && _everythingIsLoaded)
             {
-                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth/2-70,Global.DeviceInUse.PreferredBackBufferHeight * 2/8), Color.Red);
+                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth / 2 - 70, Global.DeviceInUse.PreferredBackBufferHeight * 2 / 8), Color.Red);
             }
 
+            #endregion
+
             spriteBatch.End();
+
+            #endregion
 
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || _pauseAlpha > 0)
@@ -504,7 +363,7 @@ namespace Romero.Windows.Screens
                 var alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
-            
+
             if (!_everythingIsLoaded)
             {
                 _everythingIsLoaded = true;
@@ -527,7 +386,6 @@ namespace Romero.Windows.Screens
             {
                 Global.IsDiagnosticsOpen = !Global.IsDiagnosticsOpen;
             }
-
 
             #region Developer Kill Cheat
 
@@ -563,30 +421,29 @@ namespace Romero.Windows.Screens
             }
             else
             {
+                #region Player Movement
+
                 if (_currentGameMode == GameMode.Singleplayer)
                 {
-                    _singlePlayerPlayer.Update(_gT, _cam); // Player movement
+                    _singlePlayerPlayer.Update(_gT, _cam);
                 }
                 else
                 {
-                    //Multiplayer movement update
                     _multiPlayerOne.Update(_gT, _cam);
                 }
 
+                #endregion
 
             }
+
+            #region Zombie Movement
 
             foreach (var z in _lZombies)
             {
-                if (_currentGameMode == GameMode.Singleplayer)
-                {
-                    z.Update(_gT, _singlePlayerPlayer); //Zombie movement
-                }
-                else
-                {
-                    z.Update(_gT, _multiPlayerOne);
-                }
+                z.Update(_gT, _currentGameMode == GameMode.Singleplayer ? _singlePlayerPlayer : _multiPlayerOne);
             }
+
+            #endregion
 
             #region Collision
 
@@ -682,18 +539,14 @@ namespace Romero.Windows.Screens
                 {
                     if (z.BoundingBox.Intersects(_singlePlayerPlayer.Sword.BoundingBox) && z.Visible && _singlePlayerPlayer.Sword.Visible)
                     {
-
                         KillZombie(z, _zombieSpawnChecker);
-
                     }
                 }
                 else
                 {
                     if (z.BoundingBox.Intersects(_multiPlayerOne.Sword.BoundingBox) && z.Visible && _multiPlayerOne.Sword.Visible)
                     {
-
                         KillZombie(z, _zombieSpawnChecker);
-
                     }
                 }
 
@@ -721,7 +574,6 @@ namespace Romero.Windows.Screens
 
             #region Player Death & Game Over
 
-
             if (_currentGameMode == GameMode.Singleplayer)
             {
                 if (_singlePlayerPlayer.Health <= 0 && !_singlePlayerPlayer.Dead)
@@ -740,9 +592,12 @@ namespace Romero.Windows.Screens
                     ScreenManager.AddScreen(new GameOverScreen(), ControllingPlayer);
                 }
             }
+
             #endregion
 
         }
+
+        #region Methods
 
         /// <summary>
         /// Add zombies to the game
@@ -752,7 +607,7 @@ namespace Romero.Windows.Screens
             Global.ZombieSpawnDelay = 0;
             for (var i = 0; i < count; i++)
             {
-                _lZombies.Add(new Zombie { Id = i });
+                _lZombies.Add(new Zombie(_howManyZombiesEachRound) { Id = i });
             }
             _diagZombieCount = count;
         }
@@ -801,7 +656,183 @@ namespace Romero.Windows.Screens
             zombieSpawnChecker = 0;
         }
 
+        /// <summary>
+        /// Send name, position and angle
+        /// </summary>
+        public void SendInfoToServer()
+        {
+            if (Convert.ToInt32(_multiPlayerOne.SpritePosition.X) != _previousSpritePositionX ||
+                    Convert.ToInt32(_multiPlayerOne.SpritePosition.Y) != _previousSpritePositionY || _multiPlayerOne.Angle != _previousAngle)
+            {
+                var om = _client.CreateMessage();
+                om.Write(Global.PlayerName);
+                om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.X)); // very inefficient to send a full Int32 (4 bytes) but we'll use this for simplicity
+                om.Write(Convert.ToInt32(_multiPlayerOne.SpritePosition.Y));
+                om.Write(_multiPlayerOne.Angle);
+                _client.SendMessage(om, NetDeliveryMethod.Unreliable);
+                _previousSpritePositionX = Convert.ToInt32(_multiPlayerOne.SpritePosition.X);
+                _previousSpritePositionY = Convert.ToInt32(_multiPlayerOne.SpritePosition.Y);
+                _previousAngle = _multiPlayerOne.Angle;
+            }
+        }
 
+        public void CheckZombieDeaths()
+        {
+            if (_deadZombies == _lZombies.Count)
+            {
+                _waveNotify = true;
+                _deadZombies = 0;
+                _zombieModifier++;
+                _difficultyModifier++;
+                _howManyZombiesEachRound = (int)(_howManyZombiesEachRound * HowManyZombieModifier);
+                _lZombies.Clear();
+                AddZombies(_zombieModifier * _difficultyModifier); //Add the next batch
+                _wave++;
+
+                foreach (var z in _lZombies)
+                {
+                    z.LoadContent(_content);
+                }
+
+                _bell.Play();
+            }
+        }
+
+        /// <summary>
+        /// Read name, position and angle
+        /// </summary>
+        private void ReadInfoFromServer()
+        {
+            NetIncomingMessage msg;
+            while ((msg = _client.ReadMessage()) != null)
+            {
+
+                switch (msg.MessageType)
+                {
+
+                    case NetIncomingMessageType.Data:
+                        var who = msg.ReadInt64();
+                        var name = msg.ReadString();
+                        var x = msg.ReadFloat();
+                        var y = msg.ReadFloat();
+                        var angle = msg.ReadFloat();
+                        _playerNames[who] = name;
+                        _playerAngles[who] = angle;
+                        _playerPositions[who] = new Vector2(x, y);
+                        break;
+                    case NetIncomingMessageType.WarningMessage:
+
+                        break;
+
+                }
+            }
+        }
+
+        public void SetDifficulty()
+        {
+            switch (Global.SelectedDifficulty)
+            {
+                case Global.Difficulty.Easy:
+                    _zombieModifier = 1;
+                    _difficultyModifier = 5;
+                    break;
+                case Global.Difficulty.Normal:
+                    _zombieModifier = 2;
+                    _difficultyModifier = 6;
+                    break;
+                case Global.Difficulty.Hard:
+                    _zombieModifier = 3;
+                    _difficultyModifier = 7;
+                    break;
+                case Global.Difficulty.Insane:
+                    _zombieModifier = 5;
+                    _difficultyModifier = 8;
+                    break;
+            }
+        }
+
+        public void InitializeMultiplayerPlayers(int howManyPlayers)
+        {
+            switch (howManyPlayers)
+            {
+                case 2:
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
+
+                    break;
+                case 3:
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _multiPlayerThree = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
+                    _otherPlayers.Add(_multiPlayerThree);
+
+                    break;
+                case 4:
+                    _multiPlayerOne = new Player();
+                    _multiPlayerTwo = new PlayerPuppet();
+                    _multiPlayerThree = new PlayerPuppet();
+                    _multiPlayerFour = new PlayerPuppet();
+                    _otherPlayers.Add(_multiPlayerTwo);
+                    _otherPlayers.Add(_multiPlayerThree);
+                    _otherPlayers.Add(_multiPlayerFour);
+                    break;
+            }
+        }
+
+        public void LoadMultiplayerPlayers(int howManyPlayers)
+        {
+            switch (howManyPlayers)
+            {
+                case 2:
+                    _multiPlayerOne.LoadContent(_content);
+                    _multiPlayerTwo.LoadContent(_content);
+                    break;
+                case 3:
+                    _multiPlayerOne.LoadContent(_content);
+                    _multiPlayerTwo.LoadContent(_content);
+                    _multiPlayerThree.LoadContent(_content);
+                    break;
+                case 4:
+                    _multiPlayerOne.LoadContent(_content);
+                    _multiPlayerTwo.LoadContent(_content);
+                    _multiPlayerThree.LoadContent(_content);
+                    _multiPlayerFour.LoadContent(_content);
+                    break;
+            }
+        }
+
+        void GameInProgress_Exiting(object sender, EventArgs e)
+        {
+            if (_currentGameMode == GameMode.Multiplayer)
+            {
+                _client.Disconnect("Client shutdown");
+                _client.Shutdown("Client shutdown");
+            }
+        }
+
+        private void FadeOutSong(GameTime gameTime, float fadeDuration, float valueToMuteIn,
+            float valueToFade)
+        {
+            if (MediaPlayer.Volume > valueToMuteIn && MediaPlayer.State == MediaState.Playing)
+            {
+                _songFadeCounterStart += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (_songFadeCounterStart >= fadeDuration)
+                {
+                    MediaPlayer.Volume -= valueToFade;
+                    _songFadeCounterStart = 0;
+                }
+
+            }
+            if (MediaPlayer.Volume < 0)
+            {
+                MediaPlayer.Stop();
+            }
+        }
+
+        #endregion
 
     }
 }

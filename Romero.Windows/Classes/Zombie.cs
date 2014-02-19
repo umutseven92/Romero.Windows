@@ -26,8 +26,14 @@ namespace Romero.Windows.Classes
         public bool Dead = false;
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed;
+        private int spawningZombieAmount;
 
         #endregion
+
+        public Zombie(int spawnDelayAmount)
+        {
+            spawningZombieAmount = spawnDelayAmount;
+        }
 
         public void LoadContent(ContentManager contentManager)
         {
@@ -65,7 +71,7 @@ namespace Romero.Windows.Classes
             }
             #endregion
 
-            if (Global.ZombieSpawnDelay > 10)
+            if (Global.ZombieSpawnDelay > spawningZombieAmount)
             {
                 Visible = false;
             }
