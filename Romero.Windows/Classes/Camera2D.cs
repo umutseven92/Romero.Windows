@@ -72,7 +72,6 @@ namespace Romero.Windows.Classes
             _playerToFollow = player;
         }
 
-
         public void Update()
         {
             //CheckForInput();
@@ -95,19 +94,6 @@ namespace Romero.Windows.Classes
             MouseState = Mouse.GetState();
             KeyState = Keyboard.GetState();
 
-            #region Zoom
-            if (MouseState.ScrollWheelValue > Scroll)
-            {
-                _zoom += 0.1f;
-                Scroll = MouseState.ScrollWheelValue;
-            }
-            else if (MouseState.ScrollWheelValue < Scroll)
-            {
-                _zoom -= 0.1f;
-                Scroll = MouseState.ScrollWheelValue;
-            }
-            #endregion
-
             #region Rotation
             if (KeyState.IsKeyDown(Keys.Left))
             {
@@ -118,7 +104,20 @@ namespace Romero.Windows.Classes
                 _rotation += 0.1f;
             }
             #endregion
-
+           
+            #region Zoom
+            if (MouseState.ScrollWheelValue > Scroll)
+            {
+                _zoom += 0.1f;
+                Scroll = MouseState.ScrollWheelValue;
+                
+            }
+            else if (MouseState.ScrollWheelValue != 0 && MouseState.ScrollWheelValue < Scroll)
+            {
+                _zoom -= 0.1f;
+                Scroll = MouseState.ScrollWheelValue;
+            }
+            #endregion
         }
 
         /// <summary>

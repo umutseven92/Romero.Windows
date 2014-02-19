@@ -16,9 +16,12 @@ namespace Romero.Windows.Classes
     {
         #region Declarations
 
+        private int MapSize = 4096;
+        private int SpawnOffset = 200;
+
         public int Id { get; set; }
         const string ZombieAssetName = "zombieReworked";
-        
+
         private static readonly Random Random = new Random(); //Spawn position randomizer
         private static readonly Random HighSpeedRandom = new Random(); //Fast zombie randomizer
 
@@ -26,13 +29,13 @@ namespace Romero.Windows.Classes
         public bool Dead = false;
         Vector2 _direction = Vector2.Zero;
         Vector2 _speed;
-        private int spawningZombieAmount;
+        private readonly int _spawningZombieAmount;
 
         #endregion
 
         public Zombie(int spawnDelayAmount)
         {
-            spawningZombieAmount = spawnDelayAmount;
+            _spawningZombieAmount = spawnDelayAmount;
         }
 
         public void LoadContent(ContentManager contentManager)
@@ -41,18 +44,18 @@ namespace Romero.Windows.Classes
             switch (Global.ZombieSpawnSeed % 4)
             {
                 case 0:
-                    SpritePosition = new Vector2(Random.Next(-200, 4096), -200);
+                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, MapSize), -SpawnOffset);
                     break;
                 case 1:
-                    SpritePosition = new Vector2(4296, Random.Next(0, 4096));
+                    SpritePosition = new Vector2(MapSize + SpawnOffset, Random.Next(0, MapSize));
 
                     break;
                 case 2:
-                    SpritePosition = new Vector2(Random.Next(-200, 4296), 4296);
+                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, MapSize + SpawnOffset), MapSize + SpawnOffset);
 
                     break;
                 case 3:
-                    SpritePosition = new Vector2(-200, Random.Next(0, 4096));
+                    SpritePosition = new Vector2(-SpawnOffset, Random.Next(0, MapSize));
                     break;
             }
             #endregion
@@ -71,7 +74,7 @@ namespace Romero.Windows.Classes
             }
             #endregion
 
-            if (Global.ZombieSpawnDelay > spawningZombieAmount)
+            if (Global.ZombieSpawnDelay > _spawningZombieAmount)
             {
                 Visible = false;
             }

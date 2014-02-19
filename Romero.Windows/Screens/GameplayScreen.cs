@@ -348,7 +348,7 @@ namespace Romero.Windows.Screens
 
             if (_waveNotify && _everythingIsLoaded)
             {
-                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth / 2 - 70, Global.DeviceInUse.PreferredBackBufferHeight * 2 / 8), Color.Red);
+                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth / 2 - 70, Global.DeviceInUse.PreferredBackBufferHeight * 1/6), Color.Red);
             }
 
             #endregion

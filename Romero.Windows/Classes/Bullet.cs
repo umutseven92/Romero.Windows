@@ -14,13 +14,13 @@ namespace Romero.Windows.Classes
     public class Bullet : Sprite
     {
         #region Declarations
-        
+
         const int MaxDistance = 5000;
         private new const string AssetName = "bullet";
         public bool Visible = false;
         Vector2 _startPosition;
         Vector2 _direction;
-        private const float Speed = 1200f; 
+        private const float Speed = 1200f;
 
         #endregion
 
@@ -29,7 +29,7 @@ namespace Romero.Windows.Classes
             LoadContent(theContentManager, AssetName);
             ScaleCalc = 1f;
         }
-        
+
         public void Update(GameTime theGameTime)
         {
             if (Vector2.Distance(_startPosition, SpritePosition) > MaxDistance)
@@ -40,10 +40,9 @@ namespace Romero.Windows.Classes
             if (Visible)
             {
                 SpritePosition += _direction * Speed * (float)theGameTime.ElapsedGameTime.TotalSeconds;
-
             }
         }
-        
+
         public override void Draw(SpriteBatch theSpriteBatch)
         {
             if (Visible)
@@ -51,6 +50,8 @@ namespace Romero.Windows.Classes
                 base.Draw(theSpriteBatch);
             }
         }
+
+        #region Methods
 
         /// <summary>
         /// Set all the movement values
@@ -63,6 +64,7 @@ namespace Romero.Windows.Classes
             Visible = true;
         }
 
+        #endregion
 
     }
 }
