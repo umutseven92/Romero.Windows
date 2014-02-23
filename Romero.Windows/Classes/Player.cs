@@ -52,7 +52,7 @@ namespace Romero.Windows.Classes
         private SoundEffectInstance _arrowDrawInstance;
         #endregion
 
-        private const float SprintModifier = 2.0f;
+        private const float SprintModifier = 2f;
         internal bool Dead = false;
         float _playerAngle;
         public bool Visible = true;
@@ -116,7 +116,7 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "fraser";
                     FullCharacterName = "Knight Fraser";
                     _playerSpeed = 300;
-                    Health = 300;
+                    Health = 150;
                     _canDodge = false;
                     _dodgeModifier = 0f;
                     _sprintTime = 3;
@@ -131,10 +131,10 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "becky";
                     FullCharacterName = "Lady Rebecca";
                     _playerSpeed = 450;
-                    Health = 120;
+                    Health = 100;
                     _canDodge = true;
                     _dodgeModifier = 50f;
-                    _sprintTime = 7;
+                    _sprintTime = 5;
                     _sprintDelay = 4;
                     _swingDelay = 0.5f;
                     _bulletTimer = 1;
@@ -146,10 +146,10 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "ben";
                     FullCharacterName = "Sire Benjamin";
                     _playerSpeed = 340;
-                    Health = 150;
+                    Health = 120;
                     _canDodge = false;
                     _dodgeModifier = 0f;
-                    _sprintTime = 5;
+                    _sprintTime = 4;
                     _sprintDelay = 4;
                     _swingDelay = 0.7f;
                     _bulletTimer = 0.5f;
@@ -161,10 +161,10 @@ namespace Romero.Windows.Classes
                     PlayerAssetName = "deacon";
                     FullCharacterName = "Cleric Diakonos";
                     _playerSpeed = 400;
-                    Health = 100;
+                    Health = 80;
                     _canDodge = false;
                     _dodgeModifier = 0f;
-                    _sprintTime = 4;
+                    _sprintTime = 3;
                     _sprintDelay = 4;
                     _swingDelay = 1;
                     _bulletTimer = 1;

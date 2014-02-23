@@ -16,8 +16,8 @@ namespace Romero.Windows.Classes
     {
         #region Declarations
 
-        private int MapSize = 4096;
-        private int SpawnOffset = 200;
+        private const int MapSize = 4096;
+        private const int SpawnOffset = 200;
 
         public int Id { get; set; }
         const string ZombieAssetName = "zombieReworked";
