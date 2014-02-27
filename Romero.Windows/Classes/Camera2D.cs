@@ -74,7 +74,10 @@ namespace Romero.Windows.Classes
 
         public void Update()
         {
-            //CheckForInput();
+            if (Global.IsDiagnosticsOpen)
+            {
+                CheckForInput();
+            }
             _pos.X = -_playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth / 2;
             _pos.Y = -_playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2;
 
@@ -84,6 +87,8 @@ namespace Romero.Windows.Classes
                                        Matrix.CreateScale(new Vector3(_zoom, _zoom, 1)) *
                                        Matrix.CreateTranslation(_pos.X, _pos.Y, 0); //Create view matrix
             _inverseTransform = Matrix.Invert(_transform); //Update inverse matrix
+            
+
         }
 
         /// <summary>

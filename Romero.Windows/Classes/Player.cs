@@ -36,8 +36,8 @@ namespace Romero.Windows.Classes
         internal int Health;
         #endregion
 
-        const int StartPositionX = 2048;
-        const int StartPositionY = 2048;
+        const int StartPositionX = 6144;
+        const int StartPositionY = 6144;
         private const float ThumbstickDeadZone = 0.5f;
         const int MoveUp = -1;
         const int MoveDown = 1;
@@ -274,18 +274,18 @@ namespace Romero.Windows.Classes
             {
                 SpritePosition.X = 0;
             }
-            else if (SpritePosition.X >= 4096)
+            else if (SpritePosition.X >= Global.MapSize)
             {
-                SpritePosition.X = 4096 - Size.X;
+                SpritePosition.X = Global.MapSize - Size.X;
             }
 
             if (SpritePosition.Y <= 0)
             {
                 SpritePosition.Y = 0;
             }
-            else if (SpritePosition.Y >= 4096)
+            else if (SpritePosition.Y >= Global.MapSize)
             {
-                SpritePosition.Y = 4096 - Size.Y;
+                SpritePosition.Y = Global.MapSize - Size.Y;
             }
         }
 
@@ -314,6 +314,31 @@ namespace Romero.Windows.Classes
             {
                 if (currentMouseState.RightButton == ButtonState.Pressed && !Sword.Visible && _previousMouseState.RightButton != ButtonState.Pressed && CurrentState == State.Running && _canSwing)
                 {
+                    var curMouse = Mouse.GetState();
+                    var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+                    mouseLoc = Vector2.Transform(mouseLoc, _cam.InverseTransform); //Get the mouse pos relative to the camera
+                    var direction = (SpritePosition) - mouseLoc;
+
+                    if (!Global.Gamepad)
+                    {
+                        shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+                    }
+                    else
+                    {
+                        if ((currentGamepadState.ThumbSticks.Right.X <= -0.7f || currentGamepadState.ThumbSticks.Right.Y >= 0.7f) || (currentGamepadState.ThumbSticks.Right.X >= 0.7f || currentGamepadState.ThumbSticks.Right.Y <= -0.7f))
+                        {
+                            var thumb = new Vector2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y);
+                            if (thumb != Vector2.Zero)
+                            {
+                                shootAndSwingAngle =
+                                (float)
+                                    (Math.Atan2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y));
+                                previousThumb = thumb;
+                            }
+                        }
+                    }
+
                     Swing(currentMouseState);
                     _canSwing = false;
                 }
@@ -325,6 +350,31 @@ namespace Romero.Windows.Classes
             {
                 if (currentGamepadState.IsButtonDown(Keybinds.GamepadSwing) && !Sword.Visible && !_previousGamePadState.IsButtonDown(Keybinds.GamepadSwing) && CurrentState == State.Running && _canSwing)
                 {
+                    var curMouse = Mouse.GetState();
+                    var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+                    mouseLoc = Vector2.Transform(mouseLoc, _cam.InverseTransform); //Get the mouse pos relative to the camera
+                    var direction = (SpritePosition) - mouseLoc;
+
+                    if (!Global.Gamepad)
+                    {
+                        shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+                    }
+                    else
+                    {
+                        if ((currentGamepadState.ThumbSticks.Right.X <= -0.7f || currentGamepadState.ThumbSticks.Right.Y >= 0.7f) || (currentGamepadState.ThumbSticks.Right.X >= 0.7f || currentGamepadState.ThumbSticks.Right.Y <= -0.7f))
+                        {
+                            var thumb = new Vector2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y);
+                            if (thumb != Vector2.Zero)
+                            {
+                                shootAndSwingAngle =
+                                (float)
+                                    (Math.Atan2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y));
+                                previousThumb = thumb;
+                            }
+                        }
+                    }
+
                     Swing(currentGamepadState);
                     _canSwing = false;
                 }
@@ -332,6 +382,7 @@ namespace Romero.Windows.Classes
             #endregion
         }
 
+        private float shootAndSwingAngle;
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
@@ -354,6 +405,31 @@ namespace Romero.Windows.Classes
 
                     if (_bulletTimerCounter >= _bulletTimer)
                     {
+                        var curMouse = Mouse.GetState();
+                        var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+                        mouseLoc = Vector2.Transform(mouseLoc, _cam.InverseTransform); //Get the mouse pos relative to the camera
+                        var direction = (SpritePosition) - mouseLoc;
+
+                        if (!Global.Gamepad)
+                        {
+                            shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+                        }
+                        else
+                        {
+                            if ((currentGamePadState.ThumbSticks.Right.X <= -0.7f || currentGamePadState.ThumbSticks.Right.Y >= 0.7f) || (currentGamePadState.ThumbSticks.Right.X >= 0.7f || currentGamePadState.ThumbSticks.Right.Y <= -0.7f))
+                            {
+                                var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
+                                if (thumb != Vector2.Zero)
+                                {
+                                    shootAndSwingAngle =
+                                    (float)
+                                        (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
+                                    previousThumb = thumb;
+                                }
+                            }
+                        }
+
                         _readyToShoot = true;
                     }
                 }
@@ -392,6 +468,30 @@ namespace Romero.Windows.Classes
                     }
                     if (_bulletTimerCounter >= _bulletTimer)
                     {
+                        var curMouse = Mouse.GetState();
+                        var mouseLoc = new Vector2(curMouse.X, curMouse.Y);
+                        mouseLoc = Vector2.Transform(mouseLoc, _cam.InverseTransform); //Get the mouse pos relative to the camera
+                        var direction = (SpritePosition) - mouseLoc;
+
+                        if (!Global.Gamepad)
+                        {
+                            shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+
+                        }
+                        else
+                        {
+                            if ((currentGamePadState.ThumbSticks.Right.X <= -0.7f || currentGamePadState.ThumbSticks.Right.Y >= 0.7f) || (currentGamePadState.ThumbSticks.Right.X >= 0.7f || currentGamePadState.ThumbSticks.Right.Y <= -0.7f))
+                            {
+                                var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
+                                if (thumb != Vector2.Zero)
+                                {
+                                    shootAndSwingAngle =
+                                    (float)
+                                        (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
+                                    previousThumb = thumb;
+                                }
+                            }
+                        }
                         _readyToShoot = true;
                     }
 
@@ -494,7 +594,7 @@ namespace Romero.Windows.Classes
             }
             else
             {
-                Sword.Swing(SpritePosition,new Vector2(previousThumb.X,-previousThumb.Y));
+                Sword.Swing(SpritePosition, new Vector2(previousThumb.X, -previousThumb.Y));
             }
         }
 
@@ -540,12 +640,17 @@ namespace Romero.Windows.Classes
 
             if (Sword.Visible)
             {
-                Sword.Draw(theSpriteBatch, _playerAngle);
+                Sword.Draw(theSpriteBatch, shootAndSwingAngle);
             }
 
             foreach (var b in Bullets)
             {
-                b.Draw(theSpriteBatch);
+                if (b.Visible)
+                {
+                    b.Draw(theSpriteBatch, shootAndSwingAngle);
+
+                }
+
             }
 
             if (Visible)

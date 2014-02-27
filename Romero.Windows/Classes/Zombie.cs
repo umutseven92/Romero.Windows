@@ -16,7 +16,6 @@ namespace Romero.Windows.Classes
     {
         #region Declarations
 
-        private const int MapSize = 4096;
         private const int SpawnOffset = 200;
 
         public int Id { get; set; }
@@ -41,21 +40,22 @@ namespace Romero.Windows.Classes
         public void LoadContent(ContentManager contentManager)
         {
             #region Spawn Position
+            
             switch (Global.ZombieSpawnSeed % 4)
             {
                 case 0:
-                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, MapSize), -SpawnOffset);
+                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, Global.MapSize), -SpawnOffset);
                     break;
                 case 1:
-                    SpritePosition = new Vector2(MapSize + SpawnOffset, Random.Next(0, MapSize));
+                    SpritePosition = new Vector2(Global.MapSize + SpawnOffset, Random.Next(0, Global.MapSize));
 
                     break;
                 case 2:
-                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, MapSize + SpawnOffset), MapSize + SpawnOffset);
+                    SpritePosition = new Vector2(Random.Next(-SpawnOffset, Global.MapSize + SpawnOffset), Global.MapSize + SpawnOffset);
 
                     break;
                 case 3:
-                    SpritePosition = new Vector2(-SpawnOffset, Random.Next(0, MapSize));
+                    SpritePosition = new Vector2(-SpawnOffset, Random.Next(0, Global.MapSize));
                     break;
             }
             #endregion
@@ -80,6 +80,7 @@ namespace Romero.Windows.Classes
             }
 
             LoadContent(contentManager, ZombieAssetName);
+           
         }
 
         public void Update(GameTime gameTime, Player player)

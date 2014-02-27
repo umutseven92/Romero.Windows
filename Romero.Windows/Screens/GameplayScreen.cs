@@ -31,7 +31,7 @@ namespace Romero.Windows.Screens
         private readonly List<Zombie> _lZombies;
         TimeSpan _elapsedTime = TimeSpan.Zero;
         float _pauseAlpha;
-        readonly Rectangle _bgRectangle = new Rectangle(0, 0, 4096, 4096); //Map size
+        readonly Rectangle _bgRectangle = new Rectangle(0, 0, Global.MapSize, Global.MapSize); //Map size
         private readonly Camera2D _cam;
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
@@ -348,7 +348,7 @@ namespace Romero.Windows.Screens
 
             if (_waveNotify && _everythingIsLoaded)
             {
-                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth / 2 - 70, Global.DeviceInUse.PreferredBackBufferHeight * 1/6), Color.Red);
+                spriteBatch.DrawString(_waveFont, "Wave " + _wave, new Vector2(Global.DeviceInUse.PreferredBackBufferWidth / 2 - 70, Global.DeviceInUse.PreferredBackBufferHeight * 1 / 6), Color.Red);
             }
 
             #endregion

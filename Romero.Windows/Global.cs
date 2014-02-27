@@ -16,6 +16,8 @@ namespace Romero.Windows
         /// </summary>
         public static GraphicsDeviceManager DeviceInUse;
 
+        public static int MapSize = 12288;
+
         #region Zombie Spawn Values
         public static int ZombieSpawnDelay = 0;
 

@@ -160,11 +160,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Sprites\groundTile.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Content\Sprites\ground.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -213,6 +208,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Sounds\bell.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Sprites\arrow.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
