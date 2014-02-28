@@ -11,7 +11,7 @@ namespace Romero.Windows.Classes
     /// <summary>
     /// The base class for any moving object on screen
     /// </summary>
-    public class Sprite
+    public abstract class Sprite
     {
         #region Declarations
 
@@ -22,20 +22,8 @@ namespace Romero.Windows.Classes
 
         #region Collision box
         readonly Texture2D _boundingBoxTexture = new Texture2D(Global.DeviceInUse.GraphicsDevice, 1, 1);
-        private Rectangle _boundingBox;
-        public Rectangle BoundingBox
-        {
-            get
-            {
-                _boundingBox = new Rectangle(
-                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
-                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
-                    SpriteTexture2D.Width,
-                    SpriteTexture2D.Height);
-                return _boundingBox;
-            }
-            set { _boundingBox = value; }
-        }
+      
+        public abstract Rectangle BoundingBox { get; }
         #endregion
 
         #region Scaling

@@ -40,5 +40,17 @@ namespace Romero.Windows.Classes
               new Rectangle(0, 0, SpriteTexture2D.Width, SpriteTexture2D.Height),
                 Color.White, angle, new Vector2(SpriteTexture2D.Height / 2, SpriteTexture2D.Width / 2), ScaleCalc, SpriteEffects.None, 0);
         }
+
+        public override Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+            }
+        }
     }
 }

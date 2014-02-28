@@ -177,11 +177,11 @@ namespace Romero.Windows.Classes
         public void LoadContent(ContentManager contentManager)
         {
             _contentManager = contentManager;
-
             foreach (var b in Bullets)
             {
                 b.LoadContent(contentManager);
             }
+
 
             _arrowShoot = contentManager.Load<SoundEffect>("Sounds/arrowShoot");
             _arrowDraw = contentManager.Load<SoundEffect>("Sounds/arrowDraw");
@@ -192,7 +192,7 @@ namespace Romero.Windows.Classes
             SpritePosition = new Vector2(StartPositionX, StartPositionY);
             LoadContent(contentManager, PlayerAssetName);
             Source = new Rectangle(0, 0, 200, Source.Height);
-
+            
         }
 
         public void Update(GameTime gameTime, Camera2D camera)
@@ -599,6 +599,18 @@ namespace Romero.Windows.Classes
         }
 
         private Vector2 previousThumb;
+
+        public override Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+            }
+        }
 
         public override void Draw(SpriteBatch theSpriteBatch)
         {

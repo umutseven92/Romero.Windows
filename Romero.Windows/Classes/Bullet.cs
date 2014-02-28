@@ -43,6 +43,18 @@ namespace Romero.Windows.Classes
             }
         }
 
+        public override Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+            }
+        }
+
         public override void Draw(SpriteBatch theSpriteBatch)
         {
             if (Visible)
