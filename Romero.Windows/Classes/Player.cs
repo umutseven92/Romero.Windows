@@ -208,7 +208,7 @@ namespace Romero.Windows.Classes
 
             UpdateMovement(currentKeyboardState, currentGamepadState);
             UpdateBullet(gameTime, currentMouseState, currentGamepadState);
-            UpdateSword(gameTime, currentMouseState, currentGamepadState);
+            //UpdateSword(gameTime, currentMouseState, currentGamepadState);
 
             _previousMouseState = currentMouseState;
             _previousGamePadState = currentGamepadState;
