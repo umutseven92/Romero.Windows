@@ -70,7 +70,7 @@ namespace Romero.Windows.Classes
             }
             else
             {
-                _speed = new Vector2(Random.Next(25, 100));
+                _speed = new Vector2(Random.Next(35, 100));
             }
             #endregion
 

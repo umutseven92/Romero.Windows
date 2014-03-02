@@ -15,6 +15,19 @@ namespace Romero.Windows.Classes
     {
         #region Declarations
 
+        public override Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Height / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Width / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+            }
+        }
+
+        private float boundingBoxAngle = 0.0f;
         const int MaxDistance = 5000;
         private new const string AssetName = "arrow";
         public bool Visible = false;
@@ -43,23 +56,12 @@ namespace Romero.Windows.Classes
             }
         }
 
-        public override Rectangle BoundingBox
-        {
-            get
-            {
-                return new Rectangle(
-                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
-                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
-                    SpriteTexture2D.Width,
-                    SpriteTexture2D.Height);
-            }
-        }
 
-        public override void Draw(SpriteBatch theSpriteBatch)
+        public void DrawArrow(SpriteBatch theSpriteBatch, float angle)
         {
             if (Visible)
             {
-                base.Draw(theSpriteBatch);
+                base.Draw(theSpriteBatch, angle);
             }
         }
 

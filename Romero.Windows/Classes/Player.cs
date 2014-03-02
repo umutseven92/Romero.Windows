@@ -21,6 +21,19 @@ namespace Romero.Windows.Classes
     {
         #region Declarations
 
+        public override Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
+                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
+                    SpriteTexture2D.Width,
+                    SpriteTexture2D.Height);
+            }
+        }
+
+
         public List<Bullet> Bullets = new List<Bullet>();
         public Sword Sword = new Sword();
         ContentManager _contentManager;
@@ -43,8 +56,9 @@ namespace Romero.Windows.Classes
         const int MoveDown = 1;
         const int MoveLeft = -1;
         const int MoveRight = 1;
-
+        private float _shootAndSwingAngle;
         public float Angle;
+        private Vector2 _previousThumb;
 
         #region Sound Effects
         private SoundEffect _arrowShoot;
@@ -321,7 +335,7 @@ namespace Romero.Windows.Classes
 
                     if (!Global.Gamepad)
                     {
-                        shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                        _shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                     }
                     else
@@ -331,10 +345,10 @@ namespace Romero.Windows.Classes
                             var thumb = new Vector2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y);
                             if (thumb != Vector2.Zero)
                             {
-                                shootAndSwingAngle =
+                                _shootAndSwingAngle =
                                 (float)
                                     (Math.Atan2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y));
-                                previousThumb = thumb;
+                                _previousThumb = thumb;
                             }
                         }
                     }
@@ -357,7 +371,7 @@ namespace Romero.Windows.Classes
 
                     if (!Global.Gamepad)
                     {
-                        shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                        _shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                     }
                     else
@@ -367,10 +381,10 @@ namespace Romero.Windows.Classes
                             var thumb = new Vector2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y);
                             if (thumb != Vector2.Zero)
                             {
-                                shootAndSwingAngle =
+                                _shootAndSwingAngle =
                                 (float)
                                     (Math.Atan2(currentGamepadState.ThumbSticks.Right.X, currentGamepadState.ThumbSticks.Right.Y));
-                                previousThumb = thumb;
+                                _previousThumb = thumb;
                             }
                         }
                     }
@@ -382,7 +396,6 @@ namespace Romero.Windows.Classes
             #endregion
         }
 
-        private float shootAndSwingAngle;
 
         private void UpdateBullet(GameTime gameTime, MouseState currentMouseState, GamePadState currentGamePadState)
         {
@@ -412,7 +425,7 @@ namespace Romero.Windows.Classes
 
                         if (!Global.Gamepad)
                         {
-                            shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                            _shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                         }
                         else
@@ -422,10 +435,10 @@ namespace Romero.Windows.Classes
                                 var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
                                 if (thumb != Vector2.Zero)
                                 {
-                                    shootAndSwingAngle =
+                                    _shootAndSwingAngle =
                                     (float)
                                         (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
-                                    previousThumb = thumb;
+                                    _previousThumb = thumb;
                                 }
                             }
                         }
@@ -475,7 +488,7 @@ namespace Romero.Windows.Classes
 
                         if (!Global.Gamepad)
                         {
-                            shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
+                            _shootAndSwingAngle = (float)(Math.Atan2(direction.Y, direction.X) + Math.PI / 2 + Math.PI);
 
                         }
                         else
@@ -485,10 +498,10 @@ namespace Romero.Windows.Classes
                                 var thumb = new Vector2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y);
                                 if (thumb != Vector2.Zero)
                                 {
-                                    shootAndSwingAngle =
+                                    _shootAndSwingAngle =
                                     (float)
                                         (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
-                                    previousThumb = thumb;
+                                    _previousThumb = thumb;
                                 }
                             }
                         }
@@ -558,7 +571,7 @@ namespace Romero.Windows.Classes
             {
                 var bullet = new Bullet();
                 bullet.LoadContent(_contentManager);
-                bullet.Fire(SpritePosition, new Vector2(previousThumb.X, -previousThumb.Y));
+                bullet.Fire(SpritePosition, new Vector2(_previousThumb.X, -_previousThumb.Y));
                 Bullets.Add(bullet);
             }
 
@@ -594,24 +607,11 @@ namespace Romero.Windows.Classes
             }
             else
             {
-                Sword.Swing(SpritePosition, new Vector2(previousThumb.X, -previousThumb.Y));
+                Sword.Swing(SpritePosition, new Vector2(_previousThumb.X, -_previousThumb.Y));
             }
         }
 
-        private Vector2 previousThumb;
-
-        public override Rectangle BoundingBox
-        {
-            get
-            {
-                return new Rectangle(
-                    (int)SpritePosition.X - SpriteTexture2D.Width / 2,
-                    (int)SpritePosition.Y - SpriteTexture2D.Height / 2,
-                    SpriteTexture2D.Width,
-                    SpriteTexture2D.Height);
-            }
-        }
-
+     
         public override void Draw(SpriteBatch theSpriteBatch)
         {
             var curMouse = Mouse.GetState();
@@ -639,7 +639,7 @@ namespace Romero.Windows.Classes
                         _playerAngle =
                         (float)
                             (Math.Atan2(currentGamePadState.ThumbSticks.Right.X, currentGamePadState.ThumbSticks.Right.Y));
-                        previousThumb = thumb;
+                        _previousThumb = thumb;
                     }
                 }
 
@@ -652,14 +652,14 @@ namespace Romero.Windows.Classes
 
             if (Sword.Visible)
             {
-                Sword.Draw(theSpriteBatch, shootAndSwingAngle);
+                Sword.Draw(theSpriteBatch, _shootAndSwingAngle);
             }
 
             foreach (var b in Bullets)
             {
                 if (b.Visible)
                 {
-                    b.Draw(theSpriteBatch, shootAndSwingAngle);
+                    b.DrawArrow(theSpriteBatch, _shootAndSwingAngle);
 
                 }
 
@@ -736,25 +736,25 @@ namespace Romero.Windows.Classes
                             _speed = Vector2.Zero;
                             _direction = Vector2.Zero;
 
-                            if (currentGamePadState.ThumbSticks.Left.X <= -0.7)
+                            if (currentGamePadState.ThumbSticks.Left.X <= -0.15)
                             {
                                 _speed.X = _playerSpeed;
                                 _direction.X = MoveLeft;
                             }
 
-                            else if (currentGamePadState.ThumbSticks.Left.X >= 0.7)
+                            else if (currentGamePadState.ThumbSticks.Left.X >= 0.15)
                             {
                                 _speed.X = _playerSpeed;
                                 _direction.X = MoveRight;
                             }
 
-                            if (currentGamePadState.ThumbSticks.Left.Y >= 0.7)
+                            if (currentGamePadState.ThumbSticks.Left.Y >= 0.15)
                             {
                                 _speed.Y = _playerSpeed;
                                 _direction.Y = MoveUp;
                             }
 
-                            else if (currentGamePadState.ThumbSticks.Left.Y <= -0.7)
+                            else if (currentGamePadState.ThumbSticks.Left.Y <= -0.15)
                             {
                                 _speed.Y = _playerSpeed;
                                 _direction.Y = MoveDown;
