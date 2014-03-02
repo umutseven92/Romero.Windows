@@ -27,7 +27,7 @@ namespace Romero.Windows.Classes
             }
         }
 
-        private float boundingBoxAngle = 0.0f;
+       
         const int MaxDistance = 5000;
         private new const string AssetName = "arrow";
         public bool Visible = false;
