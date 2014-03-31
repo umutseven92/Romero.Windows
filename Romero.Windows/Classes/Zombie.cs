@@ -23,7 +23,7 @@ namespace Romero.Windows.Classes
 
         private static readonly Random Random = new Random(); //Spawn position randomizer
         private static readonly Random HighSpeedRandom = new Random(); //Fast zombie randomizer
-
+       
         public bool Visible = true;
         public bool Dead = false;
         Vector2 _direction = Vector2.Zero;

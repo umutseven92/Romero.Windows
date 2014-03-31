@@ -11,7 +11,9 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using OpenTK.Graphics.ES10;
 using Romero.Windows.Classes;
+
 using Romero.Windows.ScreenManager;
 
 #endregion
@@ -36,6 +38,7 @@ namespace Romero.Windows.Screens
         private KeyboardState _previousKeyboardState;
         float _songFadeCounterStart;
         private bool _everythingIsLoaded;
+     
 
         #region Texture & Song & Font & Sound Effect
 
@@ -170,6 +173,8 @@ namespace Romero.Windows.Screens
             if (_content == null)
                 _content = new ContentManager(ScreenManager.Game.Services, "Content");
 
+           
+
             #region Load Assets
 
             _backgroundTexture = _content.Load<Texture2D>("Sprites/ground");
@@ -184,6 +189,8 @@ namespace Romero.Windows.Screens
             if (_currentGameMode == GameMode.Singleplayer)
             {
                 _singlePlayerPlayer.LoadContent(_content);
+               
+
             }
             else
             {
@@ -207,6 +214,8 @@ namespace Romero.Windows.Screens
             foreach (var z in _lZombies)
             {
                 z.LoadContent(_content);
+                //z.Body = BodyFactory.CreateCircle(world, z.SpriteTexture2D.Width / 2f, 1f, z.SpritePosition);
+                //z.Body.BodyType = BodyType.Dynamic;
             }
 
             #endregion
@@ -220,6 +229,7 @@ namespace Romero.Windows.Screens
             ScreenManager.Game.ResetElapsedTime();
             _waveNotify = true;
         }
+
 
         /// <summary>
         /// Unload graphics content used by the game.
@@ -240,6 +250,7 @@ namespace Romero.Windows.Screens
             _gT = gameTime;
             FadeOutSong(gameTime, 0.1f, 0.01f, 0.05f);
 
+            
             if (_currentGameMode == GameMode.Multiplayer)
             {
                 SendInfoToServer();
@@ -286,7 +297,7 @@ namespace Romero.Windows.Screens
         {
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
                                                  Color.DarkGreen, 0, 0);
-
+            
             var spriteBatch = ScreenManager.SpriteBatch;
 
             #region Draw Everything But GUI
@@ -311,7 +322,6 @@ namespace Romero.Windows.Screens
 
                 z.Draw(spriteBatch, angle);
             }
-
             #region Draw Players
 
             if (_currentGameMode == GameMode.Singleplayer)
@@ -341,7 +351,7 @@ namespace Romero.Windows.Screens
             #region Draw GUI
 
             spriteBatch.Begin();
-
+           
             DrawDiagnostics(spriteBatch);
 
             #region Draw Wave Notifier
@@ -352,6 +362,7 @@ namespace Romero.Windows.Screens
             }
 
             #endregion
+
 
             spriteBatch.End();
 
@@ -369,7 +380,7 @@ namespace Romero.Windows.Screens
                 _everythingIsLoaded = true;
             }
         }
-
+       
 
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
@@ -379,6 +390,7 @@ namespace Romero.Windows.Screens
         {
             if (input == null)
                 throw new ArgumentNullException("input");
+
 
             var currentKeyboardState = Keyboard.GetState();
 
@@ -445,7 +457,7 @@ namespace Romero.Windows.Screens
 
             #endregion
 
-            #region Collision
+            #region Old Collision
 
             foreach (var z in _lZombies)
             {
@@ -618,6 +630,7 @@ namespace Romero.Windows.Screens
         private void DrawDiagnostics(SpriteBatch spriteBatch)
         {
             _frameCounter++;
+           
             if (Global.IsDiagnosticsOpen)
             {
                 spriteBatch.DrawString(_diagnosticFont, string.Format("Enemies on screen: {0}\nWave: {1}\nFPS: {2}", _diagZombieCount, _wave, _frameRate), new Vector2(20, 45), Color.Green);

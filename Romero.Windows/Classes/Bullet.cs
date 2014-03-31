@@ -23,18 +23,17 @@ namespace Romero.Windows.Classes
                     (int)SpritePosition.X - SpriteTexture2D.Height / 2,
                     (int)SpritePosition.Y - SpriteTexture2D.Width / 2,
                     SpriteTexture2D.Width,
-                    SpriteTexture2D.Height);
+                    SpriteTexture2D.Height/3);
             }
         }
-
-        private float boundingBoxAngle = 0.0f;
+        
         const int MaxDistance = 5000;
         private new const string AssetName = "arrow";
         public bool Visible = false;
         Vector2 _startPosition;
         Vector2 _direction;
         private const float Speed = 1200f;
-
+        private float drawAngle;
         #endregion
 
         public void LoadContent(ContentManager theContentManager)
@@ -49,7 +48,7 @@ namespace Romero.Windows.Classes
             {
                 Visible = false;
             }
-
+            
             if (Visible)
             {
                 SpritePosition += _direction * Speed * (float)theGameTime.ElapsedGameTime.TotalSeconds;
@@ -59,6 +58,7 @@ namespace Romero.Windows.Classes
 
         public void DrawArrow(SpriteBatch theSpriteBatch, float angle)
         {
+            drawAngle = angle;
             if (Visible)
             {
                 base.Draw(theSpriteBatch, angle);

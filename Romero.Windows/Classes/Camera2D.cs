@@ -21,7 +21,9 @@ namespace Romero.Windows.Classes
         protected KeyboardState KeyState;
         protected Int32 Scroll;
         private readonly Player _playerToFollow;
-
+        public Matrix SimProjection;
+        public Matrix SimView;
+        public Matrix View;
         protected float _zoom;
         public float Zoom
         {
@@ -70,6 +72,9 @@ namespace Romero.Windows.Classes
             _pos = Vector2.Zero;
             Viewport = viewport;
             _playerToFollow = player;
+        
+            SimView = Matrix.Identity;
+            View = Matrix.Identity;
         }
 
         public void Update()
@@ -78,8 +83,8 @@ namespace Romero.Windows.Classes
             {
                 CheckForInput();
             }
-            _pos.X = -_playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth / 2;
-            _pos.Y = -_playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2;
+            _pos.X = -_playerToFollow.SpritePosition.X + Global.DeviceInUse.PreferredBackBufferWidth / 2f;
+            _pos.Y = -_playerToFollow.SpritePosition.Y + Global.DeviceInUse.PreferredBackBufferHeight / 2f;
 
             _zoom = MathHelper.Clamp(_zoom, 0.0f, 10.0f); //Clamp zoom value
             _rotation = ClampAngle(_rotation); //Clamp rotation value
